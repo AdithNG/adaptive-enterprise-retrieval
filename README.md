@@ -2,7 +2,7 @@
 
 Team 13's project investigates whether adaptive retrieval can reduce response
 time and cost while preserving answer quality on enterprise support questions.
-The source proposal is [included in this repository](<Cost-Aware Adaptive Agentic Retrieval for Enterprise Support (2).pdf>).
+The source proposal is [included in this repository](docs/proposal.pdf).
 
 ## Current status
 
