@@ -1,0 +1,27 @@
+support
+
+Nora (support): AcmeCorp escalated—their hosted API calls intermittently return 502s from the edge. Happens only when they include a custom header `X-Org-Info` with a compact blob. Started ~10:00 PDT. They provided a curl and a trace id: acme-trace-7f4. Can someone triage?
+Diego (eng-sre): On it. Do we have a sample trace/req-id from our side (edge/haproxy/envoy id)?
+Nora (support): Their root trace id: acme-trace-7f4, request-id we see on their curl: 6b9f2a. Quick example they sent:
+```bash
+curl -v -H 'Authorization: Bearer <token>' -H 'X-Org-Info: AAAAAA==\n' -d '{"input":"hi"}' https://api.redwood.com/v1/generate
+```
+Response consistently shows `HTTP/1.1 502 Bad Gateway` and body "Gateway Error".
+Jules (customer-success): I looked at our edge metrics—502 rate on edge-prod-eu-3 spikes coincident with their requests. Node CPU/memory normal. Envoy logs show repeated: `http: error reading headers: invalid header value` and our auth proxy logs contain `authz: header_decoding_failed: invalid character 0x00` for that trace id.
+Diego (eng-sre): That suggests non-printable bytes in the header value (NULs) or an encoding issue. Envoy/NGINX will drop/return 502 if header parsing fails. Can we get a raw hex of the header value from the customer or reproduce locally?
+Nora (support): Sent back a minimal repro to AcmeCorp to supply the exact header payload; they replied with a base64 blob that, when decoded, contains embedded NULs due to an older SDK serializing a protobuf with trailing null padding.
+Priya (oncall): For quick mitigation we can either strip `X-Org-Info` at the edge for the tenant, or route their requests to a fallback path that tolerates the header. Stripping example for nginx ingress: `proxy_set_header X-Org-Info "";` for that host/route. We should do this short-term while they fix encoding.
+Diego (eng-sre): Agreed. I'll prepare a one-line patch to our edge filter to drop headers containing \x00 and/or non-UTF8 sequences for tenant-scoped requests. Also will add a 502->429 escalation so we don't surface raw parse failures to the app. Quick test repro:
+```bash
+# reproduce header parse failure locally
+printf 'GET /v1/generate HTTP/1.1\r\nHost: api.redwood.com\r\nAuthorization: Bearer x\r\nX-Org-Info: ' > req.raw
+# append a blob that decodes to include NULs
+printf '\x41\x00\x42\r\n\r\n' >> req.raw
+# send to local envoy instance and observe parse error/logs
+```
+Nora (support): Applied temporary workaround: told AcmeCorp to remove/replace header, they pushed a hotfix to SDK but asked us to apply the edge strip until their rollout reaches all clients.
+EdgeBot: route update applied: blacklisted header `X-Org-Info` for tenant `acme-id` on edge-prod-eu-3 until 6357910000 (automated change).
+Diego (eng-sre): PR #4521 created to add header sanitizer on edge; will land behind a flag. I also added an alert to watch for 502 spikes and for any unintended 4xx/5xx after strip.
+Priya (oncall): Monitor checklist: 1) verify 5xx rate down for acme traces, 2) ensure no regressions for streaming endpoints, 3) rollback plan ready (undo header strip) if other tenants affected. I'll keep the runbook open.
+Jules (customer-success): Acme reports immediate reduction in errors once they re-encoded header and we applied the strip on our side. They will publish an SDK patch recommending urlsafe base64 and no NUL padding.
+Nora (support): Closing loop—customer happy for now. Action items: Diego to merge sanitizer behind flag, Priya to monitor for 24h, Jules to confirm SDK doc update. Reactions: :thumbsup: :eyes:

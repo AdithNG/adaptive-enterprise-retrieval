@@ -16,3 +16,5 @@ data/processed/*
 !data/processed/.gitkeep
 outputs/*
 !outputs/.gitkeep
+corpus.jsonl
+all_documents.zip

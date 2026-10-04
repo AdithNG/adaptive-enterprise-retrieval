@@ -1,0 +1,88 @@
+Inkwell: lightweight feature garden — proto notes
+
+Overview:
+Light, user-facing ‘feature garden’ for small, combinable session presets and micro-features. Intended as a low-friction surface for product teams to try cheap UX levers (response tiering, compact recap, micro-plugins) without heavy rollout choreography.
+
+Goals:
+- Ship a minimal surface that lets us A/B small signal-level features quickly (<= 2 week experiment cycle).
+- Make it safe: presets are non-destructive, reversible, per-user opt-in by default.
+- Measure per-session token delta and end-to-end latency impact automatically.
+- Provide simple ops knobs for rollback and per-customer gating.
+
+Constraints & assumptions (early):
+- Must work with hosted API and ideally be plumbable to Dedicated later.
+- Start with UI-only toggles + metadata sent to backend; no heavy model variant switching in v0.
+- Session state should support >1 preset active simultaneously (composable).
+- Keep server-side implementation minimal: flag + lightweight transformer in front of request -> transforms prompt or route to a preset micro-policy.
+
+Core ideas (lowest-effort protos):
+1) Compact Recap preset: short recap appended to user query when conversation length > X tokens. Configurable length (one-liner, summary bullet).
+   - UX: toggle (on/off) + slider (brevity).
+   - Backend: simple prompt template insertion; metrics: tokens/sec, quality (human eval sample).
+
+2) Budgeted Response Mode: instruct model to prefer concise outputs under token budget. Useful for mobile and low-cost tiers.
+   - UX: toggle + budget dropdown (50/100/200 tokens).
+   - Backend: prompt scaffold + token-control header.
+
+3) Micro-Plugin: small tool call stub that injects an internal fact (e.g., user profile snippet) into context in a constrained format.
+   - UX: enable macro for some conversation types (e.g., scheduling).
+   - Ops: make sure no PII leak; map to existing KMS/PII policies.
+
+4) Fail-soft fallback hinting: when latency spikes, degrade gracefully to a compact preset and surface notice to user.
+   - Tie to existing routing/latency probe hooks.
+
+User stories (example):
+- As a PM, I want to enable Compact Recap for beta users so I can evaluate recall improvements without changing model configs.
+- As an engineer, I want a server-side flag that modifies the prompt insertion so I can roll back quickly.
+- As SRE, I want per-preset telemetry (token delta, p95 latency) to detect regressions.
+
+Acceptance criteria (MVP):
+- UI: single toggle panel in experiment console + opt-in link in user settings.
+- Backend: flags flow to request pipeline, prompt alteration applied safely.
+- Metrics: default dashboards with token delta, latency, and a small human-eval pipeline (10/day) to check output quality.
+- Rollout: per-account targeting via flag service; can disable globally within 5m.
+
+Experiments & metrics to track:
+- Token cost delta vs baseline (primary cost signal).
+- Task success / subjective quality (samples + Rapid Eval rubric).
+- Retention/engagement lift for users with Compact Recap vs control.
+- Incidence of fallback triggers and time to recover.
+
+Implementation sketch (notes to self):
+- Frontend: small panel in Console -> experiment toggle + preset configs. Expose API: POST /v1/experiments/apply -> returns preset-id.
+- Middleware: before model invocation, check preset-id -> apply transformation. Keep transformation deterministic and logged.
+- Storage: lightweight preset record (id, name, prompt-template, created_by). No heavy schema needed initially.
+- Telemetry: attach preset-id to existing trace/span; add token accounting at request/response boundary.
+
+Open questions / risks:
+- How to avoid accidental context inflation (recap appended multiple times)? Add idempotency marker in session metadata.
+- Preset combinatorics: N presets could interact badly. Start with max 2 active presets and disallow conflicting types.
+- Legal/POL: micro-plugin injection needs privacy review.
+- Dedicated customers might require per-tenant opt-out; include flag to disable for private deployments.
+
+Quick prototype checklist (week 0 -> week 2):
+- [ ] Mock Console panel (Figma quick) + sample copy for opt-in flow.
+- [ ] Backend flag plumbing (reuse feature-flag service) + schema for preset record.
+- [ ] Request transformer: implement compact-recap + budgeted-response templates.
+- [ ] Telemetry hooks: tag traces + token delta logging.
+- [ ] Run 1000-request smoke tests under load to check added latency.
+- [ ] Recruit 20 beta users, run human-eval on 200 prompts.
+
+Notes to self (good UX decisions/phrasing):
+- Default wording: "Try compact recaps (beta) — reduces context noise" instead of technical token talk.
+- For budgeted responses, show expected cost savings percent estimate to encourage opt-in.
+- Provide a one-click rollback in Console for each experiment run.
+
+Next steps / owners:
+- Julian: put together mock panel + experiment copy (due 2025-02-21).
+- Mira: help define rapid-eval rubric and run first 50 samples (due 2025-02-26).
+- Sam: implement transformer skeleton and telemetry hooks (PR target 2025-03-04).
+
+Random thoughts (freewrites):
+- Could use a client-side handshake to surface small explanatory card for first-time users of a preset.
+- Might later expose a marketplace of curated presets (long term).
+- Avoid heavy model variant switching. Focus on prompt-level and routing-light levers.
+
+End of note.
+
+-- jp

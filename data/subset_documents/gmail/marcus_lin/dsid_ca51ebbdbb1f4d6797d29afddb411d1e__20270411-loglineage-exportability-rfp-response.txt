@@ -1,0 +1,121 @@
+RFP: Audit trail & log export capabilities — Redwood response
+
+From: Tom Hargreaves <procurement@evergreen.io>
+To: marcus_lin@redwood.com
+Cc: security@evergreen.io
+Date: Sun, 11 Apr 2027 09:15:00 -0700
+Subject: RFP: logging / audit trail export requirements
+
+Marcus —
+
+Thanks for taking this on. As part of Evergreen's RFP we need a short, machine-readable summary of Redwood's logging, audit trail and export capabilities focused on the following items:
+
+1) Retention defaults and configurable windows for hosted, dedicated, and private deployments
+2) Log export formats and delivery options (S3, streaming, API)
+3) Ability to perform ad-hoc forensic exports and expected delivery timelines
+4) Audit trail immutability, chain-of-custody metadata, and deletion/soft-delete behavior
+5) Evidence for compliance (SOC2 summary, export runbooks, sample export schema)
+
+Can you provide a concise response (PDF preferred) and a primary contact for a technical follow-up? We're on a tight procurement timeline — response needed by EOD Apr 13 PT.
+
+Thanks,
+Tom Hargreaves
+Head of Procurement
+Evergreen Financial Services
+[Attachment: evergreen-rfp-questions.xlsx (XLSX, 45KB)]
+From: Marcus Lin <marcus_lin@redwood.com>
+To: Tom Hargreaves <procurement@evergreen.io>
+Cc: laura_bennett@redwood.com, neha_kapoor@redwood.com
+Date: Sun, 11 Apr 2027 13:02:00 -0700
+Subject: Re: RFP: logging / audit trail export requirements
+
+Tom —
+
+Appreciate the clear list. High-level summary attached and answers below. I'll also loop in Neha (security) and Laura (solutions) for artifacts and any follow-ups.
+
+Quick answers:
+- Retention: Hosted defaults to 90 days (customer-configurable to 365 days on paid tiers); Dedicated can be configured to 7 years via reserved contracts; Private (VPC/on-prem) retention is customer-controlled and can meet regulatory windows (we commonly support 7 years+).
+- Export formats: Exports are newline-delimited JSON (NDJSON) or Parquet; we support delivery to customer-controlled S3 buckets (S3 API + SSE-KMS), direct API pulls (paginated), and time-windowed exports via the Console or API. Exports are checksummed and optionally encrypted per-customer KMS.
+- Ad-hoc forensic exports: Yes — supported via the admin API and Console. Typical delivery SLA: small exports (<=50GB) within 1–2 hours, large exports are chunked and streamed to S3; we provide a signed manifest and MD5/SHA256 checksums.
+- Immutability & chain-of-custody: Audit logs are append-only; records include sequence numbers, server timestamps (ISO8601), internal write-hash, and origin tag (route/service id). Deletions are handled via retention policy records and produce an immutable deletion-event audit entry.
+- Compliance evidence: Attached SOC2 summary, logging technical spec, and an export runbook (sample schema included).
+
+Attached: redwood-logging-technical-spec.pdf, audit-log-export-runbook.xlsx, soc2-summary-redwood.pdf
+Drive link: https://drive.google.com/redwood/evergreen-rfp-logs
+HubSpot: https://hubspot.com/deal/EVG-2027-042
+
+Next step: happy to do a 30-minute technical deep-dive for your security team. Marcus (me) and Neha can do a session on Mon Apr 18 or Tue Apr 19 PT. Which works?
+
+Regards,
+Marcus Lin
+Account Executive, Redwood Inference
+marcus_lin@redwood.com | +1 (650) 555-0192
+Redwood Inference
+[Attachments: redwood-logging-technical-spec.pdf (PDF, 1.1MB); audit-log-export-runbook.xlsx (XLSX, 320KB); soc2-summary-redwood.pdf (PDF, 210KB)]
+From: Tom Hargreaves <procurement@evergreen.io>
+To: marcus_lin@redwood.com
+Cc: security@evergreen.io, sofia.patel@acme-corp.com
+Date: Mon, 12 Apr 2027 10:22:00 -0700
+Subject: Re: RFP: logging / audit trail export requirements
+
+Marcus —
+
+Thanks — quick clarifying items from the security team:
+- Can exports be requested programmatically by our SIEM on-demand (API key or OIDC client) and pushed to our S3?
+- For hosted accounts, can log retention be extended beyond 365 days as a managed export (we'd like a 24-month searchable archive for eDiscovery)?
+- For large datasets, what's the maximum single-export object size and do you support multipart/compressed delivery?
+- Please confirm whether audit-log entries include the originating customer tenant id and request-id for cross-correlation.
+
+Also, please upload the SOC2 evidence package (control descriptions + attestation) or point to an access-controlled location so our compliance team can review.
+
+Appreciate the turnaround — EOD Apr 13 still works for us but earlier is preferred.
+
+Regards,
+Tom
+Head of Procurement
+Evergreen Financial Services
+From: Marcus Lin <marcus_lin@redwood.com>
+To: Tom Hargreaves <procurement@evergreen.io>
+Cc: neha_kapoor@redwood.com, laura_bennett@redwood.com
+Date: Tue, 13 Apr 2027 16:42:00 -0700
+Subject: Re: RFP: logging / audit trail export requirements
+
+Tom —
+
+Answers to your security follow-ups:
+
+1) Programmatic, on-demand exports: Yes. Customers can create scoped API clients (OIDC or API key) with RBAC that allow the SIEM to request exports. Exports can be configured to deliver to a pre-authorized S3 bucket or to a pre-signed URL. We provide signed manifests and per-chunk checksums.
+
+2) Extended retention for hosted customers: We support managed archival exports for customers needing >365 days. Typical pattern: 90-day hot retention in-hosted, then automated monthly archival exports to customer S3 (NDJSON/Parquet) for long-term storage. We can run a searchable archive product for up to 24 months as a managed service under an addendum. For Dedicated and Private deployments, retention is configurable per contract.
+
+3) Large export handling: Exports are chunked (default 1GB chunks), compressed with gzip or brotli, and delivered as multipart uploads to S3. Single-object limits match customer bucket limits; we recommend multipart so large exports stream reliably. Delivery timelines depend on size and network — we provide progress hooks and optional push notifications when the manifest is ready.
+
+4) Audit fields: Every audit-log entry includes tenant_id, request_id, server_timestamp (ISO8601), event_type, service_id, and sequence_number. The internal write-hash and optional signature are included for clients who require chain-of-custody verification.
+
+Evidence: SOC2 control descriptions and attestation are in the attached soc2-summary-redwood.pdf and the Drive folder above. For full artefacts we can provide an NDA-protected package or a remote read-only pod for your auditors (let Neha know the preferred route).
+
+Proposed next step: 30-minute technical deep-dive with Neha and Laura on Apr 18 at 10:00 AM PT. I'll send a calendar invite pending your confirmation.
+
+Regards,
+Marcus Lin
+Account Executive, Redwood Inference
+marcus_lin@redwood.com | +1 (650) 555-0192
+
+---
+On Mon, Apr 12, 2027 at 10:22 AM Tom Hargreaves <procurement@evergreen.io> wrote:
+> Marcus —
+>
+> Thanks — quick clarifying items from the security team:
+> - Can exports be requested programmatically by our SIEM on-demand (API key or OIDC client) and pushed to our S3?
+> - For hosted accounts, can log retention be extended beyond 365 days as a managed export (we'd like a 24-month searchable archive for eDiscovery)?
+> - For large datasets, what's the maximum single-export object size and do you support multipart/compressed delivery?
+> - Please confirm whether audit-log entries include the originating customer tenant id and request-id for cross-correlation.
+>
+> Also, please upload the SOC2 evidence package (control descriptions + attestation) or point to an access-controlled location so our compliance team can review.
+>
+> Appreciate the turnaround — EOD Apr 13 still works for us but earlier is preferred.
+>
+> Regards,
+> Tom
+> Head of Procurement
+> Evergreen Financial Services

@@ -1,0 +1,25 @@
+Ephemeral spinner lane and tone-token rescue for icon/button state parity
+
+Problem: Compact icon and compound buttons show layout shift and visual jitter when a spinner replaces an icon or label on load. In dark/tonal themes the spinner color token falls back to the wrong contrast value which created regressions in a11y contrast tests. Scope: - Introduce an ephemeral spinner lane: an overlay lane that reserves visual space for a spinner without changing surrounding layout. - Introduce a small set of "tone-rescue" tokens that ensure spinners and disabled icon tints map to accessible contrast across light/dark/tonal themes. - Update compact icon-button component to use the overlay lane and new tokens; provide a legacy opt-out for old token names. - Add unit examples and regression tests (visual diff) and add a11y color contrast checks. Non-goals: changing primary button semantics, reworking entire token system, or changing placement of split-button affordances.
+Compact icon buttons use an overlay spinner lane that avoids layout shifts when switching to loading state
+Spinner color resolves from new tone-rescue tokens and passes WCAG AA contrast in light and dark themes
+Disabled icon/tint states use a consistent token mapping for tonal themes and do not regress snapshots
+Prefer-reduced-motion honored for spinner animations and visual tests included
+Design documentation (Figma) and code examples (React) updated with migration notes and opt-out flag
+Overlay approach: reserve a thin vertical stacking context (the 'lane') within the button so spinner transforms (opacity/scale) don't change layout; use translateZ/opacity for animation to avoid layout reflow.
+Token strategy: add --button-spinner-tone-rescue and --button-icon-disabled-tone-rescue used only when component opts into new behaviour; keep legacy tokens mapped in token alias layer for backward compatibility.
+Accessibility: spinner itself will provide aria-hidden=true; loading state updates aria-live='polite' on an adjacent non-visual node so screen readers announce changes without repeated announcements on small interactions.
+Trade-offs: Overlay lane increases CSS complexity slightly and needs small runtime to compute when button is compound vs icon-only; chosen over adding static padding because static padding increased horizontal layout variance in many lists.
+Performance: animation uses transform and opacity; spinner SVG kept small (<= 14px for compact) and hardware-accelerated where available.
+Migration: components without the opt-in flag continue to use legacy tokens; recommend a migration window of one release for internal consumers.
+Use overlay 'lane' pattern instead of static padding to minimize horizontal layout drift in lists and rows
+Introduce scoped tone-rescue tokens rather than changing global tokens to reduce blast radius
+Provide a design token alias file and a runtime feature flag for opt-in to ease rollouts
+2025-02-15 - Rafael Ortiz: Initial implementation prototype pushed to PR #4238. Uses overlay lane with CSS variable --button-spinner-lane-height. Need design sign-off on lane height and vertical centering with icon-only compact buttons.
+2025-02-18 - Ava Chen: Adjusted spec in Figma to show 6px lane for compact, 10px for default buttons. Added notes about preserving focus ring and not shifting hit targets.
+2025-02-20 - Priya Shah (Engineering): Verified that overlay approach avoids layout shifts in a list of 200 items in staging. Observed a slight repaint cost; recommended batching style updates and memoizing isLoading prop on host component.
+2025-02-22 - Marcus Li (Accessibility): Ran color contrast audit. Proposed increasing spinner tone for tonal-dark theme from 54% to 62% luminance to meet AA for 14px spinner. Updated token suggestions in Confluence.
+2025-02-25 - Rafael Ortiz: Updated code to respect prefers-reduced-motion and added aria-live polite region. Also added migration helper to map legacy tokens to new tone-rescue values for one release cycle.
+2025-02-28 - Product (Leah Morgan): PM review - ok with migration plan, request telemetry flag for opt-in so we can measure usage before flip. Action: ENG to add experiment flag (ENG-11204).
+2025-03-01 - Design review (Ava Chen): Approved visuals; requested that docs include a small decision-tree for when to opt-in (compact icon-only, split-buttons only opt into overlay if width < 40px).
+2025-03-02 - QA (Hannah Kim): Visual regression tests added; three snapshots failed due to legacy consumer CSS overriding token aliases. QA note: add test harness to reset token aliases for component-level stories.

@@ -1,0 +1,184 @@
+Orbital Networks — GTM co-sell sprint & operational risk triage
+
+Meeting header: 2026-12-20 15:00 UTC | Duration: ~62 minutes | Record: Yes
+Attendees: Alex Chen (Redwood AE), Priya Desai (Redwood SE), Liam O'Neill (Redwood Partnerships); Marta Rojas (Orbital VP Partnerships), Daniel Cho (Orbital Head of Cloud), Samir Patel (Orbital Solutions Architect), Erika Nguyen (Orbital Legal)
+
+Auto-summary (auto-generated, may be imperfect):
+- Purpose: align on co-sell motion, risk areas for pilot, and next steps for a joint GTM sprint.
+- Key concerns: customer compliance (data residency, KMS), deployment mode (Hosted vs Dedicated vs Private), pricing splits, and target account lists.
+- Agreed: Redwood to produce a benchmark/cost spreadsheet; Orbital to provide topology and target accounts; legal to align on procurement timeline.
+
+Topics detected: Co-sell GTM timeline; pilot scoping; Private deployment constraints; SLA and procurement; competitive positioning.
+
+[00:00:05] Alex (Redwood AE): ok uh good afternoon everyone thanks for joining, uh this is Alex Chen from Redwood, I'm the AE on the account. We're joined by Priya, our solutions engineer, and Liam from partnerships. Can we do a quick round of intros from Orbital?
+[00:00:18] Marta (Orbital): yeah hi, Marta Rojas, VP Partnerships, thanks for setting this up. We're keen to figure out how we run a quick co-sell sprint and what the operational risk looks like.
+[00:00:25] Daniel (Orbital): Daniel Cho, I run cloud engineering, so I'll own the infra questions.
+[00:00:29] Samir (Orbital): Samir Patel, solutions architect, I'll drive the integration with our partner portal and mapping to account teams.
+[00:00:33] Priya (Redwood SE): hey, Priya here, hi everyone. Quick note—I'll try to keep the deep-dive focused to your asks so we can land next steps.
+
+[00:01:05] Alex: objective for today is threefold: one, agree a one-page co-sell plan; two, identify any blockers for a pilot (esp around VPC/KMS/SOC2); three, pick a target set to go after in Q1. Does that sound right?
+[00:01:20] Marta: yep that sounds right. also want to make sure we don't step on your current vendor agreements, we have a couple of channel exclusivities to watch for.
+
+[00:01:45] Priya: ok jumping into tech-- we usually recommend starting hosted for fast time-to-value unless you have strong regulatory needs. For enterprise pilots though, Dedicated or Private (VPC) is common. Quick question: do you have a hard requirement for on-prem or is it just preference?
+[00:02:02] Daniel: currently it's preference for some of our customers in telco/defense verticals. We have two pilot accounts that require data residency in EU and at least customer-managed KMS. So Private/VPC is likely for those two.
+[00:02:18] Alex: good callout. That leans us toward a Private deployment for the pilot but we can still demo hosted for internal stakeholders.
+
+[00:03:12] Samir: can you explain the dif between Redwood Dedicated and Redwood Private? sometimes our sales folks confuse them.
+[00:03:20] Priya: sure—Dedicated is reserved GPU capacity in Redwood's managed pool with predictable throughput and SLA; Private is a VPC or on-prem deployment where you control the network and key management. Private gives you full control over KMS/HSM and audit logging in your environment. There's also hybrid where we can route sensitive requests to Private and less-sensitive to Hosted to save cost.
+[00:03:45] Marta: ok hybrid sounds interesting for a phased approach.
+
+[00:04:10] Daniel: latency is a concern for one pilot; they expect sub-150ms for short chat flows at P95. Is that achievable on Dedicated?
+[00:04:23] Priya: depends on model choice and quantization. For base Llama-like open models we're routinely hitting P95 <120ms with our Dedicated configs for 8k context on A100-equivalent. For Private, latency benchmarks depend on customer infra—if you have NVLink and colocated inference nodes, even better. We should run a sample workload to be sure.
+
+[00:05:05] Alex: question on commercial—Orbital, how do you usually structure partner rev splits? Are you open to a lead-gen plus referral fee or do you prefer multi-touch co-sell deals?
+[00:05:19] Marta: our standard is 60/40 on ARR for co-sells but we can be flexible based on account motion and who owns the procurement. For pilot/demo leads we sometimes do flat referral fees.
+
+[00:05:45] Alex: we can model both. I'll send a simple spreadsheet with two scenarios.
+
+[00:06:30] [00:06:30] Priya: on compliance—SOC 2 Type II is available, we also support SAML/SSO and SSO integrations, audit logs, and KMS integrations (AWS KMS, GCP KMS, Azure Key Vault) and HSM options for Private. Any must-haves?
+[00:06:50] Erika (Orbital Legal): Erika here, procurement note: we'll need a data processing addendum and clarity on data retention and delete APIs. Also want to flag a couple of our enterprise customers require subprocessor info and EU processing guarantees.
+[00:07:05] Alex: understood. We have a security pack (SOC2, infra diagrams, subprocessors) we'll share. We'll also note our retention delete APIs.
+
+[00:07:45] Samir: integration flow—Orbital's partner portal calls a third-party function that runs an LLM step for re-ranking leads. We can point that at Redwood via an API key but we'd rather not send full PII to hosted endpoints. So we want tokenization + prefix-caching on your side, or route the PII to Private. Thoughts?
+[00:08:10] Priya: yeah, two patterns: 1) partial obfuscation/tokenization before hitting Hosted or 2) Private where the data never leaves your VPC. We also support prefix/KV caching to speed repeated queries and reduce cost. If PII is a blocker, Private is the cleanest approach.
+
+[00:09:00] Daniel: curious about fallbacks—if dedicated capacity is saturated, will requests fail or route to hosted? we need graceful degradation.
+[00:09:12] Priya: we have smart routing and fallback policies—can route to a lower-cost model variant or to hosted, with circuit-breaker thresholds. We can set strict policy to avoid sending PII to hosted variants.
+
+[00:09:45] Marta: on sales ops—we want a joint one-pager for SDRs and AE playbooks. Included should be value props, target ICP, a simple flow for handing leads, and a swimlane of responsibilities. Can Redwood help with that?
+[00:10:00] Alex: yes we'll produce a co-sell playbook draft. Liam from our partnerships team will help with enablement materials.
+
+[00:11:15] Liam (Redwood): quick note from partnerships—we've done similar co-sells with three ISVs this year, typical close time is 3-6 months, but with a strong pilot we can accelerate to 45-60 days. Key is clearly signed pilot scope and able champion in the account.
+
+[00:11:50] Marta: ideal timeline for us is a pilot kickoff in mid-Jan, with GTM in March. Is that feasible?
+[00:12:01] Alex: yes that aligns with Redwood capacity planning; we'll need commitments on target accounts and legal constraints by late December to hit that.
+
+[00:12:40] Samir: technical ask—can Priya show a quick high-level runbook for a Private bring-up? Steps, network ports, certs, KMS handshake?
+[00:12:52] Priya: absolutely—(high-level) step 1: exchange network egress/IP allowlist and firewall rules; step 2: KMS integration via customer-managed keys with MFA HSM interop; step 3: deploy inference nodes with our agent (container) and register with Private control plane; step 4: set routing policies and test canary. We have a runbook we'll share.
+
+[00:14:05] Daniel: what's the expected ops touch for Private? we don't want a 6-month integration.
+[00:14:12] Priya: typical Private bring-up is 2-4 weeks with a small infra team if you have infra templates; our ops team handles most orchestration and we provide the agent. If on-prem air-gapped, that takes longer.
+
+[00:15:00] Alex: let's talk pilot measurement—what success metrics should we agree on?
+[00:15:06] Marta: pipeline influenced, SQLs generated, latency SLA met, and no data residency breaches.
+[00:15:12] Samir: also operator lift—ease of deployment and maintenance.
+
+[00:15:40] Priya: ok for the benchmark I'll use your sample prompt set, run cost/latency across Hosted and Dedicated estimates, and show 3 model variants (quality/cost tradeoffs). That will give a clear recommendation for pilot.
+
+[00:16:20] [00:16:20] Alex: on pricing—if Orbital wants to pilot with us on Private, we can do a reduced pilot rate for 3 months to validate. After pilot we transition to committed Dedicated or Private pricing. I'll capture a pilot offer in the spreadsheet.
+
+[00:17:10] Erika: legal ask—if pilot data is considered customer data, we need to see the DPA and confirm delete APIs. Also want an indemnity clause for data breaches.
+[00:17:22] Alex: we'll attach the DPA and highlight delete endpoints. For indemnity we'll have legal follow up—I'll loop our legal counsel into the thread.
+
+[00:18:10] Marta: competitive question—how do we position vs Anthropic and OpenAI for regulated customers?
+[00:18:18] Priya: differentiate on deployment flexibility and observability—our Private offering plus token-level cost/latency dashboards is a good selling point. Also our rollouts and automatic fallback policies help customers feel safe in production.
+
+[00:18:50] Samir: can Redwood join our customer QBR call during the pilot? it'd be helpful for the account team to have a technical presence.
+[00:18:59] Alex: yes, we're happy to join QBRs and co-present customer wins.
+
+[00:19:35] [00:19:35] -- brief cross talk/overlap; some audio glitch --
+
+[00:20:05] Priya: a couple of technical caveats—quantization reduces memory and can affect some rare token completions; we recommend a small eval set to ensure no quality regressions. Also continuous batching and KV cache interacts with prompt engineering; we can help craft prompts to be cache-friendly.
+
+[00:21:00] Daniel: about observability—we need traces per request and token-level cost attribution for our finance team. Can Redwood provide that?
+[00:21:08] Priya: yes, Console includes token-level breakdowns, per-route dashboards, and tracing hooks you can link to your observability backend. We'll demo a console snapshot in the next call.
+
+[00:22:10] Marta: on GTM enablement—we want a joint webinar in March. Who owns the content?
+[00:22:18] Liam: partnerships can co-produce; Redwood marketing will own registration and creatives but Orbital subject matter experts should present the customer POV. We'll draft a proposed agenda.
+
+[00:23:05] Alex: ok let's recap decisions so far: 1) pilot scope will include two target accounts (one EU-residency with Private deployment, one US with Dedicated), 2) Redwood will run benchmarks and provide a pilot pricing sheet, 3) Orbital will share network/topology and procurement constraints. Anything missing?
+[00:23:24] Marta: include the referral / rev split options in the spreadsheet.
+[00:23:28] Alex: noted.
+
+[00:24:10] [00:24:10] Short silence / background noise
+
+[00:24:35] Priya: quick risk triage—listed technical risks: data exfil risk (mitigation: Private or tokenization), latency risk (mitigation: benchmark + Dedicated), quality regression on quantized models (mitigation: eval set + canary), procurement delay (mitigation: pilot SOW and short-term commercial).
+
+[00:25:22] Samir: do you have standard pilot SOW templates for co-sell?
+[00:25:28] Alex: yes we'll attach a lean SOW that includes success criteria, timelines, deliverables, and a short 30/60/90 review cadence.
+
+[00:26:00] Erika: procurement windows—we typically have ELA reviews take 3 weeks internally; if there's partner momentum we sometimes expedite. We'll confirm.
+
+[00:26:40] Daniel: question—does Redwood require any specific egress ports or protocols for Private agent?
+[00:26:48] Priya: mostly standard HTTPS outbound to control plane endpoints, plus a TCP port for agent metrics if you want direct collection. We'll send the exact allowlist.
+
+[00:27:30] Alex: ok I'm going to open the co-sell playbook doc we start from—(Alex shares link) this is a skeleton with messaging, ICP, and a basic handoff flow.
+[00:27:45] Marta: perfect, we'll review and add our account mapping.
+
+[00:28:30] [00:28:30] Technical tangent—discussion of model variants and quantization choices; some incomplete sentences and filler: "...so if you go 4-bit it tends to, uh, reduce GPU memory but you might see slight acceptance on rare tokens..."
+
+[00:30:05] Priya: we will run three model variants: 1) high quality (larger model), 2) balanced (quantized medium), 3) cost-optimized (small quantized). We'll show expected token costs and latency for each.
+
+[00:31:20] Samir: network compliance—for EU account we need data never to cross into US datacenters. Can you pin processing to EU region in Private?
+[00:31:28] Priya: yes Private can be hosted in EU region only and our control plane supports region pinning. For Hosted we also have EU regions but for strict residency Private is the preferred route.
+
+[00:32:10] Alex: what's the minimal data we need from Orbital to run the initial benchmark?
+[00:32:16] Samir: a 100 prompt sample set, expected tokens per call, and traffic profile (concurrency & peak TPS).
+
+[00:32:28] Alex: great. Can you share that by Tuesday?
+[00:32:32] Samir: yes we can—I'll upload to the shared drive.
+
+[00:33:00] Priya: we'll also need a small golden set for quality checks; ideally 20-30 edge-case prompts.
+
+[00:33:20] Marta: anything on pricing transparency? our finance folks will want NRE, pilot discounts, committed spend tiers.
+[00:33:30] Alex: we'll surface those in the spreadsheet. We'll show pilot discount, committed tier pricing, and an ops uplift for Private.
+
+[00:34:05] [00:34:05] brief audio glitch, one participant reconnects
+
+[00:35:00] Daniel: for the POC, who will be the day-to-day technical lead on Redwood's side?
+[00:35:06] Priya: that'll be me; Priya Desai, and I'll be supported by our onboarding ops team.
+
+[00:35:40] Alex: I'll handle commercial and partner enablement. Liam will support GTM.
+
+[00:36:10] Samir: regarding co-sell motion—do you have a recommended lead handing mechanism? SFDC or shared spreadsheet?
+[00:36:20] Liam: we can do SFDC shared records or a lightweight partner portal intake. For pilots a shared spreadsheet is simplest. For scaled co-sell we'd push SFDC integration.
+
+[00:36:55] Marta: ok shared spreadsheet for pilot; we'll coordinate SSO invites for the account team.
+
+[00:37:40] Priya: last tech note—if you want strict data segregation, we can enable query-level encryption where only your KMS decrypts tokens. It's slightly more complex but feasible.
+
+[00:38:10] Samir: that might be necessary for one of the accounts. Let's plan on that as a risk mitigation.
+
+[00:39:05] [00:39:05] quick side convo about market messaging; filler words, laughter
+
+[00:40:00] Alex: time check—we're about 40 minutes in. Are people ok to keep going 20 more minutes?
+[00:40:05] Marta: yep good.
+
+[00:40:25] Priya: I'll summarize the technical deliverables: benchmark spreadsheet for three variants, runbook for Private bring-up, list of allowlist ports, and console demo snapshot.
+
+[00:41:10] Alex: and commercial deliverables: co-sell one-pager, pilot SOW template, pricing spreadsheet, rev-split scenarios.
+
+[00:42:00] Erika: procurement timeline again—we aim to conclude ELA by mid-Feb if pilot looks good. Expect legal review windows.
+
+[00:42:18] Alex: we'll aim to provide templated contract language to speed the review.
+
+[00:43:00] Marta: can we do a joint internal kickoff for our sales ops + Redwood next week? a 45m sync to align handoffs and naming conventions.
+[00:43:10] Alex: yes let's lock that. I'll propose times.
+
+[00:44:00] [00:44:00] Minor crosstalk / background noise
+
+[00:45:05] Priya: one more operational note—if you want cost controls we can set token caps per route and alerting for cost spikes. That helps when rolling out to production.
+
+[00:46:00] Samir: good. Also will you show fallback model quality—like A/B comparisons—during the benchmark?
+[00:46:08] Priya: yes we'll provide side-by-side outputs for the eval set so you can judge acceptability.
+
+[00:47:20] Alex: ok final recap before we close: action items (see doc) — Redwood to send: 1) co-sell one-pager and pricing spreadsheet by 12/23, 2) security pack and DPA, 3) benchmark results by 12/29. Orbital to send: target accounts list + topology + sample prompts by 12/22. Legal to confirm procurement windows.
+
+[00:48:05] Marta: thanks everyone, this was helpful. We'll prioritize the two pilot accounts and get data to you.
+
+[00:48:20] Erika: one more ask—please include a short escalation path with names for on-call during pilot.
+[00:48:28] Alex: yes we'll include that in the SOW.
+
+[00:49:05] [00:49:05] Closing chatter and thanks
+
+[00:49:40] Priya: I'll follow up with a tech-only 30-minute dry run once we have the sample data. Proposed week of Jan 4th.
+[00:49:50] Samir: works for us.
+
+[00:50:10] Alex: thanks all, we'll follow up in email with links and the initial spreadsheets.
+
+[00:50:20] Meeting end (transcription continues with a short few closing comments and a bit of cross-talk; recording stops ~00:62:00)
+
+Notes on transcription quality: some names and product words may be mis-transcribed (e.g., "dedication" instead of "Dedicated", "KV cache" sometimes as "K V cache").
+
+References shared during call (links provided verbally):
+- Co-sell playbook skeleton (link)

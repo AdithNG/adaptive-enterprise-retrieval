@@ -1,0 +1,134 @@
+Post-pilot readout + next-steps plan — Vertical ABM (Regulated Workloads: FinServ + Healthcare)
+
+Goal
+Create a durable post-pilot readout covering (1) pipeline outcomes, (2) lessons learned / what changed in messaging + process, (3) what assets converted, and (4) a proposal to scale ABM to additional regulated segments without pulling in major product scope.
+
+Audience
+Exec staff (Marketing + Sales + Product), Security/GRC, SE leadership. This is intended to become the “v1 playbook” artifact for repeatable regulated outbound.
+
+Pilot snapshot
+- Timebox: ~8 weeks (prep + execution + close) May–June 2025
+- Verticals: Financial services (primary) + Healthcare/PHI-adjacent (secondary)
+- Primary products: Redwood Dedicated + Redwood Private (VPC/on-prem)
+- Core buyer set: CISO/Security, Platform/ML Eng, Procurement
+
+Success criteria (from brief)
+- Validate repeatable positioning + outbound motion for compliance-driven buyers
+- Produce a baseline set of vertical assets (landing page, one-pagers, security FAQ/evidence pack index, talk tracks, sequences)
+- Generate qualified pipeline (meetings, SQLs, pilots/POCs, conversion to procurement)
+
+Outcomes (high-level)
+Pipeline / meetings
+- Target accounts: 38 total (FinServ: 24, Healthcare: 14)
+- Coverage: 32/38 had a named owner + first touch within first 10 business days of execution
+- Positive replies: 21 accounts (55% of targeted accounts) had at least one positive signal (reply, referral, security questionnaire request, or “send materials”) 
+- Meetings booked: 14 (FinServ: 9, Healthcare: 5)
+- SQLs created: 6 (FinServ: 4, Healthcare: 2)
+- POCs started: 2 (Northbridge Banking, Helix Health System)
+- Procurement/legal engaged: 1 (Trident Financial Services)
+
+Qualitative signals
+- “Regulated-ready” posture consistently drove the first conversion event (security call / evidence request), not performance claims alone.
+- The best-performing hook was: predictable throughput + compliance controls + deployment flexibility (VPC/on-prem) framed as “avoid building and operating inference infrastructure under audit constraints.”
+- Most late-stage risk was not product gaps; it was response-time + consistency on security questionnaires and commercial packaging clarity (Dedicated vs Private vs hosted, plus retention/residency caveats).
+
+Account outcomes (not exhaustive; focus on stage movement)
+- Northbridge Banking (FinServ): POC complete; success criteria met on latency + logging requirements; next step is a rollout plan + procurement discovery (Dedicated vs Private decision leaning Private/VPC due to internal network policy).
+- Helix Health System (Healthcare): POC scoped + executed; outcome was “possible” but additional PHI guardrails and clearer retention/residency controls needed for full go-live; next step is security follow-up + procurement timing alignment.
+- Brightline Insurance (FinServ): security review completed; evidence pack requested; next step is a short technical deep dive (audit log export format + SAML/SCIM) before committing to POC.
+- Regal Wealth Management (FinServ): technical deep dive completed on audit logs + KMS/HSM; strong fit signal; waiting on internal platform team bandwidth to scope pilot.
+- Trident Financial Services (FinServ): progressed to procurement/legal; redlines in flight (DPA/SLA + residency language); outcome TBD.
+
+What we shipped (assets + enablement)
+Assets produced/updated during the pilot (v1)
+- Regulated workloads landing page (with cross-links to Security FAQ + evidence pack index)
+- FinServ messaging framework v1
+- Healthcare messaging framework v1
+- Regulated workloads security FAQ (sales-ready)
+- Evidence pack index page (request/sharing guidance)
+- Regulated Workloads ABM deck v1
+- Regulated inference competitive battlecard
+- Outbound email sequence (FinServ) + LinkedIn ads creative brief
+- Webinar outline + follow-up templates (webinar not executed within pilot window; outline used for 1:1 talk track)
+
+Asset conversion (directional; pull exact counts from dashboard spec)
+- Highest-converting assets in “first conversion event” (meeting / security call):
+  1) Security FAQ (link sent in outbound follow-up) 
+  2) Evidence pack index (created confidence + made the request process concrete)
+  3) ABM deck (used in live calls; reduced time to “next step”)
+- Landing page performance was “good enough” for ABM but not yet a scalable demand gen engine; the CTA that worked best was “Book a security + architecture review” over “Download benchmark.”
+
+Messaging learnings (what worked / what we changed)
+What worked
+- Lead with auditability + control: audit logs, encryption/KMS, SSO/SAML, data handling boundaries.
+- Pair compliance with economics: “predictable throughput and cost controls under real traffic,” not generic “fast GPUs.”
+- Emphasize deployment flexibility as a risk reducer: Hosted → Dedicated → Private/VPC/on-prem as they mature.
+
+What did not work (or triggered friction)
+- “HIPAA-ready” language in healthcare; too loaded without strict qualification and legal review. Replaced with “PHI-adjacent workflows” + “supports common security controls; details depend on deployment and customer configuration.”
+- Overly model-centric positioning; buyers cared more about operational posture (logs, access controls, change management, retention).
+
+Top objections and effective responses
+- “We need on-prem / no public internet access” → Redwood Private deployment pattern + customer-managed networking; SE-led architecture review.
+- “We need audit logs exported to our SIEM” → show log fields + export options; clarify timeline for any format specifics; point to examples.
+- “We need strict data retention controls” → clarify current retention policy per deployment and what is customer-configurable; align on requirements early.
+- “We already have GPUs” → frame Redwood as the inference runtime + control plane + operational tooling (rollouts, fallback, observability) and faster path to SLA compliance.
+
+Process learnings (internal)
+What went well
+- Weekly governance with Sales/PMM/Security/SE prevented major claim drift.
+- Evidence pack “index + request process” reduced ad-hoc doc hunting and lowered security review cycle time.
+
+Bottlenecks
+- Security questionnaire turnaround was inconsistent when asks landed via multiple channels (email + Slack + calls). We need a single intake and SLA.
+- Packaging confusion on Dedicated vs Private (especially for VPC-private endpoints and data boundaries). We need a one-page internal decision tree and a consistent external explanation.
+
+Product/docs feedback surfaced (non-scope, but high leverage)
+- SAML metadata validation edge cases surfaced during pilot; document known constraints + recommended IdP configs.
+- Audit log export formats and field-level definitions need a single canonical reference (docs + example snippet), especially for SIEM ingestion.
+- Retention/residency language needs a standardized “what’s supported today vs by contract vs by configuration” section.
+
+Proposed next steps (scale plan)
+Recommendation: double down on FinServ first; keep Healthcare as a smaller, tightly-qualified motion.
+
+Why FinServ first
+- Faster path to “security call → POC” when framed as auditability + latency + predictable throughput.
+- Higher incidence of Dedicated/Private fit signals (VPC, SIEM, KMS/HSM) without the additional PHI-specific program requirements.
+
+90-day plan (v2 ABM)
+1) Tighten the motion
+- Create a single “Regulated Intake” channel + lightweight form for security questionnaires and evidence requests; commit to internal SLA (e.g., acknowledge in 1 business day, first pass in 3 business days).
+- Publish an internal “Dedicated vs Private” decision tree + externally-safe explainer (no over-claims).
+
+2) Refresh assets (minimum viable)
+- Update landing page with 2 clearer architecture patterns (Dedicated in isolated environment vs Private VPC/on-prem).
+- Add a security review prep checklist (what we’ll cover; what to bring) to reduce back-and-forth.
+- Add a public-friendly proof point section (genericized benchmarks + operational outcomes). If no named customer logos, use anonymized “reference profile” format with Security-approved wording.
+
+3) Expand targeting channels
+- Add AWS Marketplace co-sell motions for accounts already in procurement processes; standardize private offer steps and who owns each step.
+- Run 1 webinar or virtual roundtable only after the v2 landing page + proof point section is ready (avoid scaling top-of-funnel before mid-funnel is de-risked).
+
+4) Measurement upgrades
+- Enforce per-account “first conversion event” tracking (reply vs meeting vs evidence request vs security call) so we don’t over-credit meetings.
+- Track cycle time metrics: first touch → first meeting, first meeting → security review, security review → POC start.
+
+Decision points
+- By end of next 2-week sprint: confirm v2 scope, owners, and publish the internal packaging decision tree.
+- By day 45: decide whether Healthcare expands beyond “PHI-adjacent only” based on whether we can standardize retention/residency language and reduce legal review overhead.
+
+Open questions / asks
+- Security: confirm the minimum externally-shareable statements for retention/residency by deployment type; add to FAQ.
+- Product (Private): confirm roadmap stance on audit export formats (what’s supported today vs planned).
+- Sales leadership: confirm whether we want to gate “evidence pack” behind a meeting for ABM (improves qualification) or keep as request-based (improves conversion rate).
+1) Readout doc completed and shared with stakeholders (Marketing/Sales/Product/Security/SE).
+2) Readout includes: funnel metrics, account outcomes, asset performance, top learnings, and a 90-day scale proposal.
+3) Clear decision: primary vertical for v2 (FinServ vs Healthcare vs both).
+4) Owners + dates assigned for next-step enablement items (questionnaire intake/SLA, packaging decision tree, docs updates).
+2025-06-10 (Ben Carter): Added initial funnel metrics and draft narrative. Waiting on Tyler to confirm landing page attribution + UTM rollups before finalizing “asset conversion” section.
+2025-06-12 (Soojin Lee): Updated messaging learnings to remove any borderline claims (esp. healthcare). Please keep “supports common security controls; details depend on deployment + customer config” language consistent across the readout + next iteration assets.
+2025-06-13 (Dr. Aisha Rahman): +1 on single intake + SLA for questionnaires/evidence. Also recommend we explicitly document what we can share pre-NDA vs post-NDA; we lost time clarifying this repeatedly.
+2025-06-17 (Markus Klein): From SE side: biggest repeat ask was audit log schema + SIEM export patterns. The example PR is good; we should link it from the FAQ and make the field definitions canonical (ENG-22091 follow-through).
+2025-06-19 (Stephanie Nguyen): Account outcomes look right. Please highlight Northbridge as the reference pilot narrative (performance + compliance) even if anonymized; it’s the most complete end-to-end story.
+2025-06-24 (Michael Grant): Procurement section: keep it factual—no promises on residency/retention beyond what we can contractually support. Trident redlines should be described as “in review” with no implied outcome.
+2025-07-02 (Ben Carter): Final readout delivered in exec sync. Decision: prioritize FinServ for next 90 days; Healthcare remains in a tightly-qualified motion (PHI-adjacent only) until retention/residency language and security intake process are standardized.

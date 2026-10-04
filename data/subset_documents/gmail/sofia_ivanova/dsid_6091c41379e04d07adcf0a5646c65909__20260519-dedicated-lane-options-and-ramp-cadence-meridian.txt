@@ -1,0 +1,144 @@
+Dedicated capacity options and phased activation proposal
+
+From: Sofia Ivanova <sofia.ivanova@redwood.ai>
+To: Elaine Wong <elaine.wong@meridiantx.com>, Dr. Aaron Patel <aaron.patel@meridiantx.com>
+Cc: Karthik Iyer <karthik.iyer@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Date: 2026-05-19T09:12:00-07:00
+Subject: Dedicated capacity options and phased activation proposal
+
+Hi Elaine / Aaron,
+
+Thanks again for the time today — great to hear more about Meridian's inference profile and the 24/7 clinical batch inference windows you expect in Q4. Attached is a short set of dedicated capacity options that map to the throughput and availability targets we discussed. I've summarized three pragmatic paths below so you can pick the shape that best fits procurement and risk appetite.
+
+Attachment: dedicated-offer_v2.pdf (PDF, 2 pages)
+Attachment: capacity-lane-diagram.png (PNG, 1 image)
+
+Options (high level)
+1) Baseline Guard (cost-focused)
+   - Cluster: 16x A100-equivalent GPUs (mixed T4/RTX for warm lanes)
+   - Minimum guaranteed GPUs: 8 (business-hours baseline)
+   - Ramp: 8 -> 12 (30 days) -> 16 (60 days)
+   - Safety buffer: 10% burst pool for scheduled windows
+   - Notes: best unit-cost; acceptable for non-latency-critical batch jobs.
+
+2) Anchored SLA (balanced)
+   - Cluster: 32x A100-equivalent GPUs (homogeneous fleet)
+   - Minimum guaranteed GPUs: 16 (always available)
+   - Ramp: 16 -> 24 (30 days) -> 32 (90 days)
+   - Safety buffer: geo-fallback lanes (regional failover) + warm cache prefill
+   - Notes: predictable tail latency targets, recommended for mixed real-time + batch workloads.
+
+3) Burst-Ready (latency-first)
+   - Cluster: 48x A100-equivalent GPUs (reserved + burst capacity)
+   - Minimum guaranteed GPUs: 24 (business peak)
+   - Ramp: 24 -> 36 (30 days) -> 48 (120 days) with two incremental activation waves
+   - Safety buffer: hot standby pods for sub-second failover
+   - Notes: higher cost but preserves 99.9th % latency SLOs under unpredictable load.
+
+Operational considerations and tradeoffs
+- Warmup: full KV-cache warmup for the 48-GPU configuration takes ~36 hours; incremental waves reduce customer-facing risk.
+- Quantization profiles: we can recommend an 8-bit quantized variant for non-critical workloads to reduce effective GPU footprint by ~25% — Karthik has the bench numbers and I'll loop him for a detailed chart.
+- Billing: reserved capacity monthly commit with credits for unused burst hours; details in the attached PDF.
+
+Suggested next steps
+- You pick preferred path (Baseline / Anchored / Burst-Ready) and target SLA (standard / extended).
+- We propose a 30-day canary on the first ramp wave for field validation (small production traffic + dedicated tracing).
+- We'll issue an updated DocuSign with the chosen option and a 30-day signature window to lock capacity.
+
+Can you let us know which path you want us to flesh out by end of week? If you prefer, we can hop on a short call to walk through tradeoffs.
+
+Best,
+Sofia Ivanova
+Account Executive, Redwood Inference
+sofia.ivanova@redwood.ai | +1 (415) 555-0182
+Redwood Inference
+
+---
+
+(quoted) Previous notes from call: "Meridian needs predictable nightly throughput for model scoring (target 200k tokens/min) and spot real-time inference for triage UI. Procurement expects a 60–90 day vendor evaluation window."
+From: Elaine Wong <elaine.wong@meridiantx.com>
+To: Sofia Ivanova <sofia.ivanova@redwood.ai>, Dr. Aaron Patel <aaron.patel@meridiantx.com>
+Cc: Karthik Iyer <karthik.iyer@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Date: 2026-05-19T11:03:00-07:00
+Subject: Re: Dedicated capacity options and phased activation proposal
+
+Hi Sofia — thanks for the clear options and the attachments. Helpful. A couple of quick clarifications before we review internally with procurement: 
+
+1) For the Anchored SLA option, does the "geo-fallback lanes" imply cross-region replicas that we pay for as reserved capacity, or are those burst-only (pay-as-you-go) nodes?
+2) What do you recommend for the minimum during business hours if our nightly batch spikes to 300k tokens/min for 2 hours — do we size to the spike or rely on burst windows?
+3) Procurement is asking that any reserved capacity be cancellable with a 60-day ramp-down clause after quarter renewal; will that be reflected in the contract?
+
+We like the idea of a 30-day canary. Also, our technical lead Dr. Patel asked whether you can document estimated warmup costs (in token-hours) for each wave so we can include them in our run-rate model.
+
+Elaine
+Elaine Wong
+VP Product Operations, Meridian Therapeutics
+elaine.wong@meridiantx.com | +1 (617) 555-0124
+
+On 5/19/26 09:12, Sofia Ivanova wrote:
+> [original message attached]
+
+From: Karthik Iyer <karthik.iyer@redwood.ai>
+To: Elaine Wong <elaine.wong@meridiantx.com>, Sofia Ivanova <sofia.ivanova@redwood.ai>
+Cc: Marissa Cole <marissa.cole@redwood.ai>, Sean Gallagher <sean.gallagher@redwood.ai>
+Date: 2026-05-20T08:47:00-07:00
+Subject: Re: Dedicated capacity options and phased activation proposal
+
+Hi Elaine, Sofia — quick technical clarification and a concrete proposal for Dr. Patel's warmup question.
+
+Geo-fallback lane model
+- We can provide geo-fallback as reserved hot-standby replicas (counted against committed capacity) or as on-demand burst nodes. For predictable failover and SLA-backed RTOs I recommend reserving a small standby fleet (4–6 GPUs) in a secondary region — this keeps failover time <120s. If you prefer not to reserve, on-demand nodes are possible but add variability in failover and cost.
+
+Warmup and token-hour estimate (rough)
+- Baseline Guard (16 GPUs): full prefix/KV warmup ~8 GPU-hours (prefill small KV sets) -> estimated 12,000 token-hours of work at an average token-rate of 1.5k tokens/min per GPU during warmup.
+- Anchored SLA (32 GPUs): incremental warmup per wave ~18 GPU-hours -> estimated 45,000 token-hours.
+- Burst-Ready (48 GPUs): cold-to-hot activation ~36 GPU-hours; if we prefill caches ahead of traffic, we reduce effective warmup to ~12 GPU-hours but that requires reserved burst windows + scheduled prefill calls.
+
+Quantization tradeoff (cost impact)
+- Using an 8-bit profile for non-critical batch scoring reduces GPU-dwell by ~20–30% on average. That can drop the effective committed GPU count for Baseline by 2–3 GPUs. We will run a short bench for your model in our lab (need sample model or representative layer sizes) and provide a precise delta.
+
+Procurement flexibility
+- We can include a 60-day ramp-down clause for reserved capacity with a phased decommit schedule (30% -> 15% -> 0% across 60 days) and apply a credit schedule for unused committed hours. I'll loop Sean for commercial confirmation.
+
+Happy to put these numbers into the PDF and the HubSpot deal.
+
+Best,
+Karthik Iyer
+Senior Sales Engineer, Redwood Inference
+karthik.iyer@redwood.ai
+
+> On 2026-05-19 Sofia wrote:
+> > [proposal summary]
+
+From: Sofia Ivanova <sofia.ivanova@redwood.ai>
+To: Elaine Wong <elaine.wong@meridiantx.com>, Dr. Aaron Patel <aaron.patel@meridiantx.com>
+Cc: Karthik Iyer <karthik.iyer@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>, Sean Gallagher <sean.gallagher@redwood.ai>
+Date: 2026-05-21T16:45:00-07:00
+Subject: Re: Dedicated capacity options and phased activation proposal
+
+Elaine — thanks for the thoughtful questions; appreciate the procurement constraints. Summary of updates and next steps below so we have a single action plan.
+
+Updated items (to be reflected in the DocuSign):
+- Geo-fallback: included as 4 reserved standby GPUs in a secondary region for the Anchored SLA option (counts toward reserved commit).
+- Business-hour sizing guidance: recommend sizing to the baseline business-hour peak (16 GPUs for Anchored), and rely on a short burst pool for the 2-hour nightly peak — this balances cost and latency. We can describe two scenarios in the contract (soft-burst vs reserved-fallback) and mark which applies.
+- 60-day ramp-down clause: agreed. We will include a phased decommit (30% after 30 days, additional 15% after 45 days, remainder after 60 days) and the credit schedule.
+
+DocuSign and timeline
+- I will prepare an updated offer with the Anchored SLA option and the geo-standby included and send a DocuSign link today (DocuSign:https://docusign.example/meridian-offer-98765). Please aim to return signed by 2026-06-18 to lock the preferred activation slots.
+- Proposed canary: start within 14 days of signature; first ramp wave (16 -> 24) targeted for day 30 post-signature.
+
+Next steps for engineering validation
+- Karthik will run a bench against your representative model for quantization recommendations. If you can share a small sample or model metadata, we can complete this bench within 5 business days.
+
+If the plan looks good I'll send the DocuSign and a short meeting invite for a 20-minute handoff to your infra/procurement teams.
+
+Thanks and talk soon,
+Sofia Ivanova
+Account Executive, Redwood Inference
+sofia.ivanova@redwood.ai | +1 (415) 555-0182
+
+Attachments: dedicated-offer_v2.pdf (updated clauses), capacity-lane-diagram.png
+
+--
+Redwood HubSpot: HS-987654
+DocuSign:https://docusign.example/meridian-offer-98765

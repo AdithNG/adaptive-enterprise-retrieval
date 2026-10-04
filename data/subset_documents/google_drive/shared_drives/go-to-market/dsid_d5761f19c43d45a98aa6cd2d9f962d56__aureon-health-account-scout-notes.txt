@@ -1,0 +1,66 @@
+Aureon Health — account scout & pilot notes
+
+Objective:
+- Quick scout for Aureon Health (regional hospital chain + telehealth). See if we can get a 90-day VPC pilot for automated patient intake and discharge summary drafting (PHI = concern).
+
+Snapshot:
+- HQ: Minneapolis, hybrid operations. Mix of Epic + homegrown telehealth app (React frontend, Java backend). Heavy on compliance (HIPAA, state regs).
+- Size: ~18 hospitals, 2M annual visits (estimate from investor deck). Likely ARR potential: $150k-$400k/year depending on scope (pilot -> prod).
+- Current process: manual intake calls -> transcribed notes -> clinician edits summary. Pain: clinician time, transcription errors, variable summary quality.
+
+Key contacts (to find emails/LinkedIn):- Chief Digital Officer (CDO) — likely Sara Whitman (title variants in org chart) - CIO — Marco DeLuca - Director of Clinical Informatics — probable champion - Telehealth product manager (PM) — outreach to identify use cases
+
+Hypotheses / Why Redwood fits:
+- PHI -> need private deployment (VPC or on-prem). Redwood Private + KMS/HSM fits ask.
+- Need low-latency for real-time intake -> Dedicated pools recommended.
+- Value prop: reduce clinician touch time, consistent summary templates, cost predictability vs building in-house.
+
+Pilot suggestion (90 days):
+- Scope: intake transcription -> draft discharge summary (template-driven) for 3 clinics.
+- Infra: Redwood Private VPC with dedicated capacity (1-2 gpus reserved), HSM for keys, 30-day logs retention (can increase).
+- Success metrics: ~30% reduction in clinician edit time, >85% template-compliance, feedback loop for model tuning.
+- Data flow: transcripts (de-identified copy) -> modeling in private network; no storage outside customer region.
+- Minimal engineering lift: one integration webhook + small adapter service to Epic export.
+
+Outreach sequence (cold -> warm):
+1) Cold email to CDO: short problem statement + 1-pager offer to run no-cost pilot for 3 clinics.
+2) Follow-up w/ data point: "We helped a regional health system cut intake edit time 27% in 8 weeks" (anonymized).
+3) Call: ask for 30-45 min intro, target to validate compliance and integration owners.
+4) Technical deep-dive with infra & security -> present architecture diagram and compliance checklist.
+
+Cold email draft (short):
+Subject: Pilot to cut clinician intake edits at Aureon Health
+Hi Sara —
+Quick note: we help hospital systems automate patient intake and discharge drafting while keeping PHI inside your VPC. If reducing clinician edit time by ~25–30% sounds useful, can we run a no-cost 90‑day pilot for 3 clinics and show results?
+If yes, I’ll send a 1‑pager + proposed timeline.
+— Maya (Redwood Inference)
+
+Follow-up talking points / objections prep:
+- "We can't put PHI on third-party cloud" -> Redwood Private + customer-managed VPC + KMS/HSM. Offer on-prem package if required. Provide SOC2 + HIPAA BAAs + architecture diagram.
+- "We already have a partner / EHR vendor" -> ask if current partner supports on-prem LLM workflows and show gap analysis (latency, cost, control). Suggest incremental pilot co-delivered with their vendor.
+- "Integration cost too high" -> propose adapter approach: small shim service (1 engineer, ~4 wks) to map Epic exports -> Redwood ingestion. Offer professional services credit for pilot.
+- "Clinical safety" -> emphasize human-in-the-loop rollouts: model suggestions only, clinician final sign-off. Provide eval plan, golden prompts, error rate thresholds.
+
+Open questions / research actions (todo):
+- Confirm exact EHR versions (Epic modules) + export formats (HL7, FHIR). Need ticket created: JIRA-8742.
+- Identify region/data residency restrictions for MN; check state-level requirements on retention.
+- Find names/emails for Sara Whitman + Marco DeLuca + Clinical Informatics director.
+- Cost ballpark for 90-day pilot (internal ask to finance): reserved capacity + onboarding PS + support = estimate $85k-$140k.
+
+Meeting agenda (if intro call booked):
+- 5 min intros
+- 10 min pain validation (clinician time, volume)
+- 10 min proposed pilot + compliance notes
+- 10 min integration & timeline Qs
+- 5 min next steps (security deep-dive request / NDA)
+
+Notes to self:
+- Bring anonymized case study (regional health system) + compliance one-pager.
+- Prep short architecture slide: VPC, KMS, audit logs, no egress.
+- Keep ask specific: "3 clinics, 90 days, success metrics".
+
+References: Confluence page linked above contains sample architecture and BAAs. Put initial outreach in sequence in Outreach CRM and tag AUREON.
+
+Status: draft outreach - need to find contact emails and attach anonymized case study before send.
+
+-- end --

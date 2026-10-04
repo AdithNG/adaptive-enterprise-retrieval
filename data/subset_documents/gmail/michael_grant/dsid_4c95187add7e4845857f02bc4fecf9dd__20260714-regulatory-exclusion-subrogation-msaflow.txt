@@ -1,0 +1,124 @@
+MSA/Order Form — regulatory fines exclusions & subrogation (redline attached)
+
+From: Jordan Ellis <jordan.ellis@acmecorp.com>
+To: aisha_rahman <aisha_rahman@redwood.com>
+Cc: Neil Carter <neil.carter@acmecorp.com>, Sofia Alvarez <sofia.alvarez@acmecorp.com>
+Date: Tue, 14 Jul 2026 09:12:00 -0700
+Subject: MSA redlines — regulatory fines & subrogation (redline attached)
+
+Hi Aisha,
+
+Thanks again for the demo last week. Attached is Acme's consolidated redline to the MSA and the Order Form focused on limitation of liability and carve-outs for regulatory fines / statutory penalties and third-party claims. Our legal team flagged two items we need to get comfortable with before procurement can sign:
+
+- Regulatory fines / statutory penalties (GDPR/CCPA/PCI): Acme requests that regulatory fines be carved out from Redwood's liability cap and that Redwood agrees to indemnify Acme for regulator-issued penalties arising from Redwood's negligence or breach of its data processing obligations.
+- Third-party penalty claims: We expect Redwood to accept responsibility for claims made by payment networks or other third parties (e.g., PCI fines) where Redwood's systems are the proximate cause.
+- Subrogation / insurer assignment: Our team is asking for a clear carve-out so we can pursue remedies (including insurer subrogation) for fines related to Redwood's acts.
+
+We attached ACME_MSA_redline_v3.docx with inline edits. Can you confirm Redwood's position on: (a) unlimited liability for regulator fines vs. capped liability; (b) whether subrogation will be permitted; and (c) whether Redwood needs any additional language limiting scope to "direct" regulator penalties (not consequential or multiplied statutory damages)?
+
+Procurement timeline: we need final redlines by COB Friday to make the July board approval window. Happy to jump on a quick call if helpful.
+
+Thanks,
+Jordan Ellis
+Senior Contracts Manager
+Acme Corporation
+(attachment: ACME_MSA_redline_v3.docx)
+
+From: aisha_rahman <aisha_rahman@redwood.com>
+To: Neil Carter <neil.carter@acmecorp.com>, Jordan Ellis <jordan.ellis@acmecorp.com>
+Cc: laura_bennett <laura_bennett@redwood.com>, rishi_malhotra <rishi_malhotra@redwood.com>
+Date: Tue, 14 Jul 2026 09:40:00 -07:00
+Subject: Re: MSA redlines — regulatory fines & subrogation (redline attached)
+
+Jordan — thanks for the redline and the clear ask. Looping in Laura + Rishi from Legal so we can get a proposed Redwood redline back quickly.
+
+Summary of Acme asks (from our side):
+- Carve regulatory fines out of the liability cap and provide indemnity for fines caused by Redwood's breach or non-compliance.
+- Accept third-party penalty claim responsibility where Redwood is the proximate cause.
+- Allow Acme to pursue subrogation/assignment against insurers.
+
+Internal priorities:
+1) Keep overall commercial cap (Order Form / MSA) — customers push hard on unlimited liability.
+2) Accept carve-outs only where we have clear control/responsibility (e.g., Redwood-managed data processing failures, PKI breaches, PCI tokenization failures).
+3) Limit subrogation exposure via insurer-only carve-out language and anti-assignment safeguards.
+
+Action items: Laura — can you propose specific language that limits Redwood's exposure to regulator fines to (a) fines resulting from Redwood's gross negligence/willful misconduct or breach of specific data obligations, and (b) allows indemnity but subject to mitigation and notice requirements?
+Rishi — I need a pricing impact read: if we accept a carve-out for fines up to $X (or unlimited), what commercial mitigants (security addendum, monitoring, insurance) do we require?
+
+Jordan — can you confirm whether Acme insists on an "unlimited" carve-out, or whether a monetary backstop (e.g., cap equal to 12 months of fees or $5M, whichever is greater) would be acceptable?
+
+I can coordinate a short call later today if that accelerates.
+
+Best,
+Aisha Rahman
+Account Executive, Strategic Sales
+Redwood Inference
+
+From: laura_bennett <laura_bennett@redwood.com>
+To: aisha_rahman <aisha_rahman@redwood.com>, rishi_malhotra <rishi_malhotra@redwood.com>, marissa_cole <marissa_cole@redwood.com>
+Cc: Jordan Ellis <jordan.ellis@acmecorp.com>, Neil Carter <neil.carter@acmecorp.com>
+Date: Tue, 14 Jul 2026 11:05:00 -07:00
+Subject: RE: MSA redlines — regulatory fines & subrogation (redline attached)
+
+Team / Jordan — I reviewed ACME_MSA_redline_v3.docx. High-level legal position below plus draft language suggestions. Attaching Redwood_response_redline_v1.docx with inline edits (key clauses summarized here).
+
+Legal assessment:
+- Regulatory fines (GDPR/CCPA/PCI): We generally resist unlimited liability, but will consider a carve-out for regulator-imposed fines where Redwood's breach of its obligations directly causes the fine. Any indemnity must be subject to: (i) Redwood's right to cure where feasible; (ii) prompt notice and control of defense; (iii) mitigation obligations; and (iv) a requirement that fines be final and non-appealable before payment (or subject to escrow/interim arrangements).
+- Third-party penalty claims (payment networks, PCI assessors): We can accept responsibility for penalties directly attributable to Redwood's failure to follow Redwood-managed payment processing obligations, limited to actual fines imposed and excluding consequential/statutory multiplier damages.
+- Subrogation/assignment: We do not object to reasonable insurer subrogation, but will resist broad assignment rights that allow a customer to transfer claims to third parties without Redwood's consent. We recommend a narrowly tailored clause allowing assignment/subrogation by the customer's insurer with notice to Redwood and cooperation rights.
+
+Suggested compromise language (high-level):
+"Notwithstanding the limitation of liability set forth herein, (i) Redwood shall be liable for and shall indemnify Customer for regulatory fines and penalties to the extent such fines are the direct result of Redwood's material breach of its obligations under the Data Processing Addendum or willful misconduct, provided Customer notifies Redwood promptly, allows Redwood to cure, and the amount is finally determined by a binding governmental order; and (ii) Customer's insurer may pursue subrogation against Redwood for such fines, provided Customer provides Redwood notice and the insurer does not materially expand the scope of the claim beyond the underlying government determination."
+
+Risk notes: we should avoid open-ended indemnities. If Acme insists on unlimited exposure, consider requiring increased insurance limits (e.g., cyber liability + regulatory fines endorsement) or a monetary backstop (cap tied to fees or a fixed $ amount).
+
+Next step: I can circulate a redline back to Acme this afternoon. If Acme insists on unlimited carve-outs, ask for a call to discuss trade-offs (insurance, runbooks, SLA credits).
+
+Regards,
+Laura Bennett
+Senior Counsel, Contracts
+Redwood Inference
+(attachment: Redwood_response_redline_v1.docx)
+
+From: Jordan Ellis <jordan.ellis@acmecorp.com>
+To: laura_bennett <laura_bennett@redwood.com>, aisha_rahman <aisha_rahman@redwood.com>
+Cc: Neil Carter <neil.carter@acmecorp.com>, Sofia Alvarez <sofia.alvarez@acmecorp.com>
+Date: Wed, 15 Jul 2026 08:30:00 -07:00
+Subject: Re: MSA/Order Form — regulatory fines exclusions & subrogation (redline attached)
+
+Laura / Aisha — appreciate the quick review. A few clarifications from Acme Legal / Procurement:
+
+- Acme will not accept a cap on regulator fines where the penalty is statutory in nature and intended to be punitive. Our position is that fines and statutory penalties issued by a regulator should be outside the commercial cap and indemnified by the vendor when caused by vendor's acts.
+- Regarding subrogation: Acme's insurers will often pursue subrogation to recoup fines; we need a clean path for that in the contract. We can accept a narrowly tailored insurer subrogation clause but cannot agree to clauses that require Redwood's prior consent for every insurer step.
+- Acme is willing to accept a finality condition (e.g., payment only when regulator decision is final) but asks that Redwood not hide behind protracted appeals to avoid payment.
+
+Practically: Acme can agree to the draft language Laura proposed if Redwood will: (1) confirm cyber insurance minimums (we propose $10M with regulatory coverage), and (2) provide a short-term escrow arrangement while appeals are pending.
+
+We have board approval constraints — if Redwood can accept these two commercial mitigants and the proposed carve-out language, procurement can move to sign by COB Friday.
+
+-Jordan
+(attachment: Procurement_impact_note.pdf)
+
+From: aisha_rahman <aisha_rahman@redwood.com>
+To: Jordan Ellis <jordan.ellis@acmecorp.com>
+Cc: laura_bennett <laura_bennett@redwood.com>, rishi_malhotra <rishi_malhotra@redwood.com>, marissa_cole <marissa_cole@redwood.com>
+Date: Wed, 15 Jul 2026 14:03:00 -07:00
+Subject: RE: MSA/Order Form — regulatory fines exclusions & subrogation (redline attached)
+
+Jordan — thanks. Proposed path forward from Redwood:
+
+1) Contract language: we will propose Laura's narrow carve-out for regulator fines limited to (a) Redwood's material breach of DPA obligations or willful misconduct and (b) fines finally determined by a binding governmental order. We will add explicit cure mechanics and mitigation obligations.
+
+2) Subrogation: we will accept insurer subrogation without unreasonably withholding consent, but will require that any insurer action not expand the substantive claim beyond the underlying regulator determination and that Redwood be given notice and an opportunity to coordinate defense.
+
+3) Commercial mitigants: Rishi, can you confirm whether increasing cyber insurance minimums to $10M is feasible for the account and whether we can offer a limited escrow holdback while appeals are pending? If insurance is a blocker, propose: (i) an indemnity cap equal to the greater of 12 months fees or $5M for fines that are not punitive; (ii) unlimited for fines arising from willful misconduct (we prefer this limited form of unlimited).
+
+4) Next steps: Laura will circulate the formal redline back to Acme by EOD. Aisha to schedule a 30-min call tomorrow to finalize language if required. Jordan — will you confirm whether escrow is required or if Acme will accept the finality + insurer subrogation language? Also please provide the primary procurement contact's phone number for a quick call.
+
+If we get confirmation on insurance + escrow, Redwood will prioritize the redline and commercial sign-off.
+
+Best,
+Aisha Rahman
+Account Executive, Strategic Sales
+Redwood Inference
+(related link: https://app.docusign.com/link/placeholder-acme-orderform)

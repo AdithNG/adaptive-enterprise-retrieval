@@ -1,0 +1,61 @@
+IronCrest Bioinformatics — Quickstart & Hosting options
+
+Intro discovery: IronCrest is evaluating Redwood for a prototype inference path with emphasis on time-to-first-token (TTFT), security/compliance (KMS, audit logs), and predictable latency for sequence-scoring workloads. Customer is leaning toward PLG quickstart for fast validation but needs clarity on transition to Dedicated or Private for regulated datasets. Next: credits + quickstart, SE benchmark, security deep-dive.
+Time-to-first-token (TTFT) and 'first-call' experience
+Hosted API vs Dedicated vs Private (VPC/on-prem) tradeoffs
+Security requirements: SOC2, KMS, SSO/SAML, audit logs, data residency
+Cost/latency tradeoffs, batching and quantization recommendations
+Pilot scope and success criteria
+[00:00] Jordan Miles: Hey everyone, thanks for joining — appreciate you taking the time. We're Jordan (AE), Priya (SE), Liam on the line from Redwood. Maya, Ravi, Selina, Tom — hi. quick intro?
+[00:12] Maya Chen: Hi yeah, thanks. I'm Maya, CTO at IronCrest Bioinformatics, we do sequence annotation and variant calling pipelines, trying to explore LLMs for smarter triage and summarization.
+[00:25] Ravi Patel: Ravi, lead ML engineer — we'll own the integration. Key for us is latency for short sequences and cost predictability.
+[00:32] Selina Ortiz: Selina, platform. we'll handle networking and infra constraints — importantly we have VPC egress rules.
+[00:40] Tom Armitage: Tom, security. I'll own compliance questions.
+[00:46] Priya Kapoor: Great — quick agenda: 1) figure out your TTFT expectations and quickstart path, 2) hosting options, 3) security checklist, and 4) next steps. Sound good?
+[00:54] Maya Chen: Yep that's perfect.
+[01:01] Jordan Miles: To kick off — IronCrest's adoption pattern? Are you thinking prototype in hosted then move to private, or jump straight to Dedicated/Private?
+[01:12] Ravi Patel: Proto first. We want to spike with real payloads and see p99 latency and cost per inference. If those numbers check out then we'll discuss Dedicated or Private. But important: how fast can we get to a real call — like first successful API call from our app? TTFT.
+[01:28] Priya Kapoor: Understood. With Redwood's PLG flow you can get keys and SDKs in under an hour. Typical TTFT to first token for a self-serve user is 15–30 minutes if you have a small sample payload and a Postman/curl test. We'll give you free credits to run through the quickstart.
+[01:51] Maya Chen: That sounds good. Are there any gotchas around VPC or firewall egress?
+[01:57] Jordan Miles: For hosted quickstarts you don't need VPC — you make outbound calls to Redwood's public API. If you need VPC/private connectivity we offer a Private deployment and VPC peering but that's a separate process.
+[02:12] Selina Ortiz: Right, likely we'll start hosted for the prototype but we have to confirm our security team's stance.
+[02:18] Tom Armitage: Our baseline asks: SOC2, SSO with SAML (IdP), ability to use our KMS for key wrapping, audit logs on token usage, and regional data residency. Do you have a SOC2 report?
+[02:33] Priya Kapoor: Short answer: yes — Redwood has SOC2. For SAML/SSO we support SSO for Console and API keys can be provisioned via our org flows. KMS integrations: for Private deployments we can integrate customer-managed KMS/HSM; hosted has encryption-at-rest with provider-managed keys but we can discuss bring-your-own-key options for Dedicated in some contracts.
+[02:58] Ravi Patel: OK, that matches what we need to triage. For the benchmark — we have sample inputs that are roughly 300–800 tokens and a mix of prompt+context. Latency matters more than raw throughput.
+[03:12] Priya Kapoor: Good, that's the sweet spot for our runtime. We'll configure an endpoint with a smaller context and run p50/p95/p99. Also we'll test batching behavior — but note batching increases throughput at the cost of tail latency; Redwood allows tuning batching windows.
+[03:30] Maya Chen: Can you explain the Hosted vs Dedicated vs Private tradeoffs again in plain terms?
+[03:36] Jordan Miles: Sure — Hosted is fastest to get started: public API, usage billing, free credits for trials, fully managed. Dedicated is reserved GPU pools for predictable throughput and isolation — better for steady production usage. Private is a customer-owned control plane (VPC or on-prem) for regulated data with KMS integration and strict residency. Cost/perf: Hosted is easiest but limited for custom KMS; Dedicated is more predictable cost for committed throughput; Private is the highest control and integration work.
+[04:04] Selina Ortiz: How hard is the migration from Hosted prototype to Dedicated?
+[04:09] Priya Kapoor: Design goal: same API and SDKs across modes. You can pin model versions and rollout policies. So migration is mostly infra provisioning and account config — we provide a migration runbook. Typical timeline: a few days for config, up to a couple weeks if you need Private and on-prem.
+[04:25] Ravi Patel: Does Redwood expose token-level cost breakdowns and per-route dashboards?
+[04:30] Liam O'Neill: Yes — Redwood Console gives per-route latency and cost, token breakdowns, and tracing hooks. You can instrument SDK calls for richer telemetry.
+[04:39] Tom Armitage: KMS specifics — if we use Dedicated, can we still bring our own key?
+[04:44] Priya Kapoor: In many Dedicated and Private engagements we can enable customer-managed keys for encryption at rest; for hosted it's limited. We'll put specifics in the security call.
+[04:54] Maya Chen: Any hard limits we should expect for the quickstart? Like maximum tokens per call?
+[04:59] Jordan Miles: For trial environments we cap aggressive concurrency to prevent noisy neighbors, but the caps are generous for prototyping — we can lift quota for a short benchmark window on request.
+[05:12] Ravi Patel: Regarding quality and models — what models do you host? We prefer open models for license reasons.
+[05:18] Priya Kapoor: We host a curated catalog of open and vendor models, and we publish verified performance profiles. For inference we have optimized kernels and quantized variants to reduce cost. We can recommend a quantization profile for your workload.
+[05:34] Maya Chen: Cool. On the cost side — can you ballpark cost for 50k tokens/day?
+[05:40] Jordan Miles: Ballpark depends on model choice and quantization. We'll have Priya run that against your sample to give a per-token and daily estimate in the spreadsheet.
+[05:50] Ravi Patel: That would help. Also curious about fallbacks — if a model variant is unavailable will requests fail?
+[05:56] Priya Kapoor: We support routing policies and automatic fallback to compatible model variants — we'll surface that in the runbook.
+[06:05] Selina Ortiz: Network-wise we need to ensure egress IP allowlist — can you provide IP ranges?
+[06:10] Jordan Miles: Yes, we'll provide IP ranges and published endpoints for allowlisting. For Private/VPC we do peering instead.
+[06:18] Tom Armitage: On audit logs — we need token-level logs or at least per-request metadata for audits.
+[06:25] Liam O'Neill: Console audit logs capture per-route metrics and request metadata; for Private deployments we can provide more detailed logs with configurable retention. We'll confirm retention windows in the security call.
+[06:38] Maya Chen: Sounds like our path: 1) get trial credits and quickstart; 2) Redwood SE runs initial benchmark with our payloads; 3) reconvene security call; 4) decide pilot commit.
+[06:50] Jordan Miles: Exactly — we'll get you credits and the quickstart link post-call. Priya will pick up the benchmark. Any blockers on the customer side to start?
+[06:59] Ravi Patel: We need to share a sanitized sample dataset first and confirm what we consider PII. We'll send that today.
+[07:07] Tom Armitage: I'll compile the compliance questions and KMS specifics — want them by Friday.
+[07:13] Priya Kapoor: Great. We'll aim to run the benchmark within 48 hours of receiving the payload and return an initial spreadsheet with p50/p95/p99 latencies, tokens-per-second, and cost estimate.
+[07:27] Jordan Miles: Wrap-up — I'll send: credits + quickstart, IP ranges, and links to SOC2 + security overview. Priya will schedule the benchmark window and Liam will join the security deep-dive.
+[07:38] Maya Chen: Thanks everyone. Appreciate the clear path.
+[07:41] Jordan Miles: Thanks all — we'll follow up with next steps in email.
+[07:44] [call ends]
+Jordan to send credit grant link + quickstart playbook (within 2 business days)
+Priya to run a short benchmark (latency/cost) against IronCrest sample payloads — propose 48h window
+Schedule security deep-dive with IronCrest Sec/infra (Tom + Redwood Security) for week of May 19
+Customer to confirm pilot scope: 50k tokens/day target and what data is PII-sensitive
+Jordan Miles | Send trial credits, quickstart guide, and links to SDKs | 2025-05-12
+Priya Kapoor | Run per-token cost + p99 latency benchmark using IronCrest sample and share spreadsheet | 2025-05-13
+Tom Armitage | Share list of compliance questions and KMS requirements ahead of security call | 2025-05-15

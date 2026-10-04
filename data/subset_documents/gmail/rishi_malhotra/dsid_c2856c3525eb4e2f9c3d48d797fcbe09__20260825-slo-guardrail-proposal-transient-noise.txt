@@ -1,0 +1,112 @@
+Hosted API SLO guardrails — rolling windows & transient-noise handling
+
+From: Rishi Malhotra <rishi.malhotra@redwood.com>
+To: Emily Stone <emily.stone@arcadia-health.com>
+Cc: Lauren Bishop <lauren.bishop@redwood.com>, Ben Carter <ben.carter@redwood.com>
+Date: Tue, 25 Aug 2026 09:12:00 -0700
+Subject: Hosted API SLOs — baseline ask and draft proposal
+
+Hi Emily,
+
+Thanks again for the conversation yesterday. Per our call, I've attached a short draft that frames Redwood's proposed SLO commitments for the Hosted API and the set of transient/noise carveouts we typically negotiate. The high-level asks from Arcadia that I recorded: low-interactive latency for clinician-facing flows (p50), predictable tail latency for batch inference and API-heavy times (p95), and clear measurement windows so your incident + procurement teams have a deterministic view.
+
+Attachment: SLO_Draft_v2.pdf (contains proposed p50/p95 numbers, measurement windows, sampling logic, and credit formula).
+
+Quick summary of our proposal (see attached for details):
+- p50: 75 ms server-side response time target, measured as a rolling 24-hour median at the account level.
+- p95: 350 ms tail target, measured as a 7-day rolling window aggregated by calendar-day buckets (see notes on weighting).
+- Transient noise carveout: temporary, high-frequency bursts that meet specific criteria (traffic spike >3x baseline and duration <15 minutes) are excluded from the rolling calculation; longer degradations remain in-window.
+- Scheduled maintenance: planned downtime windows are excluded if announced 48+ hours in advance.
+- Evidence package: we'll provide a one-time onboarding evidence export (raw sample traces + summary CSV).
+
+Can you confirm these items work for Arcadia's procurement & reliability teams, and whether you want us to bake the transient carveout into the contract language or keep it in an operational appendix? If you like this shape I can pull in Legal (Lauren) for final wording and send a DocuSign-ready amendment.
+
+Best,
+Rishi Malhotra
+Account Executive, Redwood Inference
+rishi.malhotra@redwood.com
+(415) 555-0196
+
+---
+Attachment stub: SLO_Draft_v2.pdf (7 pages)
+
+From: Emily Stone <emily.stone@arcadia-health.com>
+To: Rishi Malhotra <rishi.malhotra@redwood.com>
+Date: Tue, 25 Aug 2026 11:03:00 -07:00
+Subject: Re: Hosted API SLOs — baseline ask and draft proposal
+
+Rishi,
+
+Thanks for the write-up — helpful. A few clarifying questions from my side and procurement: 
+
+1) For p50 vs p95: Arcadia will treat p50 as the clinician interactive SLA (we need click-to-result under 200ms from our UI perspective, please call out whether Redwood's server-side p50 includes network egress; we generally assume client-to-server and back).
+2) Measurement windows: procurement prefers that p95 be conservatively calculated (we asked for a 14-day lookback during pilot) — are you open to a 14-day rolling for p95 during pilot, reverting to 7-day once in steady-state?
+3) Transient carveouts: procurement needs the exact operational criteria so they can get internal sign-off. Can you provide a machine-readable definition (thresholds, min sample sizes, and an example JSON of excluded events)?
+4) Evidence: procurement will want a sample CSV of the traces you export. I've attached a short example set from our team for reference: arcadia-eval-queries.csv
+
+If you can answer these three items in writing we'll route to procurement. If helpful we can do a 30-min touch next week (Tue/Wed AM our time).
+
+Thanks,
+Emily Stone
+Director, Platform Reliability
+Arcadia Health
+emily.stone@arcadia-health.com
+
+---
+Attachment: arcadia-eval-queries.csv (sample queries: 25 rows)
+
+From: Lauren Bishop <lauren.bishop@redwood.com>
+To: Rishi Malhotra <rishi.malhotra@redwood.com>, Ben Carter <ben.carter@redwood.com>
+Cc: Emily Stone <emily.stone@arcadia-health.com>
+Date: Wed, 26 Aug 2026 08:17:00 -07:00
+Subject: Re: Hosted API SLOs — baseline ask and draft proposal
+
+Rishi / Ben — looping in a few practical constraints from Product & SRE. I'll keep this high level so Emily has something procurement can include in the term sheet.
+
+Proposal refinements (operational + contract-friendly language):
+- Measurement windows: keep p50 as rolling 24-hour median measured at the per-account request level (Redwood measurement point = time from request ingress at API gateway to final token emission acknowledgement). Note: client-side network latency is excluded; we can add an optional client-side agent if Arcadia wants end-to-end.
+- Pilot behavior: agree to a pilot-phase p95 using a 14-day rolling window (as requested). After pilot completion (defined as a month at target stability), p95 rolls to standard 7-day rolling window. We will include a rollback clause if variance persists.
+- Transient/noise carveout (machine-readable summary): carveouts apply when ALL of the following are true for a contiguous interval:
+  * measured account-level QPS > 3x baseline QPS (baseline = 7-day median QPS)
+  * outage interval duration < 15 minutes OR affected request share < 5% of account traffic in that interval
+  * the interval does not overlap a scheduled maintenance window
+  Intervals meeting the above will be excluded from the rolling percentile aggregation. We'll provide a JSON machine-readable rule set and a sample exclusion report during onboarding.
+- Sampling & min-sample-size: to avoid noisy quantiles, p95 calculations require at least N=200 successful requests in the aggregation bucket; otherwise we fallback to a longer window for p95 computation.
+- Credits: propose standard monthly credit slabing triggered when p95 misses more than 0.5% of the aggregated measurement days in a 30-day period (we can provide the precise credit table in the amendment).
+
+Operational notes for Ben (SRE): we will implement a canary where Arcadia traffic is initially served with the standard runtime and a shadow of quantized variants for 48 hours; if tail increases by >15% during canary we'll auto-fallback. Ben, can you validate the exclusion-rule semantics (duration threshold and sample size) against telemetry?
+
+Emily: if that framing looks good I can draft contract text (short amendment + operational appendix) and Rishi can push to DocuSign.
+
+Lauren Bishop
+Head of Product Policy, Redwood Inference
+lauren.bishop@redwood.com
+
+
+From: Rishi Malhotra <rishi.malhotra@redwood.com>
+To: Emily Stone <emily.stone@arcadia-health.com>, Procurement <procurement@arcadia-health.com>
+Cc: Lauren Bishop <lauren.bishop@redwood.com>, Ben Carter <ben.carter@redwood.com>
+Date: Fri, 27 Aug 2026 10:45:00 -07:00
+Subject: Re: Hosted API SLOs — rolling windows & transient-noise handling
+
+Emily / Procurement team —
+
+Thanks — Lauren's language should give procurement what they need. Quick recap and next steps:
+
+1) Pilot p95 window: 14-day rolling during pilot, auto-switch to 7-day after one month of stability (we'll record the stability check in Confluence).
+2) p50 measurement: rolling 24-hour median, server-side only (network excluded).
+3) Transient carveout: we'll provide the JSON rule set and a sample exclusion report during onboarding; Redwood will exclude intervals that meet the criteria Lauren listed.
+4) Evidence & samples: attached sample export and the draft amendment (SLO_Draft_v2.pdf).
+
+Next steps: I can schedule a 30-min call Tue 09:00-09:30 PT next week to walk procurement through the machine-readable carveout, the sample export, and the DocuSign steps. If that works reply with a confirmed attendee list and I'll send the invite. Otherwise, if procurement is ready we can produce the DocuSign amendment and run a one-week signature window.
+
+Link: Shared draft & evidence — https://drive.google.com/open?id=1SLO-DRAFT-Arcadia
+DocuSign: https://app.docusign.com/StartSigning?d=DEAL-9831
+
+Best,
+Rishi Malhotra
+Account Executive, Redwood Inference
+rishi.malhotra@redwood.com
+
+---
+Attachment stub: SLO_Draft_v2.pdf (final for amendment)

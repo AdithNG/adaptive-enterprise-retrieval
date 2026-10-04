@@ -1,0 +1,79 @@
+Adaptive warmup provisioning sheet for model rollouts
+
+Objective:
+Deliver an operational provisioning plan for onboarding new model variants that balances latency SLOs, cost, and the KV cache footprint across regions. This sheet focuses on an "adaptive warmup" approach: progressively allocating warmup traffic and ephemeral KV reservation based on measured hit-rate improvements instead of static full-reservation ahead of rollout.
+
+Summary / TL;DR:
+- Problem: Full pre-provisioning for every new model variant is expensive (GPU-hours + reserved memory for KV cache) and often unnecessary because real-world traffic warms KV slowly.
+- Proposal: Use a staged warmup policy (canary -> regional ramp -> global ramp) combined with temporary KV reservations sized to hit conservative throughput targets and release policy when hit-rate plateau observed.
+- Outcome: Expected 20–40% reduction in peak reserved GPU capacity during rollouts for mid-sized models (13B/70B) with comparable tail latency after warmup.
+
+Assumptions (for the worked example below):
+- Models: 13B (fp16, ~24 GB RAM load), 70B (q4f16, ~32 GB RAM load) — runtime memory excludes KV.
+- KV entry size: 96 bytes per token (keys+values+overhead) — conservative estimate for our runtime format.
+- Typical session length: 120 tokens; active KV per session = session_length * token_kv_size * layers_factor (we fold layers into entry size estimate).
+- Baseline request mix: 60% short chats (<80 tokens), 30% med (80–300), 10% long (>300).
+- Target latency SLO: p95 <= 250ms generation per chunk for interactive flows.
+- Cold vs warm throughput multiplier: cold GPU throughput ≈ 0.35x of warmed throughput for same batch sizing (due to KV miss handling and memory pressure).
+
+Worked example: single-region onboarding for a new 13B model variant (peak qps target = 200 qps).
+
+Step A — KV footprint sizing (single warm instance):
+- Avg tokens/session assume 120 tokens -> per-session KV = 120 tokens * 96 bytes = 11,520 bytes (~11.25 KB)
+- Concurrent active sessions target for each worker (to saturate GPU): assume one worker handles 80 concurrent tokens-worth sessions at target throughput -> per-worker KV ~ 80 * 11.25 KB = 900 KB
+- For safety, include 2x headroom -> ~1.8 MB per worker reserved KV region
+
+Step B — GPU memory layout and ephemeral reservation:
+- Model RAM (loader) 13B: 24 GB; worker overhead: 2 GB -> usable headroom per GPU for KV ~ 6 GB on 32 GB instances -> with 1.8 MB per worker this is trivial, but multi-shard KV and caching indices increase overhead.
+- Reservation plan: allocate ephemeral 8 GB KV slab per warmup shard when onboarding (>1 worker per GPU for throughput). We will scale number of shards not by full capacity but by expected warmed-throughput ratio progress.
+
+Step C — Warmup ramp schedule (canary -> regional -> global):
+- T0: Canary (1% of traffic) for 30 minutes — objective: collect priming requests, measure KV hit-rate and tail latency. Reserve 1 warm shard (1 GPU) + minimal KV slab (8 GB).
+- T1: Regional ramp (10% traffic) for 1–3 hours — objective: i) confirm hit-rate > 0.5 and latency p95 within 1.5x baseline; ii) if yes, add 2 warm shards (scale to 3 GPUs reserved), KV slab total = 24 GB; if not, hold and investigate.
+- T2: Global ramp (50% traffic) over 6–12 hours — progressively scale to target warmed shards based on observed throughput and KV hit-rate trend.
+- T3: Full (100%) — finalize configuration and convert ephemeral reservations to regular capacity if long-term traffic justifies.
+
+Sensitivity table: KV hit-rate vs required GPUs (for 200 qps target) — simplified
+
+| KV hit-rate | warmed throughput per GPU (qps) | GPUs needed (200 qps) | Notes |
+|-------------|-------------------------------:|----------------------:|-------|
+| 0.25        | 30                             | 7                     | Cold-heavy; high memory pressure, long queueing |
+| 0.50        | 60                             | 4                     | Typical early warmup region |
+| 0.70        | 95                             | 3                     | Acceptable for regional ramp |
+| 0.90        | 140                            | 2                     | High hit-rate; minimal reserved capacity |
+
+Interpretation: each 0.1 improvement in hit-rate materially reduces GPUs needed. The adaptive plan optimizes for reaching >=0.7 within regional ramp.
+
+Regional considerations:
+- Multi-region warmup: prefer a staggered regional sequence driven by observed demand intensity. Hot regions (US-West, EU-Central) go first. Cold regions may use traffic shadowing rather than direct canary to avoid full reservation.
+- Cross-region KV sharing: for geographically close regions with peering, allow short-period cache replication for hot prefixes to lower cold misses (cost vs speed tradeoff).
+
+Cost/Capacity projection (example):
+- If full static pre-provisioning: reserve 8 GPUs for 24 hours = 8 * 24 GPU-hrs = 192 GPU-hrs per rollout day.
+- With adaptive warmup: typical profile = 1 GPU (canary 0.5 hr) + 3 GPUs (regional ramp 3 hr) + 4 GPUs (global ramp 6 hr) = ~ (1*0.5 + 3*3 + 4*6) = 0.5 + 9 + 24 = 33.5 GPU-hrs = ~82% reduction vs naive full-reserve for that day. Real-world variance means expect 20–70% savings depending on model/traffic.
+
+Runbook (quick ops checklist):
+- Pre-rollout: create rollout ticket (ENGINF-1423), allocate ephemeral pool tag 'onboard-<model>-<date>'. Ensure monitor dashboards for p95 latency, KV hit-rate, GPU utilization, OOM alerts.
+- Canary (T0): start with 1% traffic. Monitor first 15 minutes for OOM, p95 spikes > 2x baseline, KV hit-rate. Abort if critical errors or OOMs occur.
+- Regional ramp (T1): scale if hit-rate > 0.5 and p95 < 1.5x baseline. Otherwise pause and increase sample traffic to collect more warm keys.
+- Global ramp (T2): continue scaling with automated policy (if hit-rate delta per hour > 0.05 keep scaling).
+- Post-rollout: evaluate whether ephemeral reservation should be converted to reserved capacity. File costs vs traffic for finance review.
+
+Open questions / risks:
+- KV entry size variability across model layers and tokenizers — our 96B estimate is conservative but needs empirical validation with instrumented captures.
+- Cross-shard KV eviction policy interactions — eviction churn can cause oscillatory hit-rates during ramp.
+- Edge-cases: models that require very large KV per session (long context models) may need different warmup profiles (longer canary).
+
+Action items / TODOs:
+- [ ] Instrumented experiment for two upcoming onboards (PR #984) to measure real KV entry sizes and session warming curve (owner: Marco). Target date: 2026-02-20.
+- [ ] Add a dashboard tile for "KV hit-rate over first 24h of rollout" (owner: Jinwoo).
+- [ ] Draft a templated rollout policy (canary durations & thresholds) for Product to include in release notes (owner: Riya).
+
+Appendix: quick math examples (13B scenario)
+- Session KV per short session (60 tokens): 60 * 96 = 5,760 B (~5.6 KB)
+- For 200 qps with average sessions lasting 10s concurrent sessions ~ 200 * 10 = 2,000 concurrent sessions -> aggregate KV = 2,000 * 11.25 KB = ~22 MB (working set).
+- Conclusion: aggregate working set for typical mid-size model onboarding often fits in a small number of GB; majority of cost saved is in GPU throughput inefficiency during cold misses, not raw KV storage.
+
+Notes: this sheet is intentionally conservative in KV sizing to avoid under-provisioning OOMs during early experiments. Real instrumentation is needed to tune the 96 B per-token assumption and per-worker headroom.
+
+Contact: Samira Patel (samira@redwood.ai) for questions or to request simulation runs.

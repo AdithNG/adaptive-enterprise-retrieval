@@ -1,0 +1,119 @@
+CytoHealth — schedule private hosting architecture review
+
+From: Soojin Lee <soojin.lee@redwood.com>
+To: Alexandra Ortiz <alex.ortiz@cytohealth.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Rishi Malhotra <rishi.malhotra@redwood.com>
+Date: Wed, 18 Oct 2028 15:22:00 -0700
+Subject: CytoHealth — schedule private hosting architecture review
+
+Hi Alexandra —
+
+Thanks again for the discovery call today. Quick recap and proposed next steps so we can lock in the architecture review / technical deep dive for your Private (VPC/on‑prem) deployment: 
+
+What we covered (short):
+- Primary objective: host inference inside CytoHealth VPC for PHI-sensitive workloads; ensure predictable latency and auditability.
+- Key constraints: RDS/Postgres access patterns, internal NAT/IP egress policy, and strict key management (HSM preferred).
+- Scale expectations: pilot ~20 concurrent users (burst ~60 QPS), long‑term estimate TBD.
+
+Proposed next step: 60–90 minute architecture review where Redwood infra + SEs walk through deployment topology, networking requirements, auth/KMS integration, and a short demo of the runtime behavior (KV cache, batching, quant profiles). We’d like to include your Cloud Ops and Security folks.
+
+Proposed 3 slots (all PT):
+- Tue Oct 24 — 10:00–11:15
+- Wed Oct 25 — 13:00–14:30
+- Thu Oct 26 — 09:00–10:00
+
+If none of those work, please share a couple of windows and we’ll adapt. Also can you confirm the CytoHealth attendees (name + role + calendar email)? Example folks we expect: your Cloud Ops lead and one security/infosec contact.
+
+Pre‑call asks (small):
+- Share a network diagram (VPC/subnets, NAT/peering) or a simple diagram we can attach to the agenda.
+- Any existing compliance constraints (SOC2 artifact reference) we should be aware of.
+- Expected peak QPS and token budget for the pilot.
+
+I attached a short scoping note and our Private Deploy checklist to help folks prepare.
+
+Looking forward — I’ll hold the Tuesday slot tentatively if that helps.
+
+Best,
+Soosin Lee
+Senior Solutions Architect | Redwood Inference
+soojin.lee@redwood.com | +1 (415) 555‑0133
+
+Attachments: scope-notes-20281018.pdf, redwood-private-deploy-checklist.xlsx
+From: Alexandra Ortiz <alex.ortiz@cytohealth.com>
+To: Soojin Lee <soojin.lee@redwood.com>
+Cc: Michael Chen <michael.chen@cytohealth.com>
+Date: Thu, 19 Oct 2028 09:45:00 -0700
+Subject: Re: CytoHealth — schedule private hosting architecture review
+
+Thanks Soojin — really helpful summary.
+
+Tue Oct 24 10:00 PT works for our team. Attendees:
+- Alexandra Ortiz — Head of Product (me)
+- Michael Chen — Cloud Ops (michael.chen@cytohealth.com)
+- Tara Singh — InfoSec (tara.singh@cytohealth.com) — tentative
+
+A couple quick clarifications before the call:
+- Will Redwood run the demo from your lab and show a VPC integration walkthrough, or do you prefer a customer‑side demo (we can provision a short test role if needed)?
+- Can you send a draft agenda so I can share it with Tara?
+
+I attached our high‑level network diagram (very rough) — hope that helps.
+
+See you Tue the 24th.
+
+Alex
+Alexandra Ortiz
+Head of Product | CytoHealth
+alex.ortiz@cytohealth.com
+
+Attachments: cyto-network-diagram.png
+From: Marissa Cole <marissa.cole@redwood.com>
+To: Soojin Lee <soojin.lee@redwood.com>
+Cc: Rishi Malhotra <rishi.malhotra@redwood.com>
+Date: Thu, 19 Oct 2028 11:05:00 -0700
+Subject: Re: CytoHealth — schedule private hosting architecture review
+
+On Thu, Oct 19, 2028 at 9:45 AM Alexandra Ortiz <alex.ortiz@cytohealth.com> wrote:
+> Thanks Soojin — really helpful summary.
+>
+> Tue Oct 24 10:00 PT works for our team.
+
+I'll take the lead on the architecture review and bring our Private deployment runbook + recommended quantization profiles and security checklist. I can demo the VPC routing options and show a short recording of an in‑VPC deployment we did for a similar customer (no PHI).
+
+Quick note to Rishi: can you own the calendar invite and add the Redwood infra Slack channel as a pre‑call touchpoint?
+
+—Marissa
+Marissa Cole
+Solutions Engineering Manager | Redwood Inference
+From: Soojin Lee <soojin.lee@redwood.com>
+To: Alexandra Ortiz <alex.ortiz@cytohealth.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Rishi Malhotra <rishi.malhotra@redwood.com>, Michael Chen <michael.chen@cytohealth.com>
+Date: Thu, 19 Oct 2028 12:30:00 -0700
+Subject: Re: CytoHealth — schedule private hosting architecture review
+
+Perfect — thanks for the quick reply, Alex. Confirming Tue Oct 24, 10:00–11:15 PT for the architecture review (we’ll use Zoom; invite attached).
+
+Draft agenda (45–60 min + buffer):
+1) 5 min — introductions + objectives
+2) 15–20 min — high‑level deployment topology (Redwood + CytoHealth VPC options)
+3) 15 min — network/security integration (KMS, egress, IP allowlists)
+4) 10–15 min — demo of runtime behavior and ops (batching, KV cache, latency profiles)
+5) 10 min — open Q&A and next steps
+
+On the demo question: Marissa will run the demo from our internal lab and show the VPC integration patterns (we’ll also describe the steps for in‑customer VPC testing). If you’d like, we can schedule a short hands‑on follow up where we test a minimal role in your environment — we’ll put that in parking.
+
+Pre‑call checklist again (so your folks have a heads up):
+- Network diagram (thanks for sending the rough one)
+- Expected pilot QPS/token budget
+- Any compliance guardrails or specific KMS/HSM workflows
+- Preferred contact for calendar invites and Zoom dial‑ins
+
+I attached the calendar invite and added Rishi to create the invite in our system as well. If Tara (InfoSec) can confirm she’ll join, please CC her on the calendar reply.
+
+Looking forward — see you Tuesday.
+
+Best,
+Soosin Lee
+Senior Solutions Architect | Redwood Inference
+soojin.lee@redwood.com
+
+Attachments: invite-20281024.ics

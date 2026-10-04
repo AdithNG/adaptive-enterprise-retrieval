@@ -1,0 +1,175 @@
+Unit cost investigation - Zephyrus Labs
+
+Intro discovery to map Zephyrus' usage patterns, target latency and strict monthly budget. Main discussion focused on per-token unit economics, batching and KV/prefix caching tradeoffs, hosted vs dedicated cost and private deployment compliance (VPC/KMS/SOC2). Agreed next steps: pilot scope and micro-benchmarks.
+Meeting header:
+Date: 2026-06-25 15:00 UTC
+Duration: ~52 minutes
+Location: Zoom
+Attendees: Jordan Lee (Redwood AE), Priya Nair (Redwood SE), Ethan Cole (Zephyrus Head of ML), Lina Morales (Platform Eng), Rafael Hu (Finance), Amara Singh (CTO)
+
+[00:00] Jordan: Hey everyone, Jordan from Redwood. Thanks for taking the time. Quick roll call?
+[00:08] Ethan: Ethan here.
+[00:10] Lina: Lina.
+[00:12] Rafael: Rafael.
+[00:14] Amara: Amara.
+[00:16] Priya: Priya from the solutions eng side. Happy to dig into benchmarks.
+
+[00:28] Jordan: High level agenda — understand Zephyrus workloads (qps, typical prompt/response lengths), budget constraints, latency SLOs, and tradeoffs between hosted, dedicated, and private. Then outline a pilot. Sound good?
+[00:36] Amara: Yep that's perfect. We're specifically worried about token burn — our legal and finance team are nervous about runaway costs if we spike.
+
+[01:05] Ethan: Quick context: we run an assistant that summarizes internal docs and generates code suggestions. Average request is 750 tokens input, 600 tokens output, peak qps around 8 but most of the day it's 1-2 qps. We want sub-400ms latency for short assistant flows but 1-2s is okay for longer generation. Budget ceiling per month for inference is $45k.
+
+[01:47] Rafael: And just to be explicit — we need predictable unit economics. If we do hosted, how do we cap spend or get alerts? If dedicated, what's the break-even?
+
+[02:12] Priya: Great, those are the right levers. A few concepts to set expectations: per-token pricing (hosted), reserved GPU cost for Dedicated (committed monthly), and private / VPC which adds a platform fee. Then there are runtime levers — batching, prefix/KV cache, and quantization which materially change cost per token.
+
+[02:50] Lina: Can you quantify — like if we enable KV cache and batch to 8 requests, does cost drop 30%? 50%?
+
+[03:12] Priya: It depends on request distribution. For a lot of small repeated queries, prefix/KV caching can be 40-70% savings on recurrent tokens. For our serving runtime with continuous batching, you typically see 20-45% effective token-cost reduction vs naive single-request inference when batching to sizes of 4-8 and keeping latency SLOs. But for long outputs (600 tokens) batching often helps amortize overhead so savings can be smaller per token but large in throughput terms. Those are rough numbers; we'll run a micro-benchmark on your prompt set.
+
+[04:05] Ethan: When you say prefix cache — does that store user context in KV on GPUs? We're concerned about PII persistence and retention.
+
+[04:22] Priya: Good point. We let customers configure cache policies. For hosted we can do ephemeral KV cache not logged to persistent storage; for Dedicated/Private you can point cache to your own managed store or disable it entirely. We also support TTLs and zero-retention modes. We'll include KMS details in the security pack.
+
+[05:10] Rafael: From finance perspective — show us break-even for dedicated. If our peak qps is 8 but steady is 1-2, committed capacity might be wasteful unless autoscaling with burst works.
+
+[05:32] Jordan: Exactly. Dedicated has a committed GPU pool and predictable throughput. We have automatic burst options and routing policies — fall back to hosted variants when reserved capacity is saturated. The break-even is driven by utilization: if you use >~65% of a reserved token throughput for the month, dedicated typically becomes cheaper. But again depends heavily on model size, quantization, and batching.
+
+[06:10] Amara: Can you explain quantization here? We have some internal concerns about quality regressions.
+
+[06:21] Priya: We offer QC profiles — 8-bit and mixed-precision quantization paths. For many of the open models we onboard, 8-bit gives near-parity for most generation tasks, but we'll run evaluations on your eval set to measure delta. Redwood Optimize will recommend quantization profiles per workload and flag regressions.
+
+[07:00] Ethan: Ok so pilot looks like: run our representative small/medium/large prompts, measure latency, tokens, and quality under three modes: hosted (standard), dedicated reserved pool with autoscale/burst, and private VPC. Also measure with/without KV cache and batching.
+
+[07:28] Priya: That's our usual micro-benchmark. We'll need sample prompts, sample traffic shape (qps histogram), and expected SLOs per route. Also any blocked tokens or redaction rules.
+
+[08:00] Lina: On the private/VPC side — will Redwood manage the control plane or do we need to run anything on-prem?
+
+[08:18] Jordan: For Private we offer a customer-managed data plane, optional on-prem pack, and a private control plane. You can choose the model — VPC peered control plane or fully air-gapped. KMS/HSM integrations are supported. We'll surface the architecture diagram in the security docs.
+
+[08:45] Rafael: SOC2 and audit logs are non-negotiable. We need API-level audit for token lineage and RBAC.
+
+[08:58] Priya: We have per-token tracing and token-level cost attribution in the Console. Audit logs and SSO/SAML with SCIM are supported; we'll attach our SOC2 report and the logging sample.
+
+[09:22] Ethan: Competitor question — how do you compare to Anthropic/openai on pricing?
+
+[09:30] Jordan: On raw hosted per-token, we're competitive on open models, and for dedicated we can beat managed endpoints when utilization is high due to GPU amortization and batching optimizations. Also our routing and fallback gives predictable latency during spikes. We'll include a competitor compsheet.
+
+[10:02] Lina: About throttles and spend controls — can we enforce hard monthly caps or per-route budgets?
+
+[10:12] Priya: Yes — we support per-route quotas, alerts, and hard limits. For hosted we can set quota thresholds and soft limits; for Dedicated we can add caps in the control plane and also route to lower-cost model variants when thresholds are hit.
+
+[10:45] Amara: For our planning, can you give an example calculation? Say 1.5 qps steady, 45k budget, average total tokens per call 1350, what do we look at?
+
+[11:00] Jordan: Quick back-of-envelope: steady 1.5 qps is ~129,600 requests/month (1.5 * 3600 * 24 * 30). At 1,350 tokens per request that's ~175M tokens/month. If hosted per-token = $0.00003 per token (example), that would be about $5.25k — but that per-token number varies by model and context — embedding vs gen different. If using larger model and higher per-token rates, it scales up. The key is batching, caching and model choice can drop effective cost per served token considerably. We'll produce scenarios with realistic per-token rates for the models you want.
+
+[12:10] Rafael: That example number seems low — are you counting both input and output?
+
+[12:18] Priya: Yes both. But remember per-token rates differ for input vs output on some pricing plans; we'll annotate that. Also for long outputs, batching helps less for tail latency so effective cost per user request might be higher; that's why we do the benchmark.
+
+[13:00] Speaker 6 (mumble): question on caching architecture — how is cache invalidation handled?
+
+[13:10] Priya: Cache invalidation is TTL-based and explicit API calls to clear prefix keys. For shared contexts we recommend a short TTL and user-scope keys. We'll document recommended policies.
+
+[14:05] Ethan: On measurement — we want to be able to attribute cost to features and products internally. Can Redwood break down cost per route and per token type?
+
+[14:18] Jordan: Yes the Console provides token-level cost breakdown, route-level dashboards, and traceable request IDs. You can export CSVs for cost allocation.
+
+[15:00] Lina: Any limitations on model pinning across hosted and dedicated? We want consistent behavior when we roll from hosted to dedicated.
+
+[15:12] Priya: You can pin model versions and rollout policies. The same model artifact can be used across hosted and dedicated; kernel selection and quantization may vary but we try to keep behavior consistent. We recommend a canary rollout to validate outputs.
+
+[16:00] Rafael: Inventory question — what's the minimal committed term for Dedicated? Monthly? Annual?
+
+[16:12] Jordan: We have monthly and annual reserved options. Monthly reserves give flexibility; annual reserves give pricing advantages. We'll include a few reserved capacity price points in the pilot materials.
+
+[16:40] Ethan: Tuning question — will Redwood suggest batching configs automatically?
+
+[16:48] Priya: Redwood Optimize recommends batch sizes and cache policies based on observed latency distribution and usage patterns. You can also set hard latency SLOs and it will suggest conservative batch sizes to meet them.
+
+[17:20] Amara: Ok, quality. We need to run our eval set for rouge/bleu and also human spot checks. If quantization drops accuracy for our code suggestions, we need a rollback plan.
+
+[17:33] Priya: Absolutely — we'll run model regression evals and tie alerts to quality thresholds. Rollback is supported and we suggest progressive rollouts.
+
+[18:00] Jordan: Quick risks — unpredictable spikes, long-tail requests that blow up tokens, and data residency/compliance. How important is region residency?
+
+[18:12] Amara: Strongly prefer EU residency for certain customers. We need logs and data at rest in EU for some cases.
+
+[18:28] Jordan: We support region pinning and private deployments in selected regions. We'll note the regions available for Private.
+
+[19:05] Rafael: Financial ask — show a 12-month spend plan for hosted vs dedicated with scenarios Low/Med/High usage.
+
+[19:18] Jordan: We'll prepare a 12-month spreadsheet with break-even points and sensitivity to avg tokens, qps, and batch sizes.
+
+[20:00] Ethan: For the pilot telemetry — what logs do you need from our side?
+
+[20:08] Priya: Representative prompt set, qps histogram, target eval queries, and any per-request metadata you want to propogate like tenant-id so we can show cost attribution. Also a sample of blocked tokens/redaction rules.
+
+[20:45] Lina: How long does a typical pilot take?
+
+[20:52] Jordan: Micro-benchmarking can start in a week and results in 5-7 business days. A fuller pilot with regression evals and dedicated capacity tests is typically 3-4 weeks.
+
+[21:20] Rafael: On procurement — any security questionnaires we can pre-fill?
+
+[21:27] Jordan: We'll send an NDA/security packet, SOC2, and a standardized security questionnaire. We can also fill customer security questionnaires as part of the enterprise process.
+
+[22:00] Ethan: Wanted to raise a potential blocker — our legal might force us to avoid sending PII to hosted endpoints. If so, private on-prem is likely. How much overhead for private?
+
+[22:14] Priya: Private incurs an onboarding and platform fee and possibly on-prem infra. We can give a cost delta and implementation plan. For many customers we do a VPC/private control plane which reduces friction versus full on-prem.
+
+[23:05] Amara: Any quick wins we should try first to reduce token-cost before changing architecture?
+
+[23:12] Priya: Prompt engineering: truncation, instruction tuning to shorten outputs, caching repeated prefixes, and aggressive batching for non-latency-critical routes. Also using a smaller model variant for lower-cost routes.
+
+[24:00] Lina: Are you able to run a quick sim for our 1.5 qps baseline during the pilot to validate queueing/latency under burst?
+
+[24:12] Priya: Yes — we'll simulate steady and burst patterns, and show latency percentiles and cost.
+
+[25:00] Ethan: On reporting — we want monthly alerts if any route goes > 20% above forecast.
+
+[25:08] Jordan: That's doable. We'll configure cost monitors and Slack/webhook alerts.
+
+[26:00] Rafael: Curious — for auditing token lineage, do you store raw tokens? How is redaction handled?
+
+[26:12] Priya: By default we do not persist raw input tokens for hosted customers unless explicitly enabled for debugging. For Dedicated/Private you control persistence. Redaction hooks can filter PII before logs.
+
+[27:20] Ethan: Ok final thing — show us a sample SLA for Dedicated latency targets.
+
+[27:30] Jordan: Dedicated SLA typically commits to P99 latency targets for a class of requests and uptime. We'll send the SLA draft.
+
+[28:00] Amara: Good. Let's summarize next steps so everyone is aligned.
+
+[28:06] Jordan: Summary recap: 1) Jordan sends pilot scope including hosted/dedicated/private cost scenarios and 12-month spend model 2) Priya runs micro-benchmark on the sample prompts with/without KV cache and batching and shares results 3) Customer provides prompt set, qps histogram, and compliance contacts. Any additions?
+
+[28:36] Ethan: Add security docs and SOC2.
+
+[28:40] Rafael: And a finance-specific break-even table comparing monthly vs annual Dedicated reserves.
+
+[28:50] Jordan: Got it. We'll aim to deliver pilot materials by next Tuesday.
+
+[29:05] Amara: Timeline-wise, procurement review will take ~2-3 weeks once we have security pack.
+
+[29:15] Jordan: Great — we'll be responsive. Any other blockers?
+
+[29:22] Lina: One small one — we may need a short demo of Console cost breakdown during the next meeting.
+
+[29:30] Jordan: We can do a 30-minute walkthrough of Console.
+
+[29:40] Priya: I'll also include the micro-benchmark runbook and scripts so you can reproduce locally.
+
+[30:00] Ethan: Thanks, this is productive.
+
+[30:05] Jordan: Thanks all. We'll follow up with the documents and schedule the bench run.
+
+[30:12] (end call)
+
+Notes on transcript quality: Some speaker tags are generic or approximate, occasional words mis-transcribed (e.g., "K V cache" vs "KV cache", "quantize" vs "quantization"), filler words and overlaps present.
+
+Recap (as spoken):
+- Customer profile: Zephyrus runs doc summarization and code suggestions; average request ~1,350 tokens; steady qps ~1-2, peak ~8; budget $45k/mo.
+- Key concerns: predictable unit economics, token lineage and compliance (SOC2/KMS), dedicated vs hosted break-even, caching and batching impact, quantization quality.
+- Agreed pilot: micro-benchmark across hosted/dedicated/private, with/without caching/batching, regression evals, and a 12-month spend model.
+
+Attachments referenced: pilot-scope-template (link in chat), SOC2-summary.pdf (will be sent), example cost model spreadsheet (will be sent).
+
+End of transcript.

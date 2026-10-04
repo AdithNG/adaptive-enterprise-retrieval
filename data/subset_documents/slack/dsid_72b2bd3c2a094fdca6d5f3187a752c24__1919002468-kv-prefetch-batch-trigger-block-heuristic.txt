@@ -1,0 +1,57 @@
+eng-runtime
+
+anna: Heads-up — seeing repeated OOM spikes on paged-attn when KV prefetch is enabled together with batch_trigger=8. Happens on long-context workloads; profiler shows a compaction cost spike and kernel falling back to the generic attention path. Logs + small trace attached below.
+
+mike: Which model / seq_len distribution? Is this on dedicated or hosted?
+
+anna: lightweight repro on dedicated (dev pool). Model: redwood/open-6b, typical seqs: 4096 tokens (50% long, 30% med, 20% short). Config snippet:
+
+```
+prefetch_window: 6
+batch_trigger: 8
+workspace_size_mb: 2048
+kv_cache_policy: paged
+allocator: default
+```
+
+ravi: Hmm. Prefetch window 6 means we pre-allocate blocks for lookahead, combined with batch_trigger=8 we're coalescing many streams that each allocate ephemeral workspace slices. Compaction gets invoked often -> allocator churn. Sample from perf: 
+
+```
+[perf] compaction_start t=0.42s
+[perf] moved_blocks=312 freed_bytes=24MB
+[perf] kernel_select: fallback=naive_attention (no fast kernel available — fragmented)
+```
+
+jen: I reproduced locally. When compaction runs it does a bunch of small frees which invalidates kernel workspace placement and ruins the fast-kernel alignment. Also noticed KV prefetch allocs are pinned to hot buckets (hot/cold segregation mismatch).
+
+perf-bot: memory-pressure summary for thread 1919002468: peak_rss=13.6GB peak_gpu=11.9GB compaction_events=14 OOM_events=3 kernel_fallbacks=9
+
+mike: Short-term mitigation: reduce prefetch_window to 2 and lower batch_trigger to 4. Medium-term: consider enabling slab_coalesce and increasing max_reuse_age so freed blocks get repurposed instead of triggering compaction. Example flags: `slab_coalesce=true`, `max_reuse_age=3`
+
+anna: Tried that on a canary run. Results after 200 requests: peak_gpu down ~12%, compaction_events down to 4, OOMs -> 0. Latency p50 +3ms, p95 +18ms (acceptable for this workload).
+
+ravi: Good. I also sketched a change to the batch_trigger heuristic so it accounts for `estimated_kv_cache_pressure`. Pseudocode: 
+
+```
+if estimated_kv_cache_pressure > threshold:
+  trigger_batch_at = max(1, batch_trigger - 2)
+else:
+  trigger_batch_at = batch_trigger
+```
+
+This reduces the chance of merging many streams that will each cause small KV prefetch allocations.
+
+jen: I'll put up a canary rollout config with an automatic rollback if kernel_fallbacks > 5/min. Canary config:
+
+```
+rollout: canary
+fraction: 10%
+monitor: kernel_fallback_rate, oom_count
+rollback: kernel_fallback_rate > 5/min OR oom_count > 0
+```
+
+anna: Sounds good — thanks. I'll coordinate with perf to run longer stress runs (10k requests) and post updated flamegraphs.
+
+mike: Long-term we should also evaluate: 1) prefetch as soft reservations (no pinned blocks unless cold misses happen), 2) compact-on-idle instead of immediate compaction, 3) add kernel-aware allocation hints so prefetched blocks align to fast-kernel stride.
+
+anna: Adding those to the follow-up checklist. Posting current flamegraph + trace link in a follow-up message. :thumbsup:

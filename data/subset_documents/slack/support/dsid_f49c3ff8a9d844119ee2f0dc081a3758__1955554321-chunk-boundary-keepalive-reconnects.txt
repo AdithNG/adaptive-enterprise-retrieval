@@ -1,0 +1,83 @@
+support
+
+Priya S.: Hey team, customer reported streaming responses abruptly ending ~30s into long generations. They see partial text then client reconnect loop. Not seeing errors in app logs. Any obvious proxy suspects? :thinking:
+
+Alex M.: have we ruled out client-side read buffer timeouts? what client are they using?
+
+Priya S.: They said a browser-based client in a react app (EventSource polyfill). Repro in curl -N shows the same partial chunk then connection closed by remote.
+
+Dan S.: Can you paste the curl output and any TCP close reason? Also which fronting infra? ALB + Cloudflare in front of our private endpoint.
+
+Priya S.: curl -v --no-buffer "https://api.example.com/v1/streams/resp"
+< HTTP/1.1 200 OK
+< Content-Type: text/event-stream
+< Transfer-Encoding: chunked
+...
+< 8
+< partial-chunk-data..
+* Connection #0 to host api.example.com left intact
+* Closing connection 0
+
+Priya S.: No explicit 502/504, just connection closed client-side with small amount of payload.
+
+CloudInfraBot: Noted: ALB idle timeout = 60s, Cloudflare TCP keepalive default 30s, Envoy route idle_timeout = 0s (disabled).
+
+Eve H.: Hm, sounds like chunk boundary + proxy buffering + idle timeout interplay. Cloudflare and ALB both can buffer and close idle connections. If the server sends small chunks intermittently, the proxy may treat it as idle and tear down.
+
+Alex M.: Repro steps I ran locally: started a server that emits SSE every 45s. Behind nginx with default proxy_buffering on => nginx buffered and then closed connection after upstream idle. When I disable proxy_buffering and set proxy_http_version 1.1 + proxy_set_header Connection "" it streamed fine.
+
+Priya S.: Can you share the exact nginx snippet? customer uses ALB though but might have nginx at origin for private setup.
+
+Alex M.: snippet:```
+location /v1/streams/ {
+  proxy_pass http://upstream;
+  proxy_http_version 1.1;
+  proxy_set_header Connection "";
+  chunked_transfer_encoding on;
+  proxy_buffering off; # important
+  proxy_cache off;
+}
+```
+
+Dan S.: For ALB specifically we often see ALB idle timeout (default 60s) close connections if there's >60s between packets. Two options: increase idle timeout to > server heartbeat interval OR push keepalive heartbeats at shorter interval. Also make sure the origin sends some bytes (e.g., ":\n\n" SSE comment heartbeat) before the ALB idle.
+
+Priya S.: Customer says intermittent partial output earlier than 60s though — sometimes after 15-25s. Could be Cloudflare layer. Cloudflare can buffer responses for certain routes, and their edge may close if it thinks connection idle.
+
+Eve H.: Cloudflare has 'Response buffering' behaviors depending on Workers / proxy mode. If using Cloudflare in front of ALB, the edge will wait for headers and may buffer small chunks. Setting proper headers helps: ensure Transfer-Encoding: chunked and disable Content-Length, and add Cache-Control: no-transform. Also try toggling "Connection: keep-alive" behavior.
+
+Priya S.: I asked customer for network packet capture; they sent tcpdump showing RST from CF edge at ~22s after last payload.
+
+Dan S.: RST from CF edge suggests edge timed out or saw upstream dead. Did they have any TLS renegotiation or HTTP/2 hop? ALB -> our service might be h2, will that change streaming semantics?
+
+Alex M.: Yes HTTP/2 to upstream can change chunk boundaries; nginx/Envoy sometimes coalesce frames. For streaming SSE we prefer HTTP/1.1 end-to-end or ensure proxies pass through chunked frames. For Envoy check "per_connection_buffer_limit_bytes" and disable upstream buffering. Example envoy route config:```
+route: {
+  idle_timeout: 0s,
+  max_stream_duration: 0s,
+  upgrade_configs: []
+}
+```
+
+Eve H.: Also check TCP keepalive on the origin host (kernel): net.ipv4.tcp_keepalive_time and keepalive_intvl; some cloud providers drop idle connections faster than ALB idle timeout, so app-level heartbeat is safest.
+
+Priya S.: Customer provided app logs: model generation producing tokens every ~200ms, but model server flushes only every 8 tokens (~1.6s). So not sparse. Weird that CF edges still RST at 22s.
+
+Dan S.: Could be intermediate NLB health or idle connection pool behaviour. NLB is 350s idle default? But Cloudflare could have WebSockets/streaming heuristics. Let's ask customer if they have any WAF or bot management that might terminate long-lived connections.
+
+Priya S.: Sent question. They replied: we have Cloudflare Pro, no Workers, standard WAF rules. Also they proxied through an internal Envoy sidecar on k8s. Sidecar had envoy config with idle_timeout: 20s (oops).
+
+Alex M.: That explains the ~22s RST. Envoy sidecar killed the connection due to idle_timeout. Even though app was sending small chunks, sidecar probably didn't see activity due to header coalescing.
+
+Priya S.: Action items we gave customer: 1) Set Envoy idle_timeout to 0s or >120s, 2) Disable proxy buffering at any nginx layer, 3) Ensure Transfer-Encoding: chunked and SSE heartbeats every 15s (comment lines ":\n"), 4) If using ALB increase idle timeout to 120s, 5) Check Cloudflare page rules to disable response buffering for this route.
+
+Dan S.: Also suggested quick repro command for them:```
+# server: emit heartbeat every 15s and small payloads
+curl -v -N https://.../v1/streams/resp | ts -s
+```
+
+Priya S.: Customer applied envoy change to 0s and disabled buffering on nginx sidecar. They report stable streaming for 24h so far.
+
+Eve H.: Great. For internal docs we should add checklist for streaming troubleshooting: check all proxies (CF, ALB, NLB, Envoy, nginx), look for idle_timeout and proxy_buffering, ensure chunked transfer + SSE heartbeat <= smallest idle, and include repro curl -N steps and tcpdump checks.
+
+Alex M.: I'll add a short KB entry and include sample nginx/envoy snippets + curl repro.
+
+Priya S.: Thanks everyone, closing the escalation. :white_check_mark:

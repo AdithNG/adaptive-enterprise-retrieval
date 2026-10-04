@@ -1,0 +1,172 @@
+Usage Insights: reconciliation suite vs billing totals + CI drift gate
+
+Title: Usage Insights: reconciliation suite vs billing totals + CI drift gate
+
+Summary
+We’ve had a few early beta reports that “console totals don’t match invoice” (see SUP-24811) and a recurring internal concern that aggregation lag + rounding will cause subtle drift. This PR adds a reconciliation suite that compares Usage Insights rollups (route/model aggregates) against billing totals (metering hooks → invoice preview) within a defined tolerance, and wires it into CI + a nightly scheduled run with alert hooks.
+
+Key goals
+- Catch drift early (instrumentation regressions, bucketing/alias issues, timezone boundary mistakes, rounding deltas).
+- Define and document a tolerance policy that is strict enough to catch real issues but robust to expected effects (late events, FX rounding, minimum billable units).
+- Provide a runbook-friendly output: workspace/project, day/hour, route/model slices that contribute most to drift.
+
+What’s included
+1) Reconciliation job + report format
+- New job: services/telemetry/reconciliation/usage_insights_vs_billing
+- Compares totals for a given workspace_id + time range across:
+  - usage_insights.route_model_agg (the dataset powering console breakdown tables)
+  - billing.usage_totals (billing hook rollups used for invoice preview)
+- Outputs both:
+  - a single “gate” metric per workspace/time window (pass/fail)
+  - a ranked list of top contributing slices (route/model/region/deployment_mode where present)
+
+2) Tolerance policy (documented + implemented)
+We gate on both absolute and relative drift, and we avoid evaluating windows likely to be incomplete.
+- Windows evaluated:
+  - Hourly buckets for last 24 hours (excluding most recent 2 hours)
+  - Daily buckets for last 7 days (excluding current day)
+- Late-event buffer:
+  - Ignore the most recent 2 hours entirely to avoid normal ingestion lag.
+  - For daily checks, only evaluate days older than 26 hours.
+- Tolerance thresholds:
+  - Absolute drift allowed: max($2.00, 2000 tokens worth of cost at the workspace’s effective blended rate) per evaluated window
+  - Relative drift allowed: <= 0.50% per evaluated window
+  - Gate fails if BOTH absolute and relative drift exceed thresholds (prevents false positives on small totals)
+- Currency handling:
+  - Compare in USD using billing’s canonical conversion for the period.
+  - Usage insights cost uses the same price book snapshot key as billing (price_book_version) to avoid rate drift.
+- Rounding:
+  - Compare on unrounded micros (int64) where available; rounding only applied in the human report.
+
+Tolerance helper (illustrative snippet):
+
+function isDriftAcceptable({ expectedMicros, actualMicros }) {
+  const driftMicros = Math.abs(actualMicros - expectedMicros);
+  const rel = expectedMicros === 0 ? (actualMicros === 0 ? 0 : 1) : driftMicros / expectedMicros;
+  const absOk = driftMicros <= ABS_TOLERANCE_MICROS;
+  const relOk = rel <= 0.005;
+  return absOk || relOk; // fail only if BOTH are violated
+}
+
+3) CI + scheduled runs
+- Adds a Buildkite step (non-blocking in PRs, blocking in main nightly):
+  - PR builds: runs reconciliation unit tests + one small integration fixture
+  - Nightly: runs full reconciliation across allowlisted beta workspaces with paging
+- New pipeline: .buildkite/pipelines/usage-insights-reconciliation.yml
+- Artifacts:
+  - Uploads a CSV and JSON summary for each run
+  - Posts a summary comment to #eng-platform on failures with a link to artifacts
+
+4) Alert hooks + runbook pointers
+- On gate failure, the nightly job:
+  - Emits metric: usage_insights.reconciliation.drift_exceeded{workspace_id, window_type}
+  - Logs structured payload with top slices and suspected causes
+  - Posts to Slack: #usage-insights-alerts
+  - Creates a lightweight incident event (non-page) unless drift persists 2 consecutive runs, then page the on-call (aligns with SRE feedback from earlier threads)
+
+5) Guardrails to avoid noisy failures
+- Workspace allowlist for beta reconciliation (config in services/telemetry/reconciliation/config/beta_allowlist.yml)
+- Suppression for known exceptions:
+  - If billing is missing a price_book_version for the period (rare), mark “skipped” not “failed”
+  - If insights freshness lag > threshold (uses existing freshness metadata), mark “skipped”
+
+Why this approach
+- We compare at the same conceptual level as customers: “what billing says you owe” vs “what console says you spent”.
+- We still include drill-down slices to make debugging actionable (route/model/region).
+- Late-event handling is explicit and conservative; we don’t want to treat expected lag as correctness drift.
+
+Files / areas changed (high level)
+- services/telemetry/reconciliation/usage_insights_vs_billing/*
+- services/telemetry/reconciliation/lib/tolerance.ts
+- services/telemetry/reconciliation/lib/report.ts
+- services/telemetry/reconciliation/config/beta_allowlist.yml
+- .buildkite/pipelines/usage-insights-reconciliation.yml
+- docs/internal/runbooks/usage-insights-reconciliation.md
+- libs/billing/pricebook/resolve_pricebook_version.ts (small helper to align snapshots)
+
+Test plan
+- Unit tests:
+  - tolerance calculations (edge cases: 0 totals, tiny totals, large totals)
+  - rounding behavior (micros vs displayed dollars)
+  - skip logic (freshness lag, missing pricebook)
+- Integration tests:
+  - fixture dataset with:
+    - retries + fallbacks
+    - model alias → version bucketing
+    - streaming endpoints
+  - verifies:
+    - aggregation totals match billing totals within tolerance
+    - top-slices ranking is stable/deterministic
+- Manual:
+  - Ran job for HelioChat staging workspace on 2026-02-16 (7d window) and validated output against invoice preview totals.
+
+Rollout notes
+- Nightly reconciliation initially scoped to beta allowlist only.
+- If the nightly job is noisy, we can widen the late-event buffer or adjust absolute tolerance; prefer changing absolute tolerance first.
+- No change to customer-visible console behavior.
+
+Links
+- Linear: ENG-3817
+- Related PRs: pr-23114 (aggregation job), pr-23135 (query API)
+- Support: SUP-24811
+
+Reviewer notes / questions to focus on
+- Tolerance policy: are we comfortable gating on “abs OR rel” instead of “abs AND rel”? (current implementation is intentionally forgiving on small totals)
+- Skip windows: is 2 hours sufficient buffer for late events in all regions?
+- Alerting: does the ‘2 consecutive runs before paging’ rule match SRE expectations?
+
+---
+
+Conversation (abridged)
+
+Allison Grant (Observability) — 2026-02-11
+“Please make sure this does not page on first failure. Also can you include a metric with a ‘skipped_reason’ label so dashboards can separate drift vs ‘data not ready’?”
+
+Cole Summers — 2026-02-11
+“Good call. Updated: first failure posts to #usage-insights-alerts + emits metrics; paging only after 2 consecutive failures. Added skipped_reason label to reconciliation outcome metric.”
+
+Nadia Rahman — 2026-02-12
+“Double-check retry accounting: billing counts retried requests as billed tokens; insights should too. Your fixture needs at least one retry case where the first attempt generated some tokens.”
+
+Cole Summers — 2026-02-12
+“Added fixture scenario: partial generation then retry; billing expected includes both attempts. Reconciliation now compares on metering_event_id aggregation rather than request_id when available to avoid undercounting.”
+
+Logan Wright — 2026-02-13
+“Perf: the nightly query looks like it’ll scan too much if we do 7 days across many workspaces. Can we do workspace-by-workspace, partition prune by day, and cap to allowlist?”
+
+Cole Summers — 2026-02-13
+“Adjusted: strictly allowlist, query per workspace, partition filter on event_day; added a hard cap of 200 workspaces. Also added a note in the pipeline config to expand gradually.”
+
+Kevin Osei (Security) — 2026-02-14
+“Make sure report artifacts don’t include customer prompts/content. I see route/model; ok. But please avoid including raw request IDs if they can be correlated.”
+
+Cole Summers — 2026-02-14
+“Removed request_id from exported artifacts; only includes hashed route_key + model_key + bucket timestamps + cost/tokens metrics.”
+
+Chloe Martin — 2026-02-15
+“The tolerance uses a blended rate estimate for the token-based absolute threshold. Can we just use a flat USD micros threshold and keep it simple?”
+
+Cole Summers — 2026-02-15
+“Switched to flat $2 absolute threshold for now (micros), plus relative 0.5%. Kept the blended-rate note in comments as possible follow-up.”
+
+Dylan Brooks — 2026-02-17
+“Looks good. Please add a short section to the internal runbook: common causes (missing route tags, model alias bucketing, timezone boundaries) and first debug steps.”
+
+Cole Summers — 2026-02-17
+“Added runbook section + links to dashboards for freshness and metering ingestion.”
+
+Approvals
+- Allison Grant — Approved (2026-02-17)
+- Nadia Rahman — Approved (2026-02-18)
+- Logan Wright — Approved (2026-02-18)
+- Kevin Osei — Approved (2026-02-18)
+
+CI
+- buildkite/redwood:unit-tests ✅
+- buildkite/redwood:lint ✅
+- buildkite/redwood:telemetry-integration-fixtures ✅
+- buildkite/redwood:usage-insights-reconciliation-smoke ✅
+
+Merge
+- Merged via squash on 2026-02-18
+- Squash commit: “Usage Insights reconciliation vs billing totals (ENG-3817)”

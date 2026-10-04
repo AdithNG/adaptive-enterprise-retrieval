@@ -1,0 +1,151 @@
+Marketplace listing & pricing commitments — catalog visibility across AWS/Azure/GCP
+
+From: Elena Rossi <elena.rossi@dataforge.ai>
+To: vanessa.ortiz@redwood.ai
+Date: 2026-11-18T09:12:00-08:00
+Subject: Marketplace listing & co-sell: catalog visibility and pricing commitments
+
+Hi Vanessa —
+
+Thanks for connecting last week at the ISV summit — DataForge is excited to partner with Redwood on marketplace distribution. We’re an analytics ISV (real-time feature store + inference orchestration) and want to get listed across AWS, Azure, and GCP. Key asks:
+
+- Visibility in the catalog (search & featured) for the initial SKU
+- Ability to publish a private offer / committed discount for early customers
+- Clarification on whether Redwood can support a single billing SKU across clouds or if we need per-marketplace variants
+
+I’ve attached a short product brief and a draft pricing matrix so your marketplace/partnership teams can evaluate scope. Would you be able to outline the typical timeline and the materials you need from us to start the listing + co-sell enablement?
+
+Att: product-brief.pdf
+
+Best,
+Elena Rossi
+Partnerships, DataForge Analytics
+elena.rossi@dataforge.ai
++1 (415) 555-0234
+
+From: vanessa.ortiz@redwood.ai
+To: Elena Rossi <elena.rossi@dataforge.ai>
+Cc: marissa.cole@redwood.ai, jonas.weber@redwood.ai, karthik.iyer@redwood.ai
+Date: 2026-11-18T10:03:00-08:00
+Subject: Re: Marketplace listing & co-sell: catalog visibility and pricing commitments
+
+Hi Elena —
+
+Great to meet you in SF — excited about DataForge’s fit for our marketplace customers. Quick reply with what we need and the next steps:
+
+1) Materials we need from you to start intake:
+   - Full listing package (product brief, screenshots, one-line + long description) — product-brief.pdf is a good start
+   - SKU-level pricing table and map to expected billing units (tokens/requests/seat) — attach aws-pricing-matrix.xlsx if possible
+   - Security snapshot (SOC2 / secure deployment notes) and completed security questionnaire — security-questionnaire.pdf
+
+2) Operational notes per cloud (high level):
+   - AWS: Private offers + co-sell requires SKU + pricing commitment and a partner manager handoff. Listing publication can take 2–3 weeks after intake if no compliance blockers.
+   - Azure: Marketplace listing requires commercial marketplace package + offer creation. Co-sell opt-in needs alignment with MS field. 3–4 week typical runway.
+   - GCP: Listing + billing integration require a separate listing pack (gcp-listing-pack.zip). GCP sometimes requires additional sales enablement assets for the co-sell badge.
+
+3) Ask: can you confirm whether DataForge can commit to a 12-month private offer with tiered discounts (we can list the tiers publicly in the private offer metadata)? That unlocks co-sell motion with our field teams.
+
+If you’re available, let’s schedule a 30-minute intake call tomorrow or Friday to walk through artifacts and assign owners. Proposed times: Thu 11/19 10:00–11:00 PT or Fri 11/20 9:00–10:00 PT.
+
+Thanks — I’ll loop Marissa (marketplace ops) and Jonas (partnerships) to advise on timeline and pricing mechanics.
+
+—Vanessa
+Vanessa Ortiz
+Head of Channel Partnerships, Redwood Inference
+vanessa.ortiz@redwood.ai
+
+From: marissa.cole@redwood.ai
+To: vanessa.ortiz@redwood.ai, Elena Rossi <elena.rossi@dataforge.ai>
+Cc: jonas.weber@redwood.ai, karthik.iyer@redwood.ai
+Date: 2026-11-18T14:22:00-08:00
+Subject: RE: Marketplace listing & co-sell: catalog visibility and pricing commitments
+
+Thanks Vanessa / Elena — adding a short ops checklist so expectations are aligned:
+
+- AWS marketplace: need SKU manifest, detailed unit economics, and the security questionnaire fully completed. After intake we file a listing ticket with AWS Partner Network — expect 10–20 business days to publish if there are no follow-ups. For private offers we need the offer terms (discount %, committed ARR) and a signed private offer template.
+
+- Azure Marketplace: ensure the offer is bundled correctly (SaaS vs VM vs managed service). Azure requires a commercial marketplace plan per SKU; co-sell requires MS field nomination which we can request once a private offer is live. Lead time tends to be 3–5 weeks.
+
+- GCP Marketplace: provide container or billing integration details; GCP will want a test account we can use to validate billing flows. GCP tends to require more engineering artifacts up front.
+
+Attachments to request from DataForge prior to intake: security-questionnaire.pdf (completed), invoicing contact + tax docs, aws-pricing-matrix.xlsx (SKU mapping), sample EULA/terms.
+
+We can lock a target: publish initial AWS listing + private offer in ~3 weeks, Azure in ~4–5 weeks, GCP in ~4 weeks — contingent on artifacts being complete. Suggest we do a single kickoff call and then spin up per-cloud tickets.
+
+Marissa Cole
+Marketplace Operations Lead, Redwood Inference
+
+From: Elena Rossi <elena.rossi@dataforge.ai>
+To: vanessa.ortiz@redwood.ai
+Cc: marissa.cole@redwood.ai, jonas.weber@redwood.ai, karthik.iyer@redwood.ai, Sourcing <sourcing@dataforge.ai>
+Date: 2026-11-19T09:45:00-08:00
+Subject: Re: Marketplace listing & co-sell: catalog visibility and pricing commitments
+
+Hi Vanessa / Marissa —
+
+Thanks for the clear list. Quick updates:
+
+- We can commit to a 12‑month private offer for an initial cohort. Attached is the aws-pricing-matrix.xlsx and a draft discount schedule (10% on net new, 18% at $200k ARR, 25% at $500k ARR).
+- Security: attached security-questionnaire.pdf (SOC2 in progress; we have ISO27001 in place).
+- Billing: we can provide a cloud-billing test account for GCP and an engineer to support integration testing next week.
+
+Atts: aws-pricing-matrix.xlsx, security-questionnaire.pdf, product-brief.pdf
+
+We’re OK with the proposed kickoff times — Thu 11/19 10:00 PT works for our GTM lead (I’ll send a calendar invite).
+
+Best,
+Elena
+
+From: jonas.weber@redwood.ai
+To: vanessa.ortiz@redwood.ai, marissa.cole@redwood.ai, karthik.iyer@redwood.ai
+Date: 2026-11-19T11:02:00-08:00
+Subject: Re: Marketplace listing & pricing commitments — co-sell ask
+
+Short note from Partnerships:
+
+We should define a concise co-sell ask per cloud for our field reps. Proposed two-line asks to include in the co-sell package:
+- AWS: "Engage customers for 20% of qualifying inbound opportunities where DataForge solves real-time feature infra needs; private offer available for 12 months."
+- Azure: "Nominate DataForge for field-led POCs in enterprise accounts; commercial marketplace plan + private offer requested."
+
+Also: Legal will likely want a copy of the private offer template + any MSA redlines. Can someone confirm which legal contact at DataForge we should loop in?
+
+Jonas Weber
+Director, Partnerships, Redwood Inference
+
+From: vanessa.ortiz@redwood.ai
+To: Elena Rossi <elena.rossi@dataforge.ai>
+Cc: marissa.cole@redwood.ai, jonas.weber@redwood.ai, karthik.iyer@redwood.ai
+Date: 2026-11-20T15:03:00-08:00
+Subject: RE: Marketplace listing & pricing commitments — kickoff scheduled
+
+Thanks all — call confirmed. Next steps and owners:
+
+- Kickoff call: Thu 11/19 10:00 PT (calendar invite sent) — joint intake with DataForge GTM and Marketplace Ops. (link: https://calendar.redwood.com/event/6b9f-aws-marketplace-kickoff)
+- Action: DataForge (Elena) to upload completed security questionnaire + aws-pricing-matrix.xlsx to the HubSpot deal by EOD 11/19.
+- Action: Marissa to open marketplace intake tickets per cloud and share ticket IDs in this thread.
+- Action: Jonas to draft the co-sell one-pager and the two-line asks; Legal will be looped after DataForge shares private-offer template.
+
+If artifacts land on schedule we’ll target AWS listing + private offer live in ~3 weeks. I’ll follow up with ticket IDs and the DocuSign link for the private offer once Ops confirms.
+
+—Vanessa
+Head of Channel Partnerships, Redwood Inference
+vanessa.ortiz@redwood.ai
+
+On Thu, Nov 18, 2026 at 9:12 AM Elena Rossi <elena.rossi@dataforge.ai> wrote:
+> Hi Vanessa —
+> 
+> Thanks for connecting last week at the ISV summit — DataForge is excited to partner with Redwood on marketplace distribution. We’re an analytics ISV (real-time feature store + inference orchestration) and want to get listed across AWS, Azure, and GCP. Key asks:
+> 
+> - Visibility in the catalog (search & featured) for the initial SKU
+> - Ability to publish a private offer / committed discount for early customers
+> - Clarification on whether Redwood can support a single billing SKU across clouds or if we need per-marketplace variants
+> 
+> I’ve attached a short product brief and a draft pricing matrix so your marketplace/partnership teams can evaluate scope. Would you be able to outline the typical timeline and the materials you need from us to start the listing + co-sell enablement?
+> 
+> Att: product-brief.pdf
+> 
+> Best,
+> Elena Rossi
+> Partnerships, DataForge Analytics
+> elena.rossi@dataforge.ai
+> +1 (415) 555-0234

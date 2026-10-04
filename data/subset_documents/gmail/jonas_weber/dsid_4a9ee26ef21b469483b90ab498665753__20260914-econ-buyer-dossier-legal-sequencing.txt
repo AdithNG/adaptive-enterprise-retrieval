@@ -1,0 +1,106 @@
+Post-call recap: buyer dossier + legal routing sequencing
+
+From: Jonas Weber <jonas.weber@redwoodinference.com>
+To: Samir Gupta <samir.gupta@medicore-analytics.com>, Elena Morales <elena.morales@medicore-analytics.com>
+Cc: Monica Patel <monica.patel@redwoodinference.com>
+Date: 2026-09-14T15:23:00-07:00
+Subject: Post-call recap: buyer dossier + legal routing sequencing
+
+Thanks Samir and Elena — quick recap from today’s 30m discovery and suggested next steps so we keep momentum: 
+
+1) Buyer & decision criteria (confirm):
+- Economic buyer: Elena Morales (confirmed) — main evaluation criteria: inference latency at p95, per-token cost, and data residency controls.
+- Day-to-day champion: Samir (platform lead) — will run POC and own integration.
+
+2) Security & procurement owners (as called out on the call):
+- Security reviewer: Priya Nair (you mentioned; Samir please confirm email)
+- Procurement / contracting: Victor Hsu (you, Elena?) — point for NDA/MSA/DPA routing.
+
+3) Legal routing ask (what we propose):
+- Stage 1: NDA (light redline) — goal: 2 business days turnaround from your side.
+- Stage 2: MSA + DPA redline sequencing — host first-pass from MediCore, we’ll return consolidated redline within 3 business days, then loop legal for final sign.
+- Simultaneous: security can request SOC2 artifacts — we’ll share an artifact index.
+
+Attachments sent with this thread: NDA_v2.pdf (blankline-stub) — please attach any company-specific clauses you need.
+
+Action items:
+- Samir: confirm Priya’s email and Victor as procurement owner (reply in-line).
+- Elena: confirm decision timeline (target pilot sign-off by end of Oct?).
+- Monica: internal ask to prepare redline choreography & turn-time estimates.
+
+Thanks again — happy to hop on a 15m legal-routing call if helpful.
+
+—
+Jonas Weber
+Account Executive | Redwood Inference
+jonas.weber@redwoodinference.com
+[Attachment: NDA_v2.pdf (PDF)]
+From: Samir Gupta <samir.gupta@medicore-analytics.com>
+To: Jonas Weber <jonas.weber@redwoodinference.com>, Elena Morales <elena.morales@medicore-analytics.com>
+Date: 2026-09-14T16:05:00-07:00
+Subject: Re: Post-call recap: buyer dossier + legal routing sequencing
+
+Thanks Jonas — summary looks right. A couple clarifications: 
+
+- Priya Nair (security lead) is priya.nair@medicore-analytics.com — she’ll want SOC2 Type II and network segmentation notes.
+- Procurement owner is Victor Hsu (victor.hsu@medicore-analytics.com) — he’ll own the MSA path.
+- Timeline: Elena and execs want a pilot decision by 2026-10-25; procurement needs ~2 weeks to review commercial terms after legal signs off.
+
+I’ve attached our standard procurement intake (separate doc) — I’ll upload anything else to the shared drive you suggested.
+
+Samir
+Senior Platform Engineer | MediCore Analytics
+samir.gupta@medicore-analytics.com
+[Attachment: MediCore_procurement_intake.xlsx (XLSX)]
+From: Jonas Weber <jonas.weber@redwoodinference.com>
+To: Monica Patel <monica.patel@redwoodinference.com>, Ben Carter <ben.carter@redwoodinference.com>
+Cc: Samir Gupta <samir.gupta@medicore-analytics.com>, Elena Morales <elena.morales@medicore-analytics.com>
+Date: 2026-09-15T09:04:00-07:00
+Subject: Fwd: Post-call recap: buyer dossier + legal routing sequencing
+
+Monica / Ben — looping you both for redline sequencing and suggested SLA on turn times. Key asks from MediCore: 2 business day NDA turnaround, MSA/DPA sequencing after initial redline, and security will request SOC2 artifacts.
+
+Proposed internal plan: 
+- Step A (NDA): send our NDA_v2.pdf. Ask MediCore to return with only business-specific edits; target 48h turnaround.
+- Step B (MSA): once NDA in place, have Ben produce a clean MSA tailored for cloud inference (include quantization/data-residency appendices). Accept customer redlines; propose to consolidate and return within 3 business days.
+- Step C (DPA): handle in parallel with MSA, security-specific items isolated so Priya can review separately.
+
+Questions for Ben: can we commit to 3 business day first-pass on MSA redlines? Any blockers for SOC2 artifact delivery?
+
+—Jonas
+From: Ben Carter <ben.carter@redwoodinference.com>
+To: Jonas Weber <jonas.weber@redwoodinference.com>, Monica Patel <monica.patel@redwoodinference.com>
+Cc: Samir Gupta <samir.gupta@medicore-analytics.com>
+Date: 2026-09-15T11:18:00-07:00
+Subject: Re: Fwd: Post-call recap: buyer dossier + legal routing sequencing
+Thanks Jonas — plan looks good. Confirming internal routing and estimated turn times below: 
+
+NDA (Stage 1):
+- Send NDA_v2.pdf to Victor after Samir confirms; ask for “clean redline” and restrict edits to business terms where possible. Target: 48 hours from receipt.
+MSA + DPA (Stage 2):
+- When customer returns MSA redline, Legal team will triage technical vs commercial clauses. I can do an initial consolidation within 3 business days. If material IP/data-residency changes are requested, expect an additional 3 business days for legal counsel review.
+Security artifacts: 
+- We’ll share SOC2 artifact index (SOC2_artifact_list.xlsx) and a minimal network diagram. If Priya requests deeper evidence, that can add ~5 business days depending on our SOC2 vendor clearance.
+Escalation & fallback: 
+- If procurement requests extended indemnities or unusual export controls, flag to me and we’ll escalate to VP Legal (pre-approval may be needed); expect extra lead time.
+Action items: 
+- Monica: prepare MSA template with inference-specific appendices by EOD 2026-09-16.
+- Jonas: send NDA_v2.pdf to Victor and ask for 48h turnaround.
+—Ben Carter
+Senior Counsel, Contracts | Redwood Inference
+ben.carter@redwoodinference.com
+[Attachment: SOC2_artifact_list.xlsx (XLSX)]
+From: Elena Morales <elena.morales@medicore-analytics.com>
+To: Jonas Weber <jonas.weber@redwoodinference.com>, Samir Gupta <samir.gupta@medicore-analytics.com>, Victor Hsu <victor.hsu@medicore-analytics.com>
+Date: 2026-09-16T10:12:00-07:00
+Subject: Re: Post-call recap: buyer dossier + legal routing sequencing
+Appreciate the clear plan. Victor — I’ve asked procurement to prioritize the NDA and will push for the 48h turnaround Jonas requested.
+
+I uploaded our initial commercial redline to the Drive (link below) — this is only the commercial sheet and a handful of comments in the MSA we think will be minor. I’ll route MSA redline to Ben once procurement confirms NDA is signed.
+
+DocuSign room for signatures (we can use once both sides agree): https://www.docusign.com/rooms/abcd-efgh-2026
+
+Elena Morales
+VP Product | MediCore Analytics
+elena.morales@medicore-analytics.com
+[Link: https://drive.google.com/drive/folders/1aB2cRedlinePackage]

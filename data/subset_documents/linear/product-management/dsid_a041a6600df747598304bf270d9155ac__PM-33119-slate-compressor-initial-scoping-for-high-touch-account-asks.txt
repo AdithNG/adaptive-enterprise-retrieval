@@ -1,0 +1,31 @@
+Slate Compressor: initial scoping and prioritization for high-touch account asks
+
+Problem: Sales and CS funnel an asynchronous flood of feature asks from high-touch enterprise prospects. Current first-pass triage is slow, inconsistent, and produces large, disparate tickets that burden PM and Eng review cycles. Goal: Create a lightweight, repeatable 'Slate Compressor' intake flow that aggregates related asks into prioritized "slates" for rapid economic sizing and decisioning. Outcomes: (1) ~40% reduction in initial review volume for PMs, (2) consistent trade-off frames (cost/latency/risk/regulatory), (3) fast handoff docs for Solutions/Eng to scope and estimate.
+Incoming enterprise asks are bucketed into a Slate within 48 hours of CS submission
+Each Slate has a canonical one-paragraph problem statement, 3 prioritized solution options, and a first-pass econ delta (low/med/high)
+PM lead can decide Go/No-Go for implementation vs pilot vs nurture within one cycle
+Templates and playbook are documented and used by at least two CS teams as measured by intake form adoption
+Draft Slate Compressor intake form (fields: account, ask cluster tags, business outcome, rough econ, compliance constraints, urgency)
+Prototype a weekly auto-aggregation job that groups asks by overlapping customer intents and product area (PoC: CSV + manual rules)
+Design 1-pager Slate template for PM/Eng handoff
+Run 2 pilot clusters with Sales East and Strategic CS to validate signal grouping and field coverage
+Create internal playbook (Confluence) with decision matrix and rollup examples
+Use business-impact-first prioritization: rank by ARR/strategic importance, technical effort estimate, and compliance risk
+Keep initial aggregation rules simple (keyword + product-area mapping) and avoid ML-based clustering in Phase 1
+Ship a manual semi-automated workflow for now; revisit automation after 4 pilot slates
+Finalize intake form v1 incorporating deployment constraints and preferred GTM field (owner: Aisha) — due 2025-01-17
+Implement semi-automated aggregator (script + owner mapping) and run first weekly cluster job (owner: Marco) — schedule 2025-01-20
+Run two pilot slates with Sales East and Strategic CS and capture time-to-decision metrics (owner: Priya) — complete by 2025-01-31
+Update playbook with sample completed slates and decision templates — owner: Aisha/Elena
+Over-aggregation: merging unrelated asks could hide edge regulatory requirements
+Under-aggregation: leaving too many small slates won’t reduce PM load
+Automation early: premature ML clustering could introduce opaque grouping and damage trust with CS
+Resource contention: Eng estimates may slip if multiple slates hit same subsystem simultaneously
+Pilot metrics to capture: time-to-first-review, slate-to-decision time, % of slates routed to pilot vs backlog, sample econ delta accuracy
+When scaling, consider integration with Redwood Console to tag slates by model/route impact (latency/cost annotations)
+If a slate has a deployment constraint of 'on-prem' or 'air-gapped', escalate to Security & Compliance review and flag as high implementation cost
+2025-01-11 Aisha Kumar: Kickoff sync with Sales East — agreed to pilot with 5 high-touch prospects. Action: Sales to capture canonical 'why now' field in CRM and attach to intake.
+2025-01-12 Marco Silva: Eng review — flagged two common engineering concerns: data residency requirements for Private customers and feature toggling complexity for dedicated capacity. Suggested adding a 'deployment constraints' field in the form.
+2025-01-13 Priya Desai (Solutions): Suggested 'customer journey' snippet for each slate to surface UX gaps. Also requested a sample Slack digest for weekly syncs.
+2025-01-14 Product Review (Aisha/Marco/Elena): Agreed to P1 pilot, estimate 5 points. Decision captured to exclude ML clustering initially due to explainability concerns.
+2025-01-15 Sales feedback (Lars): Pilot intake form missing 'preferred go-to-market model' (self-serve vs dedicated vs private). Added as follow-up field.

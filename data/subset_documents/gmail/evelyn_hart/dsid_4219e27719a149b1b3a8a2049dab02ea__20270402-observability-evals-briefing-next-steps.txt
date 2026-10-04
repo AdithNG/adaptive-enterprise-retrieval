@@ -1,0 +1,116 @@
+Post-call: Observability & evals briefing / next steps
+
+From: Evelyn Hart <evelyn.hart@redwood.ai>
+To: Sara Birch <sara.birch@datacare.com>, Marcus Lee <marcus.lee@datacare-ia.com>
+Cc: Rafael Mendes <rafael.mendes@redwood.ai>
+Date: Fri, Apr 2, 2027 at 3:12 PM PDT
+Subject: Post-call: Observability & evals briefing / next steps
+
+Hi Sara / Marcus — thanks again for the 30m today. Quick note to capture what we heard and confirm next steps so everyone is aligned.
+
+TL;DR: DataCare wants an eval that demonstrates end-to-end tracing from app -> model, token-level cost/latency breakdowns, and regression alerts on a golden prompt set before committing to a production rollout. Redwood will share an eval plan and SOC2 summary; propose a 4–6 week POC with dashboards and rollover guardrails.
+
+Summary of pain points (what you told us):
+- Latency spikes and unpredictable tail latency on inference requests impacting support SLAs.
+- No standardized tracing across service boundaries — hard to map user requests to model tokens.
+- Limited visibility into per-request token cost and cache effectiveness.
+- No automated detection of quality regressions after model or prompt changes.
+
+Current stack & constraints (from call):
+- Models currently served on an internal Triton + custom wrapper; some on managed GPU infra (GCP).
+- Observability: Prometheus + Grafana for infra metrics; no application->model tracing today.
+- Compliance: HIPAA-relevant workflows for PHI; customer expects SOC2 + data residency options.
+- Traffic profile: bursty daytime traffic, target steady-state ~50 QPS, occasional spikes to 120 QPS.
+
+Success criteria for the eval (what would make this a win):
+- End-to-end traces connecting frontend request -> Redwood middleware -> model KV cache (OpenTelemetry-compatible).
+- Dashboards showing token-level latency and cost, plus P95/P99 latency breakdown by route.
+- Regression alerts triggered by >2% drop in pass-rate on the golden prompt set (we'll co-author the set).
+- Canary rollout plan and automatic fallback to a lower-cost model variant if quality falls below threshold.
+
+Proposed next steps (agreeing on owners/dates):
+1) Redwood to share a 1-page Eval Plan + SOC2 summary (attached) — Evelyn (today EOD).
+2) DataCare to share a representative golden prompt set and one sample conversation for tracing (Sara) — by Apr 9.
+3) Align on POC start week (two candidate weeks: Apr 12 or Apr 19). Proposed length: 4–6 weeks.
+4) Technical kickoff (30–45m) to include your infra lead + our SE to confirm instrumentation hooks and dashboard templates.
+
+Attachments: redwood-eval-plan-v1.pdf, SOC2-summary-2026.pdf
+
+If that reads correctly, I can send a calendar invite for the technical kickoff and lock the POC start date.
+
+Best,
+Evelyn Hart
+Account Executive | Redwood Inference
+@redwood.ai | +1 (415) 555-0147
+
+
+From: Sara Birch <sara.birch@datacare.com>
+To: Evelyn Hart <evelyn.hart@redwood.ai>, Rafael Mendes <rafael.mendes@redwood.ai>
+Date: Fri, Apr 2, 2027 at 4:03 PM PDT
+Subject: Re: Post-call: Observability & evals briefing / next steps
+
+Thanks, Evelyn — this is great and captures the call. A few clarifications and asks from our side:
+
+- Confirmed: we can provide a golden prompt set (privacy redacted) by Apr 9. We'll include both high-frequency user prompts and a few long-context examples.
+- Can you confirm how Redwood handles PHI in the POC? We need explicit notes on data isolation and encryption-at-rest for the POC environment.
+- We'd like to see 2–3 example dashboards (preferably Grafana JSON) that show token-level cost and trace spans — is that possible before kickoff?
+- Our internal target quality metric: <2% false-negative rate on intent detection and <3% degradation on extraction F1 compared to our baseline over the golden set. If Redwood's regression alerting can be tuned to those thresholds, that's ideal.
+
+We're leaning toward starting the POC the week of Apr 19 (more time to curate data). I'll tentatively hold Apr 20–22 for a kickoff.
+
+Appreciate the SOC2 summary attachment — will review and follow up on residency questions.
+
+Best,
+Sara Birch
+Director of Product, DataCare Analytics
+Sara.Birch@datacare.com | +1 (646) 222-8810
+
+
+From: Evelyn Hart <evelyn.hart@redwood.ai>
+To: Sara Birch <sara.birch@datacare.com>, Marcus Lee <marcus.lee@datacare-ia.com>
+Cc: Rafael Mendes <rafael.mendes@redwood.ai>
+Date: Sat, Apr 3, 2027 at 9:08 AM PDT
+Subject: Re: Post-call: Observability & evals briefing / next steps
+
+Thanks Sara — appreciate the detail. Quick answers inline and next steps: 
+
+- PHI handling: for the POC we can provision an isolated tenant with customer-controlled keys (KMS) and optional VPC peering; no data persists beyond retention window you set. See SOC2-summary-2026.pdf for controls; happy to have Security engage if you want deeper artifacts.
+- Dashboards: attaching two Grafana JSON snippets and a link to our Observability Playbook — the dashboards include token-cost, P95/P99 by route, and a trace waterfall that maps spans to KV cache hits. (See related link).
+- Regression alerting: we support configurable rules — we'll start with your thresholds (<2% intent FN, <3% F1 drop) and tune during the first week of the POC. Alerts can post to Slack, PagerDuty, or webhook.
+
+Proposed technical kickoff: Apr 20, 2027 at 10:00 AM PT — 30 minutes. Agenda: roles, instrumentation checklist (OTel hooks), golden prompt ingestion, initial dashboard walkthrough, success criteria sign-off. I'll send the invite once you confirm.
+
+Next internal step for us: Rafael, can you prepare a pricing estimate for a 6-week POC with a dedicated SE, reserved capacity for 2x A100-equivalent GPUs, and one week of post-POC handover? Stephanie, can you confirm SE availability and ownership for the kickoff?
+
+Quoting your note below for context: 
+
+> Our internal target quality metric: <2% false-negative rate on intent detection and <3% degradation on extraction F1 compared to our baseline over the golden set. If Redwood's regression alerting can be tuned to those thresholds, that's ideal.
+
+Thanks,
+Evelyn
+
+
+From: Evelyn Hart <evelyn.hart@redwood.ai>
+To: Rafael Mendes <rafael.mendes@redwood.ai>, Stephanie Nguyen <stephanie.nguyen@redwood.ai>
+Date: Sat, Apr 3, 2027 at 11:20 AM PDT
+Subject: Fwd: Post-call: Observability & evals briefing / next steps
+
+Rafael / Stephanie — forwarding DataCare thread. Summary / ask is below — can you both action?
+
+Summary (1-min): DataCare (Sara + Marcus) wants an eval demonstrating tracing, token-cost dashboards, and regression alerts on a co-authored golden prompt set. Target POC: 4–6 weeks; they're proposing kickoff week Apr 20 (tentative). Compliance: HIPAA-related; they requested SOC2 and data residency notes.
+
+Action items: 
+- Rafael: Please produce an itemized POC estimate (6 weeks) including: dedicated SE hours (estimate 120h), reserved capacity 2x A100-equivalent (list hourly & flat POC fee), and optional extended support for handover. Deliverable: pricing PDF for customer by Apr 6.
+- Stephanie: Confirm SE assignment & availability for Apr 20 kickoff; prepare example Grafana JSONs (token-cost + trace waterfall) and a short instrumentation checklist (OTel hooks + sample headers) by Apr 6.
+
+I'll reply-all to the customer once we have the pricing and SE confirmed. CC'ing Rafael in the thread so Sara sees we have pricing in flight.
+
+Thanks — Evelyn
+
+[Quoted earlier message to customer]
+> Thanks, Evelyn — this is great and captures the call. A few clarifications and asks from our side:
+> 
+> - Confirmed: we can provide a golden prompt set (privacy redacted) by Apr 9. We'll include both high-frequency user prompts and a few long-context examples.
+> - Can you confirm how Redwood handles PHI in the POC? We need explicit notes on data isolation and encryption-at-rest for the POC environment.
+> - We'd like to see 2–3 example dashboards (preferably Grafana JSON) that show token-level cost and trace spans — is that possible before kickoff?
+

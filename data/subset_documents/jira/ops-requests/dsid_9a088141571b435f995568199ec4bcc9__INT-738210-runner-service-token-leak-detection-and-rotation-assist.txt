@@ -1,0 +1,55 @@
+Runner service account token exfiltration alert: rotate tokens and validate CI access paths
+
+Issue summary:
+Security monitoring flagged potential exfiltration of a long-lived service token tied to a fleet of ephemeral CI runners. Alert originated from log anomaly: identical token used from two distinct datacenter IP ranges within a 5 minute window. Impact: potential unauthorized access to private repositories and deployments; immediate mitigation required for release pipelines scheduled tonight.
+
+Impact:
+- Nightly release pipelines (release-nightly) and a handful of ad-hoc build jobs are at risk of unauthorized usage.
+- No confirmed production changes yet, but token reuse pattern suggests credential may be leaked to an external CI job runner.
+
+Environment:
+- prod control plane, primary runner pool in us-east-1, ephemeral runners launched via autoscaler with service-account tokens minted by internal token-service.
+
+Steps to reproduce / observed sequence:
+1) 2026-03-13T18:02Z: Security alert (Evidently: auth-anomaly-20260313-17) flagged token XXXXXX-XXXXXXXXXXXXXXXX used from IP A and B.
+2) Investigated runner logs: token XXXXXX appears in runner bootstrap logs for runner-id r-3487 and r-3491.
+3) Token issuance log shows token minted by token-service for service-account ci-ephemeral-deployer at 2026-03-13T17:58Z with TTL 24h.
+4) Access patterns include git fetch and artifact upload attempts to s3-bucket "ci-artifacts-prod".
+
+Immediate requests:
+- Rotate all active tokens for service-account ci-ephemeral-deployer and issue short-lived replacements (1h TTL) for any upcoming scheduled jobs.
+- Block any outstanding runner sessions that present the old token.
+- Audit artifact uploads and git pushes between 2026-03-13T17:50Z and 2026-03-13T18:20Z.
+
+Timeline and hypotheses:
+- 2026-03-13T17:58Z token minted by token-service (log id ts-98231).
+- 2026-03-13T18:02Z security alert for token reuse from multiple geo-ip blocks.
+- Hypothesis A: token printed into a job log or artifact and then scraped by a scanning service or malicious actor.
+- Hypothesis B: compromised runner bootstrap image contained a hardcoded token (unlikely, but check image digest).
+- Hypothesis C: token-service issued a duplicate due to race and same token reused on two runners (race condition in token-service code).
+Findings so far:
+- Runner bootstrap scripts do not print tokens intentionally; however, one community script in customer templates folder was discovered in an older job that echoed env on error (CI job id 77312).
+- Image digests for r-3487 and r-3491 match the current official ephemeral-runner image: sha256:fdc9..., no unauthorized modifications.
+- Token-service code review shows a retry path that can return the same token if request ID deduplication occurs; engineering hypothesis plausible.
+Logs & evidence locations:
+- token-service logs: /var/logs/token-service/ts-2026-03-13.log (search ts-98231)
+- runner audit: gs://redwood-ci-logs/runner/audit/2026/03/13/
+- security alert: SIEM event auth-anomaly-20260313-17 (Slack #sec-alert archived thread)
+Ava Martinez (reporter) 2026-03-13: Raised after SOC flagged token reuse; requesting immediate token rotation and kill of affected runners.
+Samuel Cheng (assignee) 2026-03-13: Acknowledged. Initiating emergency rotation for ci-ephemeral-deployer; will create short TTL tokens for scheduled jobs. Requesting SRE to isolate runner pool.
+Lena Ortiz (SRE) 2026-03-13: Isolating runner subnet and revoking existing tokens at the gateway level. Patching autoscaler to stop spawning new ephemeral runners from that SA until rotation completes.
+Morgan Patel (Security) 2026-03-14: Found one suspicious artifact upload attempt; quarantine copy saved to secure bucket for forensic analysis. Suggest scanning artifacts for leaked secrets and checking access logs for third-party IPs.
+Samuel Cheng 2026-03-14: Short-lived tokens issued (1h TTL) and deployed to release-nightly job definitions. Documented mitigation in runbook and linked a follow-up engineering ticket to fix token-service dedupe retry path.
+
+Mitigation steps executed 2026-03-14:
+1) Revoked all active tokens for service-account ci-ephemeral-deployer in Vault and invalidated tokens at the gateway layer.
+2) Issued new short-lived tokens (1h) and patched CI job definitions for release-nightly and related pipelines.
+3) Quarantined suspicious artifact and initiated forensic scan.
+4) SRE temporarily drained and reprovisioned the affected runner pool with fresh images.
+5) Created follow-up engineering ticket INT-738211 to implement token-service fix (prevent duplicate token issuance under retry) and another task INT-738212 to add automated token-leak detection on artifact uploads.
+Post-mortem/next steps:
+- Engineering to harden token-service by 2026-03-20 and add extra logging for request IDs.
+- CI config update to set default TTL for ephemeral tokens to 1h.
+- Add a pre-flight check to runner bootstrap to redact env prints and fail if dangerous debug flags are present.
+- Security to run backward scan for other service-accounts to ensure no further exposures.
+Status: mitigations completed; further engineering work scheduled.

@@ -1,0 +1,79 @@
+Northgrove MedOps integration field scrap
+
+Quick context: Northgrove Health (regional hospital chain, ~12 sites) — want LLM-powered triage assistant to summarize ED nurse intake, suggest next steps to clinicians, and generate discharge instructions drafts. Must be PHI-safe and deployable inside their VPC (no cross-tenant data plane). Call 11/12 recap below (notes to self, messy).
+
+Attendees: Elena (me), Samir (SE), Dr. Lisa Chen (MedOps lead), Mark Rivera (IT/security), Priya (solutions), Jordan (SRE standby)
+
+Call summary (high level):
+- Goal: replace / augment manual note summarization and care-path suggestions; not decision automation, clinicians must sign off.
+- Primary constraint: all PHI MUST remain in customer network; they have an existing AWS VPC + transit gateway.
+- SLA ask: interactive latency target ~ <200ms p50 for short summaries (200-600 token outputs). Peak concurrencies unknown but expect bursts during shift change (estimate 3–6 concurrent writers per site).
+- Data residency: US-only, logs/audits must be exported to their Splunk; minimal telemetry to Redwood (token counts, errors) only if permitted by contract.
+
+Raw technical notes / gotchas: (unpolished)
+- EHR notes are VERY long and noisy (copied templates, macros). Token explosion risk — need aggressive input truncation + prefix filtering at the agent layer.
+- RAG approach required for up-to-date med protocols (we cannot store EHR in hosted Redwood). Suggest: vector DB inside their VPC + local document chunker + private retrieval service.
+- KMS: they insist on customer-managed KMS for model keys and any encryption at rest. Need to confirm Redwood Private KMS integration (HSM/KMS options).
+- Network: outbound connections from private inference nodes must be blocked; control plane communication over a customer-approved management endpoint (their firewall rules will be strict).
+- Model choice: they asked about using an LLM with reduced hallucination for clinical text. We should propose a medically-tuned open model + evals; consider Redwood Optimize recommendations (quantized 8-bit to fit GPUs).
+- Streaming: clinicians want near real-time typing/streaming of summary — confirm that Private deployment supports token streaming over websocket within VPC.
+- Audit logs: must include per-request redaction summary (which fields were removed) and hashes for content provenance. Also retention policy (90 days accessible, archived 7 years) — legal asked.
+- Cost sensitivity: hospital IT flagged budget — reserved nodes vs burst capacity discussion. Offer hybrid: dedicated baseline + burst to hosted (but hosted blocked by PHI). So likely need capacity plan for Dedicated inside customer infra or bare-metal in their data center.
+
+Operational considerations:
+- Monitoring: they want per-route latency + token-level cost breakdown forwarded to their Splunk. Need a small collector agent or S3 export.
+- Rollouts: canary traffic must be controllable per-site. They requested ability to pin model versions per hospital for phased rollout.
+- Fallback: if model unavailable, fallback to a constrained template-based summarizer (local rules) to avoid outages.
+
+Open questions (to resolve with Northgrove):
+1) Exact concurrency profile: can they share 24h trace of ED admissions? (ask analytics team) — affects shard/replica sizing.
+2) Which exact fields from EHR are allowed into the model? We need a whitelist/blacklist to implement redaction.
+3) Do they require real-time transcription ingestion (speech->text) or will nurses paste free text? Mentioned both; clarification needed.
+4) Legal/IT: acceptable telemetry envelope (what metrics Redwood can receive).
+5) KMS/HSM vendor(s) and network peering windows for control-plane handshake.
+
+Initial requirements (raw list):
+- Private deployment inside customer VPC (no external PHI egress).
+- Customer-managed KMS for keys and secrets.
+- Per-request audit log exported to customer Splunk with configurable retention.
+- Latency: P50 < 200ms for short summaries; P95 < 600ms.
+- Streaming support over websocket within VPC.
+- Canary rollouts per site + model pinning.
+- Local vector DB + retriever integration (customer-managed).
+- Redaction pipeline (pre-inference) + provenance hashes.
+
+Suggested immediate actions (next 2 weeks):
+- Action: Ask for ED admission sample (anonymized) and concurrency CSV — Owner: Dr. Chen to provide / Owner (follow): Elena to nudge — Due: 2024-11-20
+- Action: Security scoping call focused on KMS/network — Owner: Mark (Northgrove) + Priya — Due: 2024-11-19
+- Action: Draft Private deployment architecture doc showing control-plane flow, blocked egress, KMS handshake, Splunk export — Owner: Samir — Draft due: 2024-11-18 (put PR to github link)
+- Action: Build quick eval metric set for hallucination on clinical templates (small eval harness) — Owner: Jordan — due: 2024-11-22; ticket JIRA-RDW-4318
+- Action: Cost sketch (3 sizing scenarios: pilot, 6-site, all-sites) — Owner: Elena — due: 2024-11-21
+
+Notes to self / heuristics for proposal:
+- For ED triage text size assume 1.5–3KB per record; chunking size 512 tokens for retriever.
+- Use 1 replica per 2–3 concurrent streams for sub-200ms p50 on A100-equivalent hardware (rough baseline — need benchmarking).
+- Default to conservative data retention in proposal; they will ask to reduce if cost blowouts.
+
+Draft email bullets for follow-up to Mark & Dr. Chen: (copy to Priya/Samir)
+- Confirm concurrencies and sample records (anonymized)
+- Share top-level architecture diagram (Samir will attach)
+- Propose security scoping call on 11/19, 30m
+- Ask legal for telemetry envelope examples we can accept
+
+Risk register (quick):
+- High: Regulatory — anything that touches PHI and leaves network = deal breaker.
+- Medium: Hallucination on medication lists — mitigations: RAG + fine-grained system prompts + evals.
+- Low: Latency not meeting target — mitigations: quantized models + local cache + prefetching of patient context.
+
+Misc scribbles / heuristics:
+- If they insist on on-prem bare-metal, check our GPU support matrix for RTX-8000 vs A100 and our quantization toolchain compatibility.
+- Prep a short demo using synthetic EHR snippets (redacted) to show streaming + canary pinning.
+
+References / notes to link into final playbook:
+- Confluence: Northgrove MedOps integration (linked above)
+- RDW internal: RAG playbook + clinical hallucination evals (link: github PR above)
+- Legal template: PHI addendum checklist (ask legal for template id)
+
+End messy notes. Will clean up before sending proposal.
+
+-- Elena

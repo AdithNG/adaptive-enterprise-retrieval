@@ -1,0 +1,66 @@
+eng-security
+
+maya: FYI onboarding Acme. They require tenant-scoped webhook contracts + rotating signatures. Two quick asks: 1) best pattern to rotate signing keys without dropping events? 2) how do we validate S3 fallback/manifest signatures for customers who insist on S3 exports?
+
+devon: Short answer: overlapping keys + key-id header + explicit schema_version. Longer: keep old key(s) active for a migration window, surface the key id in a header so customers can pick the verification key, and include a canonical payload for signing.
+
+maya: canonical payload? example?
+
+devon: Minimal convention we've used: signed_payload = timestamp + '.' + body_json_canonicalized (sort keys, no whitespace). Signature = HMAC-SHA256(key, signed_payload). Headers: `X-RW-Signature: sha256=...`, `X-RW-Signature-KeyId: key-v2` and `X-RW-Timestamp`. Verification pseudocode:
+```
+// server side verification pseudocode
+payload = req.headers['X-RW-Timestamp'] + '.' + canonicalize(req.body)
+key = lookup_key(req.headers['X-RW-Signature-KeyId'])
+expected = hmac_sha256(key, payload)
+if not constant_time_eq(expected, req.headers['X-RW-Signature']): reject()
+if abs(now - req.headers['X-RW-Timestamp']) > 300: reject() // replay guard 5m
+```
+
+samir: Do we support asymmetric (RSA/ECDSA) signatures from KMS? Some customers want key material never exposed to app.
+
+devon: Yes, support both. For HMAC we use data keys (SSE) but for stricter compliance recommend KMS asymmetric signing: store signer in KMS/HSM and include `X-RW-Signature-Alg: rsa-v1-sha256` with `X-RW-Signature-KeyId` referencing the KMS key ARN/alias. Verification flow is the same but uses public key verify. Important: still include key-id header so rotation is explicit.
+
+maya: What about tenant-scoped contracts? customer wants per-tenant key rotation.
+
+devon: We map tenant_id -> signing_key_id in our tenant metadata table. On rotate: 1) generate new key (KMS CreateKey or generateDataKeyPair) -> 2) add new key-id to mapping alongside old key-id -> 3) start signing with new key but continue accepting old key for N days -> 4) notify tenant with header example and recommended client changes -> 5) after migration window, revoke old key. Keep audit events for sign/rotate ops.
+
+samir: How do we avoid replay/ordering issues when we have retries + S3 fallback?
+
+devon: Add nonce/idempotency id in the event (`event_id`) and require idempotent receivers to dedupe on that. For replay defense we use the timestamp TTL and store recent nonces per tenant for short windows if requested by high-security customers. For S3 fallback we include a manifest file with checksums + signature: `manifest.json` contains list of object keys + sha256 + schema_version + signed_manifest.signature. Clients validate manifest signature before downloading objects.
+
+security-bot: NOTE: make sure rotation ops are recorded in audit log with fields: actor, tenant_id, old_key_id, new_key_id, rotation_ts, reason. Also include KMS key version in the audit payload so customers can map to KMS rotation history.
+
+ops-bot: deploy-bot: webhook-signing v2 rolled to staging at 2023-11-02T16:20Z (:rocket:)
+
+maya: Schema changes — customer wants schema v2 but must stay compatible for Splunk and Datadog ingestion. Any suggestions?
+
+devon: Best practice: keep the event envelope stable and bump `schema_version` inside the JSON. For webhooks also set `X-RW-Schema-Version`. For incompatible changes, create a v2 endpoint path `/webhook/v2/tenants/:id` and route new customers there. For customers on old endpoints continue signing both versions during migration window. Example envelope: `\{"schema_version\": \"2\", \"event_id\": \"...\", \"tenant_id\": \"...\", \"payload\": { ... } }`.
+
+samir: Any acceptance tests we should give to customers when onboarding?
+
+devon: Yes — small checklist to include in onboarding doc (send this to customer):
+- Provide callback URL + expected TLS certs
+- Support `X-RW-Signature` + `X-RW-Signature-KeyId` + `X-RW-Timestamp` headers
+- Verify signature using canonicalize(body) + timestamp window (5m default)
+- Verify `schema_version` and handle unknown versions gracefully (log + 400 or a 202 depending on contract)
+- Idempotency: dedupe on `event_id`
+- Fallback: validate `manifest.json` signature before consuming S3 objects
+- Test vectors: call our test endpoint to fetch signed sample events and validate locally
+
+maya: Can we provide a sample curl for the verification test?
+
+devon: Sure:
+```
+# sample verification test (client side)
+curl -i -H "X-RW-Signature: sha256=abcd1234" -H "X-RW-Signature-KeyId: key-v2" -H "X-RW-Timestamp: 1699990000" -H "Content-Type: application/json" -d '{"schema_version":"2","event_id":"evt-123","payload":{"foo":"bar"}}' https://hooks.acme.example/receive
+```
+
+security-bot: Also add a small test harness to the onboarding kit that verifies both HMAC and RSA paths and emits an explicit failure reason (bad signature / stale timestamp / unknown key-id).
+
+maya: Great. Can someone draft the onboarding checklist + sample verification code for customers this afternoon? I can forward to Acme.
+
+devon: I’ll put a short doc in the onboarding repo and ping you in #customer-success.
+
+samir: I'll add unit tests for canonicalization + nonce replay to the repo branch.
+
+maya: thanks all :thumbsup:

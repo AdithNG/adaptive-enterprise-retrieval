@@ -1,0 +1,61 @@
+Staggered retry/warmup patterns from client fleet causing tenant-level 429 throttles
+
+Issue summary:
+Customer reports recurring tenant-level 429 responses during large fleet rollouts and worker restarts. Behavior appears concentrated during a ~2-6 minute window after a portion of their uploader fleet resumes activity (we see synchronized warmups).
+
+Impact:
+- NimbleDocs ingestion pipelines observe 20-40% increased 429s for ~3 minutes after batches of uploader processes restart (~100s of clients).
+- Processing latency and backlog grow; customer sees failed items and manual retries.
+- Affects production workload (dedicated pool, us-west-2).
+
+Environment:
+- Dedicated pool (customer-dedicated-42), prod us-west-2.
+- Client SDK: nimble-uploader v1.3.2 (homegrown wrapper that performs exponential backoff with jitter).
+- Observed on model routes: /v1/generate and /v1/embeddings (mixed).
+
+Steps to reproduce (from customer repro script):
+1) Stop 250 uploader workers (simulate rolling deploy).
+2) Bring them back up in groups of ~25 with 10s intervals using their orchestration tool.
+3) Each worker immediately resumes sending batched requests (~50 concurrent requests each).
+4) After ~30-90s the gateway begins returning 429s for the tenant.
+
+Observed behavior:
+- 429 rate spikes for tenant key across both generation and embedding routes; per-key token counts indicate burst window exhaustion.
+- Rate limiter logs show many short-lived connections with similar timestamps (client-side jitter clustered bursts).
+- Server-side token-bucket windows refilled at fixed intervals causing alignment with client bursts.
+
+Expected behavior:
+- Smooth admission across restart/warmup period; backoff/jitter should avoid synchronized bursts that exhaust tenant quota.
+
+Initial hypothesis:
+- Clients' backoff/jitter algorithm (uniform jitter applied to entire batch) plus coordinated rolling restarts align retries into micro-bursts.
+- Tenant-level burst allowance and quota windowing on the rate-limiter are too tight for the customer's dedicated commit pattern, causing transient 429s even though sustained QPS is within contracted capacity.
+- Per-route quotas and token-bucket refills are contributing to momentary alignment effects.
+2026-03-05 10:14 - Priya Shah (Support): Ticket opened after NimbleDocs reached out via email. Requested immediate logs and sample timestamps. Asked for deployment schedule and SDK version.
+2026-03-05 11:02 - NimbleDocs (Customer): Provided restart schedule, sample request timestamps (2000+), and confirmed they use an internal wrapper that applies uniform jitter at the batch level.
+2026-03-05 13:40 - Miguel Torres (SRE): Collected gateway rate-limiter traces and token-bucket metrics for customer-dedicated-42; saw alignment windows at 00s of each minute when bursts peaked.
+2026-03-06 09:30 - Miguel Torres (SRE): Reproduced similar pattern in staging by orchestrating group restarts; confirmed that default burst allowance (50 tokens per window) is getting exhausted momentarily despite average QPS < committed QPS.
+2026-03-06 11:05 - Support (Priya): Shared immediate mitigation steps and recommended client config changes (stagger start and per-worker random delay) while we prepare a server-side soft-fix.
+2026-03-07 15:22 - Engineering (Ava Chen): Implemented temporary rate-limiter tweak in control plane to increase per-tenant burst allowance and add smoothing on refill for the dedicated pool. Deployed behind feature flag for NimbleDocs only.
+2026-03-08 08:45 - NimbleDocs (Customer): Confirmed drop in transient 429 spikes after the flag was applied; reporting normalization during next rolling deploy. Customer requested a recommended long-term config and SDK guidance.
+2026-03-08 12:10 - Miguel Torres (SRE): Marked follow-ups for console UI to expose burst settings and to add a guidance doc for SDK backoff best-practices.
+
+Findings:
+- Token-bucket refill granularity aligned with minute boundary (refill event at 00s) which caused many client requests to arrive right after refill resulting in burst depletion.
+- Client-side jitter implementation used per-batch seeding leading to near-simultaneous retries across many workers.
+- Dedicated pool quota calculations assume smoothing over longer horizons; short transient bursts exceed burst tokens causing 429s even though 5-min average was within contract.
+Telemetry checked:
+- Gateway logs: connection timestamps clustered within 10-30s windows across restarted workers.
+- Rate-limiter metrics: bucket depth dropped to zero for ~120s during incidents.
+- No evidence of serving-runtime OOM or GPU shortage; CPU and GPU utilization remained nominal.
+Hypothesis validated by staging repro where adding random per-process startup offsets removed the 429 spike.
+Short-term mitigation applied (feature-flagged): increased per-tenant burst tokens from 50 -> 200 and modified refill to smooth over two sub-windows to reduce alignment.
+Workarounds provided to customer:
+- Stagger worker start with randomized delay (recommended 60-180s spread for 250 workers).
+- Update uploader SDK to apply jitter per request rather than per batch and add a low-rate warmup ramp (start at 10% of steady concurrency and ramp over 2-5 minutes).
+Long-term actions / follow-ups:
+- (ENG) Add a tenant-specific smoothing policy in rate-limiter configurable from Console (ENG-4812).
+- (DX) Publish a best-practice KB and a code sample for staggered restarts in our SDK docs (DOCS-129).
+- (SRE) Add a metric/alert that flags >20% bucket depletion events in a 1-minute window for dedicated pools.
+- (PRODUCT) Expose per-tenant burst config and simulation tool in Console for Dedicated customers.
+Status: Mitigation confirmed; customer validated behavior during two subsequent rollouts. Scheduling follow-ups in sprint.

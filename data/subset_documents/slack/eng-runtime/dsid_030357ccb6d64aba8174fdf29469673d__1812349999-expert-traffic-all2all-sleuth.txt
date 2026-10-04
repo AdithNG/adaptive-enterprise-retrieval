@@ -1,0 +1,64 @@
+eng-runtime
+
+ravi: pushed a perf snapshot from the canary run 03/15 — attaching timeline + flame. seeing intermittent 3x tail on token routing step (all-to-all). root cause looks like repeated allreduce/all2all stalls when expert counts per-token spike.
+
+ravi: key lines from profiler:
+```
+step 234: token_fanout_all2all  ms=47.8
+        compute_forward ms=12.1
+        allreduce_grad   ms=6.3
+        expert_swap      ms=19.4  // big chunk is comm
+KV_cache_lookup ms=1.2
+```
+
+infra-bot: deployment canary 2026-03-15T08:12 by @ravi — config: tp=2, pp=1, moe_expert_shard=8, batching=dynamic.
+
+dana: thanks — did we change kernel selection recently? wondering if we're falling back to a slower all2all kernel when seq_len > 512.
+
+ravi: not intentionally. runtime picks kernels based on seq distribution; but profiling shows kernel_choice="generic_alltoall" for those steps.
+
+liam: I repro locally with synthetic fanout pattern — when per-token expert count variance is high we see repeated small all2alls that don't overlap with compute. NCCL shows full barrier.
+
+yusuf: batching heuristics might be the trigger — dynamic batching grouped heterogeneous sequences so some batches have 2x tokens routed vs others. routing matrix size jumps and causes comm blowup.
+
+sara: try enabling async progress / NCCL_P2P_LEVEL=nvlink and set TORCH_CUDA_EXECUTION_ORDER=stream. also check if KV cache serialization is forcing host roundtrips. :mag:
+
+ravi: timeline shows KV cache reads are local and tiny. the stall is at the routing alltoall start: no compute overlap — the compute stream waits for comm to finish before expert execute.
+
+liam: maybe kernel selection is conservative for correctness. we have a fast 'segmented_alltoall' kernel that can handle ragged routing but only for float16 payloads. are we using fp32 for routing indexes?
+
+dana: yes routing matrix currently encoded as int32 indices + fp32 expert payloads. can we quantize the routing weights/payload to fp16 and pack indices into int16 to reduce comm volume? Would need to validate lossless mapping.
+
+ravi: uploaded a short patch that forces fp16 payloads + segmented kernel — perf jumps down ~30% in microbench but still see tail in canary under real traffic. link: https://git.redwood/s/routing-hotfix/PR-412
+
+yusuf: two other ideas: 1) compress routing by delta-encoding repeated expert ids (run-length), 2) bias the batcher to co-locate similar routing patterns (routing-aware batching) to avoid high-variance mini-batches. both require small infra changes.
+
+sara: agree. routing-aware batching seems low-risk — scheduler tweaks + a cache of recent routing histograms used as hint. We should be careful about latency SLOs.
+
+liam: also test enabling NCCL_ASYNC_ERROR_HANDLING=1 and experiment with nonblocking alltoall (ibv API path). on our HW nonblocking can overlap nicely if we schedule compute on separate streams.
+
+dana: note: kernel selector currently uses a threshold: if avg_seq_len > 384 => generic_alltoall. we can make it consider routing sparsity (nnz fraction) because dense all2all is worse for sparse routing.
+
+ravi: created a short checklist: (1) repro with synthetic high-variance fanout (liam) (2) try segmented_alltoall + fp16 payloads (ravi, dana) (3) implement routing-aware batching prototype (sara, yusuf) (4) NCCL async/nonblocking experiments (liam) (5) collect new canary traces and compare flame graphs (ravi).
+
+ops-bot: action created: ENG-8312 "investigate expert routing all2all hotspots" assigned to ravi, liam; due 2026-03-22.
+
+dana: also flagging this as potential regression vs release v2.3 — comparing historic traces shows all2all medians increased ~15% after kernel selector rewrite. adding to the incident queue.
+
+ravi: good catch — will diff kernel selector commit. if selector change is the regression we may gate it behind an opt-in config until we get routing-aware heuristics.
+
+sara: can someone run a cheap experiment: force routing packing to int16 and run perf test across 8 GPUs? If we see >20% reduction on tail, worth shipping quick patch. @liam can you take? :pray:
+
+liam: on it. will post microbench numbers by EOD and attach new traces.
+
+ravi: thanks — keeping thread as single place for traces. dropping the raw perf dump here: 
+```
+trace://canary/1812349999/trace.pb
+flame:///canary/1812349999/flame.svg
+```
+
+yusuf: pinging infra for a nvlink test node allocation 8xA100 to run nonblocking alltoall tests.
+
+infra-bot: nvlink-test-08 allocated to liam for 2h (expires in 1h50m).
+
+ravi: next sync: quick 15m at 2026-03-16 09:30 to review initial numbers. thanks all :thumbsup:

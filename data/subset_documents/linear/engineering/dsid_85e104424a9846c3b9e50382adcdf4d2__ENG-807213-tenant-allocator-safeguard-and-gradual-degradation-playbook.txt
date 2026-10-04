@@ -1,0 +1,47 @@
+Tenant allocator safeguard and gradual degradation playbook
+
+Summary:
+This ticket defines an operational playbook and implementation work to introduce 'allocator safeguards' that enforce per-tenant throughput contracts while allowing controlled, progressive degradation when capacity is constrained. The goal is to reduce noisy-neighbor incidents and prevent sudden total denial for best-effort tenants by combining runtime admission controls, IO/PCIe bandwidth shaping, and a telemetry-driven backpressure signal sent to the API gateway for graceful client-side throttling.
+
+Why now:
+We continue to see high variance in tail latency and token throughput from mixed workloads on Dedicated pools. Existing hard-eviction policies cause customer-facing errors during transient spikes. By adding a multi-stage safeguard (soft throttles, IO shaping, fallback model routing, and eventual hard-eviction as last resort) we can improve SLO adherence for paid contracts while preserving availability for lower-priority tenants.
+
+Scope and non-goals:
+- In scope: allocator admission control at pod/instance granularity, per-tenant IO and kernel scheduling hints, API-layer backpressure signal, and an operations runbook for on-call.
+- Out of scope: rewriting kernel scheduler, major changes to tenant billing; those are follow-ups.
+New allocator exposes per-tenant declared throughput (tokens/s) and burst window in node metadata.
+Runtime enforces soft bandwidth ceilings (PCIe/host-IO) for tenants above declared burst using cgroup or container QoS hints without dropping requests.
+API gateway consumes backpressure signal (X-Backpressure: level) and returns structured 429s with recommended retry-after and degraded model variant.
+Dashboard shows per-tenant degradation events, percent of requests downgraded, and time-to-recover; SLO violation rate for paying tenants drops by >=50% in spike tests.
+Ops playbook for progressive degradation (soft throttle -> IO shaping -> variant fallback -> eviction) is documented and validated in DR runbook run.
+Automated tests cover simulated noisy neighbor scenarios and assert graceful degradation path completes without 5xx client-facing errors for P1/P0 tenants in >=95% of trials.
+Unit tests for allocator metadata and policy evaluation (local).
+Integration test harness: multi-tenant synthetic workload with mix of bursty small requests and long-context generation for 24h soak.
+Chaos test: inject noisy-tenant IO pressure and verify progressive degradation steps are triggered and logged.
+Performance benchmark: measure tail P95/P99 latency and paying-tenant throughput under 2x baseline load before/after change.
+Stage 1: Feature flag behind 'allocator-safeguard' active for internal test orgs in dedicated-staging. Monitor metrics for 48h.
+Stage 2: Open to 5% of production tenant traffic with automated rollback on SLO regression >5%.
+Stage 3: 25% -> 75% -> 100% with 24h observation windows at each step.
+Fallback: Immediate disable of soft throttle if error increase or token loss observed; runbook step triggers paging.
+Paying-tenant SLO (median latency and P95 token latency) before/after
+Percent requests downgraded to degraded-variant
+Number and duration of progressive-degradation events per tenant
+Rate of 429s with X-Backpressure header returned
+CPU/GPU PCIe bandwidth utilization per physical host
+Signal levels: green/yellow/red/critical documented; thresholds tied to host-level bandwidth and tenant queue length.
+On-call play: when host drops to red, enable soft-throttle for best-effort tenants for that pool and notify customers with degraded routing info.
+Escalation: if degraded state persists >30m, evaluate fallback routing to lower-cost model variant for affected tenants, and start eviction scoring if no relief.
+Post-incident: collect KV cache warmup metrics and include in incident report to refine burst windows.
+We prefer incremental soft-throttles vs immediate eviction to avoid client 5xx but accept some additional tail latency for best-effort tenants.
+IO shaping implemented via cgroup/efa hints rather than kernel patches to reduce rollout risk across cloud providers.
+Backpressure header intentionally minimal (level + retry-after + recommended-variant) to avoid protocol bloat and allow SDKs to implement client-side delay/backoff.
+2026-02-21 - Marco Chen: Initial spike analysis attached; observed correlated PCIe saturation on hosts with mixed small-chat and long-gen workloads.
+2026-02-25 - Priya Desai (PM): Prioritize paying tenant SLOs; ensure billing/contract team is looped if throughput declarations are used for pricing.
+2026-03-03 - Ana Ruiz (SRE): Suggest adding a synthetic tenant in staging that emits pathological IO patterns to validate shaping layer.
+2026-03-10 - Marco Chen: Prototype implementation of allocator metadata and soft throttle is passing unit tests; integration harness scheduled week of Mar 17.
+2026-03-14 - Aisha Kumar: Enabled feature flag for internal orgs in dedicated-staging; observed initial degradations being applied to best-effort tenants as expected.
+Pre-release note to enterprise customers describing new safeguard behavior and how to declare throughput SLAs.
+Support KB: explanation of X-Backpressure header and recommended client SDK handling patterns.
+Post-deploy: summary email for customers who experienced degradation events with links to incident dashboards.
+Follow-ups: integrate with billing to convert declared throughput into optional reserved capacity purchase.
+Consider long-term: kernel-level NIC pacing or hardware QoS cooperations for better enforcement in multi-tenant hosts.

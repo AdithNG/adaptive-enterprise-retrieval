@@ -1,0 +1,95 @@
+Pinehaven Retail cold sequence & pilot scribbles
+
+Top-line: Pinehaven is a mid-market omnichannel retailer (170 stores + online), mid-Atlantic focus, strong seasonal volumes. Probable pain: high customer service ticket volume around order status + returns; existing chat vendor (Zendesk chat + rule-based bot) expensive and high deflection gap.
+
+Goal: Fast pilot that (a) demonstrates latency and cost advantage vs current setup, (b) reduces CS contacts for order/return flows by 20–30%, (c) shows quantifiable token/unit economics with Redwood Optimize recommendations.
+
+Quick facts pulled from public sources & call notes:
+- HQ: Richmond, VA. Founded 2008. Revenue est. $220M–$350M.
+- Tech stack: Shopify Plus backend (rumored), Zendesk for CS, Segment for analytics.
+- Buying signals: recently posted for "Head of Customer Experience" and "VP Ops"; job mentions analytics & automation.
+- Current vendor: Zendesk Guide + in-house macros for agents.
+
+Stakeholders (mapped to personas):
+- Head of CX / VP Ops (Jordan Keller) — cares about deflection rate, SLA adherence, agent cost, and CS headcount curve.
+- Director, Omnichannel (Priya Rao) — cares about consistent experience across web/chat/in-store; wary of brand tone.
+- CTO / Head of Infra (Marco Santini) — data security, compliance, private deployment possibility (VPC), and latency.
+- Product Manager (Alicia: commerce/product) — cares about upsell/cross-sell conversion from chat and cart recovery.
+
+Primary value props to lead with:
+1) Production-grade latency: sub-300ms token pipeline with Redwood serving runtime for the most common order-status flows — translates to faster chat responses and happier customers.
+2) Cost predictability: show monthly cost modeling for token volumes + recommendations from Redwood Optimize (batching + caching) to reduce per-query cost vs their current per-ticket agent cost.
+3) Quality + control: ability to pin model versions and roll out via canary; private deployment option for PII-sensitive flows (order numbers, addresses).
+4) Quick pilot w/ measurable KPI: deflection %, avg handle time saved, # of escalations prevented.
+
+Pilot hypothesis and scope (minimum viable pilot):
+- Scope: implement Redwood hosted or dedicated endpoint for 3 intents: order status, returns initiation, and shipping ETA. Integrate via Zendesk webhook or small middleware to intercept chat messages.
+- Duration: 6 weeks (2 weeks integration + training, 4 weeks live A/B with 10% traffic).
+- Success metrics: 20%+ deflection (self-serve resolution), 15% decrease in AHT for agent-handled tickets, 90%+ intent accuracy on curated prompt set.
+- Rollout trigger: if deflection >= 20% and NPS impact neutral/positive, expand to 25% traffic in next phase.
+
+Outbound email sequence (cold + follow ups) — raw drafts (tone: consultative, engineering-savvy):
+Email 1 (subject: "Quick idea to cut CS tickets for Pinehaven checks"):
+Hey Jordan — saw Pinehaven’s recent job posting for Head of CX and wanted to reach out with a quick idea. We helped a similar omni retailer move common order/return questions from agents to a lightweight, self-serve flow that cut chat ticket volume 28% in the first month.
+Would you be open to a 15-min call next week to share the playbook and a simple pilot plan? No vendor lock, quick demo.
+— Maya
+
+Email 2 follow-up (3 days) (subject: short: "Pilot idea — 15 minutes?"):
+Jordan — circling back. If now isn’t the right person, can you point me to who owns chat/automation? I can tailor a one-pager for them.
+
+Email 3 (7 days later) (subject: "2-minute pilot summary attached"):
+Attach: 1-slide with KPI targets + cost model. Quick ask: 15 mins.
+
+LinkedIn connect + short note (if email fails):
+LinkedIn note: "Jordan — Maya from Redwood Inference. Built a short pilot for retailers to cut chat tickets by ~25% — happy to share a one-pager if relevant."
+
+Cold call script bullets (10–15s intro):
+- Intro: Maya at Redwood — we run inference for LLMs (hosted/dedicated/private).
+- Value: quick pilot to reduce order/return contacts and show cost savings vs agent FTE.
+- Ask: 15-min intro or point me to head of CX/ops.
+
+Objection handling (quick snips):
+Objection: "We already have a chatbot"
+- Reply: Got it — most chatbots are rule-based and fail on edge phrasing. We augment existing bots (no rip-and-replace) and measure deflection + fallback rates. Pilot can run behind the scenes for limited intents.
+Objection: "Security / PII concerns"
+- Reply: We can run the pilot on Redwood Private (VPC) or provision a Dedicated pool to keep data in your VPC/KMS; show audit logs. Start with non-sensitive intents while we validate.
+Objection: "Too expensive / vendor sprawl"
+- Reply: Pilot budget is intentionally small (engineering hours + short-term token commit). We provide a cost model vs agent cost per ticket; in previous pilots 3–5x ROI within a quarter.
+
+Notes for the demo / internal prep (what to bring):
+- 6 example chat transcripts for each intent (order status, returns, shipping ETA). Use to seed prompt set and evaluation.
+- Baseline metrics from Zendesk: ticket volumes, current deflection rate, SLA targets, avg handle time.
+- Access ask: read-only Zendesk API key (or webhook) for 2-week pilot; if not possible, we run a sidecar that ingests logs.
+- Engineering touch: 2 engineer-days for initial integration (middleware + routing).
+
+Playbook / technical approach (high level):
+1) Ingest 200–500 transcripts and map intents + examples.
+2) Build small routing rules to surface 3 intents to Redwood endpoint.
+3) Use Redwood Optimize to recommend batching, KV cache for common prefixes (order numbers), and a quantization profile if using Dedicated to reduce GPU memory.
+4) Canary: 10% traffic for 4 weeks, collect metrics + human evals.
+
+Measurement & evaluation plan (how we prove impact):
+- Weekly dashboard with: deflection rate (per intent), # of escalations, avg reply latency, token cost per resolved ticket, agent handle time change.
+- Qualitative review: 50 random resolved interactions scored for accuracy and tone.
+
+Open questions / To do (actionable):
+- [ ] Verify tech stack (confirm Shopify Plus). LinkedIn/engineering job posts hinted but need validation. (Ethan to check LinkedIn job reqs + Glassdoor)
+- [ ] Pull sample transcripts from Zendesk (ask for 6–12 examples now). (Maya to ask in intro)
+- [ ] Prepare 1-slide pilot one-pager and 1-page cost model (Noah). Target to send with Email 3. Due: 2026-03-10.
+- [ ] Identify legal/privacy guardrails for PII in pilot — loop in security to confirm VPC options. (Marco / SRE contact).
+
+Meeting request template (for calendar invite if they accept):
+15-min intro agenda:
+- 3 mins: quick intros & current painpoints
+- 6 mins: pilot concept + metrics we track
+- 4 mins: integration ask & timeline
+- 2 mins: next steps
+
+Quick laminate of real numbers to show in pitch (examples we can cite):
+- Peer retailer pilot: 28% ticket deflection in 30 days; avg handle time for escalations reduced 17%.
+- Example cost model: 10k chats/month * 1.2k tokens/chat avg = 12M tokens -> Redwood hosted w/ batching/cache cuts per-resolved cost by ~45% vs naive API approach (numbers illustrative; include final model in one-pager).
+
+Closing thought / voice memo summary:
+- Keep ask very small: 15 minutes, show one-pager, request 6 transcripts. Focus pilots on order/return flows that are high-frequency + low-risk. Use Private/Dedicated options only if they ask about PII.
+
+Next steps for me: draft one-pager today, send Email 1 to Jordan + LinkedIn connect tomorrow, sync with Noah on cost model by EOD.

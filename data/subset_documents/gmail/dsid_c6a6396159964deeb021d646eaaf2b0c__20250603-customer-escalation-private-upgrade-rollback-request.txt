@@ -1,0 +1,202 @@
+Escalation: Rollback guarantees + upgrade support coverage for Redwood Private (Cascade Financial Group)
+
+From: Alyssa Chen <alyssa.chen@cascadefg.com>
+To: Markus Klein <markus.klein@redwoodinference.com>
+Cc: Tom Becker <tom.becker@cascadefg.com>, Rachel Kim <rachel.kim@redwoodinference.com>
+Date: Tue, Jun 3, 2025 at 9:12 AM
+Subject: Escalation: rollback guarantees + upgrade support coverage (Redwood Private)
+
+Markus,
+
+We’re preparing our next Redwood Private upgrade in our VPC environment and need written clarity on two items before we’ll schedule the maintenance window:
+
+1) Rollback guarantees: if the upgrade fails (including DB migration issues), can we roll back to the prior version and what is the expected time to restore service? We need something more concrete than “best effort.”
+
+2) Support coverage: we will be doing this in our standard maintenance window (Saturday 1:00–4:00am ET). We need to know if Redwood will have engineering/SRE coverage during the window, and what escalation path exists if rollback is required.
+
+We’ve had issues with other vendors where “rollback” meant “rebuild the cluster,” which is not acceptable for us.
+
+Please respond by EOD Thursday so we can confirm the window with our change advisory board.
+
+Thanks,
+Alyssa
+
+—
+Alyssa Chen
+Director, Platform Operations
+Cascade Financial Group
+
+
+
+From: Markus Klein <markus.klein@redwoodinference.com>
+To: Vivek Kulkarni <vivek.kulkarni@redwoodinference.com>, Sean Gallagher <sean.gallagher@redwoodinference.com>, Connor O'Brien <connor.obrien@redwoodinference.com>, Dev Patel <dev.patel@redwoodinference.com>
+Cc: Rachel Kim <rachel.kim@redwoodinference.com>, Rafael Mendes <rafael.mendes@redwoodinference.com>, Naomi Feldman <naomi.feldman@redwoodinference.com>
+Date: Tue, Jun 3, 2025 at 10:01 AM
+Subject: Fwd: Escalation: rollback guarantees + upgrade support coverage (Cascade)
+
+Fwd’ing escalation from Cascade. They’re asking for (a) rollback “guarantees” incl. DB migration failure case and (b) engineering/SRE coverage for Sat 1–4am ET window.
+
+Can you please send:
+- What we can state publicly re: rollback semantics (current GA vs what’s in-flight), and any hard constraints (N-1 only, schema migration caveats).
+- What support coverage we can commit to for this specific window (named SRE? on-call bridge? limitations).
+
+They’re asking for response by Thu EOD.
+
+Markus
+
+—
+Markus Klein
+Solutions Engineering
+Redwood Inference
+
+
+
+From: Sean Gallagher <sean.gallagher@redwoodinference.com>
+To: Markus Klein <markus.klein@redwoodinference.com>
+Cc: Vivek Kulkarni <vivek.kulkarni@redwoodinference.com>, Connor O'Brien <connor.obrien@redwoodinference.com>, Dev Patel <dev.patel@redwoodinference.com>, Rachel Kim <rachel.kim@redwoodinference.com>, Rafael Mendes <rafael.mendes@redwoodinference.com>
+Date: Tue, Jun 3, 2025 at 10:47 AM
+Subject: Re: Fwd: Escalation: rollback guarantees + upgrade support coverage (Cascade)
+
+For support coverage:
+
+- We can offer “upgrade window coverage” as a planned event: open an internal incident bridge at start of window, have SRE on-call (Rafael) + one release eng point (Connor or Devon) on standby.
+- For a Sat 1–4am ET window, we can commit to: ack within 15 minutes on the bridge + continuous coverage until upgrade completes or rollback is confirmed.
+- If they want this as a contractual commitment, it needs to be captured as a paid premium support addendum / named escalation path, but for this upcoming window we can do it as a one-off (assuming 48h notice and precheck outputs shared beforehand).
+
+I’d avoid using the word “guarantee” on RTO/RPO. We can give typical timings and what determines rollback time (snapshot restore vs logical restore).
+
+Sean
+
+—
+Sean Gallagher
+SRE Lead
+Redwood Inference
+
+
+
+From: Vivek Kulkarni <vivek.kulkarni@redwoodinference.com>
+To: Markus Klein <markus.klein@redwoodinference.com>
+Cc: Sean Gallagher <sean.gallagher@redwoodinference.com>, Connor O'Brien <connor.obrien@redwoodinference.com>, Dev Patel <dev.patel@redwoodinference.com>, Rachel Kim <rachel.kim@redwoodinference.com>, Naomi Feldman <naomi.feldman@redwoodinference.com>
+Date: Tue, Jun 3, 2025 at 11:26 AM
+Subject: Re: Fwd: Escalation: rollback guarantees + upgrade support coverage (Cascade)
+
+On rollback semantics (what we can say today):
+
+- Supported upgrade path is N-1 → N for Redwood Private. We do not currently support skipping major versions without a review.
+- Rollback is supported to the previously running version provided:
+  (a) the upgrade hasn’t crossed a non-reversible schema boundary, and
+  (b) the recommended backups/snapshots were taken before applying migrations.
+- Our current guidance: take a pre-upgrade backup of the control-plane DB + config state; if on EBS/CSI, take a volume snapshot; if managed DB, take a point-in-time snapshot.
+- For migration failures: we run migrations with guardrails (lock timeouts, idempotent steps), but in the event of a failure we can roll back application components immediately and then restore DB to the pre-upgrade snapshot.
+
+What I’d like to avoid: “guaranteeing” a fixed rollback time without knowing their storage/backend. We can give a typical range and define prerequisites (snapshot ready, prechecks clean, artifacts available).
+
+If helpful, we can offer a rollback drill in staging prior to prod.
+
+Vivek
+
+—
+Vivek Kulkarni
+Product, Private Deployments
+Redwood Inference
+
+
+
+From: Naomi Feldman <naomi.feldman@redwoodinference.com>
+To: Markus Klein <markus.klein@redwoodinference.com>
+Cc: Vivek Kulkarni <vivek.kulkarni@redwoodinference.com>, Sean Gallagher <sean.gallagher@redwoodinference.com>, Connor O'Brien <connor.obrien@redwoodinference.com>, Dev Patel <dev.patel@redwoodinference.com>, Rachel Kim <rachel.kim@redwoodinference.com>
+Date: Tue, Jun 3, 2025 at 12:05 PM
+Subject: Re: Fwd: Escalation: rollback guarantees + upgrade support coverage (Cascade)
+
+Two notes for the written response:
+
+1) Please avoid hard “guarantees” unless it’s in their contract. Use “supported rollback procedure” and “expected restoration time is typically X–Y given prerequisites.”
+
+2) Since they’re regulated, mention auditability: we can provide an upgrade report (precheck results, timestamps for backup start/complete, and change summary). If they require SIEM evidence, we can provide audit log entries for upgrade start/stop + rollback invocation in our newer Private releases (verify what version they are on / targeting).
+
+Naomi
+
+—
+Naomi Feldman
+Security/Compliance Product Reviewer
+Redwood Inference
+
+
+
+From: Markus Klein <markus.klein@redwoodinference.com>
+To: Connor O'Brien <connor.obrien@redwoodinference.com>, Sean Gallagher <sean.gallagher@redwoodinference.com>, Vivek Kulkarni <vivek.kulkarni@redwoodinference.com>
+Cc: Rachel Kim <rachel.kim@redwoodinference.com>, Dev Patel <dev.patel@redwoodinference.com>, Naomi Feldman <naomi.feldman@redwoodinference.com>, Rafael Mendes <rafael.mendes@redwoodinference.com>
+Date: Wed, Jun 4, 2025 at 9:18 AM
+Subject: Draft response to Cascade (rollback + support coverage)
+
+All — draft below. Please reply with edits/approvals. If no objections by 2pm PT I’ll send.
+
+---
+Alyssa,
+
+Thanks — understood on the need for operational clarity.
+
+Rollback (supported procedure)
+- For Redwood Private, we support in-place upgrades on the supported path (N-1 → N). As part of the upgrade workflow, Redwood requires a pre-upgrade backup/snapshot of the control-plane database and configuration state.
+- If an upgrade fails (including during database migrations), the supported remediation is:
+  1) stop/roll back the application components to the prior running version, and
+  2) restore the control-plane database from the pre-upgrade snapshot (if migrations were applied and need to be reverted).
+- In environments with pre-upgrade snapshots in place, service restoration is typically on the order of tens of minutes. Exact timing depends on the snapshot mechanism (managed DB PITR vs volume snapshot) and the size of the database.
+
+Upgrade window support coverage
+- We can staff your planned maintenance window (Sat 1:00–4:00am ET) with Redwood support + SRE escalation.
+- Proposed plan: you share precheck outputs and the target version 48 hours prior; we open a live bridge at the start of the window; Redwood SRE/release escalation is available throughout until completion or rollback confirmation.
+
+Auditability
+- We can provide an upgrade report containing precheck results and timestamps for backup/upgrade steps. If required, we can also provide audit log entries that reflect upgrade start/stop and rollback invocation (version dependent).
+
+If you’d like, we can also run a rollback drill in a non-production environment prior to the production change window.
+
+---
+
+Markus
+
+
+
+From: Markus Klein <markus.klein@redwoodinference.com>
+To: Alyssa Chen <alyssa.chen@cascadefg.com>
+Cc: Tom Becker <tom.becker@cascadefg.com>, Rachel Kim <rachel.kim@redwoodinference.com>
+Bcc: Dev Patel <dev.patel@redwoodinference.com>
+Date: Wed, Jun 4, 2025 at 4:38 PM
+Subject: Re: Escalation: rollback guarantees + upgrade support coverage (Redwood Private)
+Attachments: Redwood-Private-Upgrade-Rollback-Guidance-DRAFT-2025-06-04.pdf (application/pdf)
+
+Alyssa,
+
+Thanks — understood on the need for operational clarity before you take this to CAB.
+
+Rollback (supported procedure)
+- For Redwood Private, we support in-place upgrades on the supported path (N-1 → N). As part of the upgrade workflow, we require a pre-upgrade backup/snapshot of the control-plane database and configuration state.
+- If an upgrade fails (including during database migrations), the supported remediation is:
+  1) roll back the application components to the prior running version, and
+  2) restore the control-plane database from the pre-upgrade snapshot if migrations were applied and need to be reverted.
+- With pre-upgrade snapshots in place, service restoration is typically on the order of tens of minutes. Exact timing depends on your snapshot mechanism (managed DB PITR vs volume snapshot) and the size of the database.
+
+Upgrade window support coverage
+- We can staff your planned maintenance window (Sat 1:00–4:00am ET) with Redwood support and SRE escalation.
+- To do so safely, we ask that you share the target version and precheck outputs at least 48 hours prior. We’ll open a live bridge at the start of the window and maintain coverage until completion or rollback is confirmed.
+
+Auditability
+- We can provide an upgrade report containing precheck results and timestamps for backup/upgrade steps. Where enabled for the version you’re running/targeting, we can also provide audit log entries reflecting upgrade start/stop and rollback invocation.
+
+I’ve attached a short draft guidance PDF you can use for your internal change record; we can tailor it to your exact DB/snapshot approach if you confirm which backend you’re using.
+
+If helpful, we can also run a rollback drill in a non-production environment prior to the production window.
+
+Can you confirm:
+1) current Private version and target version,
+2) database backend (RDS/Postgres in-cluster/etc.), and
+3) whether the window is firm at Sat 1:00am ET?
+
+Markus
+
+—
+Markus Klein
+Solutions Engineering
+Redwood Inference
+markus.klein@redwoodinference.com

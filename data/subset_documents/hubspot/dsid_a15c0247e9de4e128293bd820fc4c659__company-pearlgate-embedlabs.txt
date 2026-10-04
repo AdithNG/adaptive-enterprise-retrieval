@@ -1,0 +1,12 @@
+PearlGate Embed Labs
+
+CRM snippets + rep notes. Mid-market SaaS, product team building a contextual search layer for their docs + support chat. Current stack: Postgres for metadata, S3 for raw docs, they plan to use Pinecone (trial) but open to integrating Redwood's routing + batch embed generation. Key ask: reliable nightly batch job (5M documents/month, incremental delta) + on-demand embeddings for user queries. Throughput targets: embedding throughput ~400 qps peak during batch windows (they plan parallel workers), semantic search end-to-end latency target <150ms for top-10 retrieval + re-rank. Cost-sensitive: prefer a Dedicated committed capacity plan if unit economics beat hosted at scale. Want clear per-route token cost breakdowns in Console. Security: SOC2 required, SSO/SAML for engineering/admins, KMS for key management, audit logs retained 1 year (customer-facing compliance). Data residency: majority NA but 15% EU customers — asks whether Dedicated can pin region or require VPC peering to EU region. Model preferences: Open Llama-style quantized variants for cost, but want Redwood-verified performance profile before committing. 
+2025-10-07: Intro call (AE Sofia) — product overview, quick fit (embeddings + semantic search)
+2025-11-12: Hosted API demo — evaluated streaming vs batch endpoints, initial latency numbers using small dataset
+2026-01-20: Security call with infra (asked for SOC2 + SSO details, KMS options) — linked Drive FAQ
+2026-02-08: Pricing and capacity conversation (requested committed nodes pricing vs pay-as-you-go)
+2026-03-01: Architecture deep-dive with SE (Daniel) — ingestion pipeline, vector DB choices, batching strategy; agreed on POC scope
+Run 2-week Dedicated POC (ingest + query load test), deliver sizing + 12-mo pricing
+Legal DPA review (data residency clauses)
+Procurement needs 3rd vendor quote
+SRE needs load test script for nightly batch

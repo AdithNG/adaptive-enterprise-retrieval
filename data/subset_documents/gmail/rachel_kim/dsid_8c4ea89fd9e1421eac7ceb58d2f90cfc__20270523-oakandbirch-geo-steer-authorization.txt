@@ -1,0 +1,89 @@
+Oak & Birch — sustained tail latency and 502s; geo-steer authorization request
+
+From: Evan Cole <evan.cole@oakandbirch.io>
+To: rachel.kim@redwood.ai
+Cc: marissa.cole@redwood.ai
+Date: Sun, 23 May 2027 09:12:00 -0700
+Subject: Re: Production alerts — sudden p99 latency + 502s
+
+Rachel —
+
+We started seeing a steady rise in tail latency and intermittent 502/502 bursts for our API traffic hitting your us-west-2 fabric starting ~08:45 PDT. Impact is visible on our web checkout and API endpoints (p95 is OK, p99 spiking to ~4.8s and 502s around 1.2% of requests). Our customers are reporting timeouts.
+
+Attached are a short sample of logs and a screenshot from our synthetic monitoring run. We haven’t redeployed anything on our side and there were no traffic pattern changes. Can Redwood do a temporary geo-steer off us-west-2 to us-east-2 while you investigate? We need something in the next 20–30 minutes to avoid the promotion window at 10:00 PDT.
+
+We’re open to a canary first then full steer. Please advise expected impact on latency and whether this will count toward our credits / SLA conversation.
+
+— Evan
+Evan Cole
+Head of Platform, Oak & Birch
+ops@oakandbirch.io
+
+Attachments: oak_logs_sample_20270523.log (text), latency-screenshot-502s.png (image)
+From: Rachel Kim <rachel.kim@redwood.ai>
+To: Evan Cole <evan.cole@oakandbirch.io>
+Cc: Marissa Cole <marissa.cole@redwood.ai>, Hannah Schmitt <hannah.schmitt@redwood.ai>
+Date: Sun, 23 May 2027 09:30:12 -0700
+Subject: Re: Production alerts — sudden p99 latency + 502s
+
+Evan — thanks for the heads up and attaching the samples. I’m escalating to our on-call operations and infra teams now.
+
+Immediate plan (proposed):
+- Ops (Hannah) to run a 10% canary geo-steer to us-east-2 for affected routes (literal route: /api/v1/orders) within the next 10 minutes.
+- Observe error rate and tail latency for 15 minutes; if stable, ramp to 100%.
+- Infra (Markus) to parallel debug the us-west-2 fleet (kernel evictions, queue depth, GPU hot nodes).
+
+If we need to do a cross-region reroute that increases egress/cost or requires SLA exceptions, I’ll request exec authorization now and keep you posted. I will share ETA within 10 minutes.
+
+I’ll start the canary once ops confirms readiness.
+
+— Rachel
+Rachel Kim
+Account Executive, Redwood Inference
+rachel.kim@redwood.ai
+Phone: +1 415-555-0192
+From: Rachel Kim <rachel.kim@redwood.ai>
+To: Markus Klein <markus.klein@redwood.ai>, Vanessa Ortiz <vanessa.ortiz@redwood.ai>, Hannah Schmitt <hannah.schmitt@redwood.ai>
+Cc: Marissa Cole <marissa.cole@redwood.ai>
+Date: Sun, 23 May 2027 09:36:45 -0700
+Subject: URGENT: Oak & Birch — request exec authorization for cross-region steer and potential goodwill credit
+
+Team — forwarding Oak & Birch’s alert (below). Ops has confirmed they can start a 10% canary to us-east-2 immediately. Initial canary will route ~10% of their /api/v1/orders traffic and will be monitored for p99 and 502 rate.
+
+Why I need you:
+- Risk: Full reroute to us-east-2 will increase their egress and may touch reserved capacity commitments; if we exceed committed burst allowances it could incur month-to-month cost adjustments.
+- Customer impact: This customer is in the middle of a promotion (high revenue window) and they have severe user experience impact now.
+- Ask: Executive sign-off to proceed with a phased geo-steer to us-east-2 (10% -> 50% -> 100% over 30m) if canary looks good, and pre-approval to offer a one-time 10% invoice credit if we confirm the root cause is on our platform.
+
+Notes from Ops (Hannah):
+- Can run the canary at 09:40 PDT; telemetry hooks and synthetic checks are in place.
+- If canary shows lower p99 and error rate, ramping to 100% is expected to take ~20–30 minutes.
+
+Potential downsides: brief cache warm-up causing slight latency increase for cold sessions, and cost delta for inter-region egress until rollback.
+
+I’ve attached the logs and screenshot Oak & Birch provided. Related ticket: Jira SUP-4521.
+
+Please reply-all with APPROVE / DECLINE and any edits to the plan. My recommended text to the customer on approval: "We will initiate a monitored canary steer to us-east-2 immediately and keep you updated every 10 minutes. If root cause is on our side we will apply a one-time credit."
+
+— Rachel
+From: Marissa Cole <marissa.cole@redwood.ai>
+To: Rachel Kim <rachel.kim@redwood.ai>, Markus Klein <markus.klein@redwood.ai>, Hannah Schmitt <hannah.schmitt@redwood.ai>, Vanessa Ortiz <vanessa.ortiz@redwood.ai>
+Date: Sun, 23 May 2027 10:05:00 -0700
+Subject: Re: URGENT: Oak & Birch — request exec authorization for cross-region steer and potential goodwill credit
+
+APPROVE — proceed with the staged geo-steer immediately.
+
+Operational guidance:
+- Hannah: start the 10% canary now, validate p99 and 502 drop for 15 minutes. If green, ramp to 50% then 100% while maintaining an open bridge.
+- Markus: prioritize investigation on us-west-2 fleet (GPU throttles / kernel OOM / queue saturation). If you find a platform regression, flag Finance for a one-time 10% credit and Legal for any contract notes.
+- Rachel: notify Oak & Birch with the recommended message and set cadence: 09:40 canary started, updates at +15m and +30m.
+
+Customer comms: please use this message to Evan (slightly edited):
+"Evan — we’ve initiated a monitored 10% canary steer to us-east-2 for your /api/v1/orders traffic. We’ll observe for 15 minutes and, if stable, ramp to 100% over the next 20–30 minutes. We will keep you updated every 10–15 minutes. If we confirm the root cause is on Redwood’s platform, we will apply a one-time 10% credit to your next invoice."
+
+Keep me posted on the bridge. Thanks — Marissa
+
+— Marissa Cole
+Director, Customer Success, Redwood Inference
+marissa.cole@redwood.ai
+Phone: +1 650-555-0110
