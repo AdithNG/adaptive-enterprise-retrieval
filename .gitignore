@@ -16,3 +16,4 @@ data/processed/*
 !data/processed/.gitkeep
 outputs/*
 !outputs/.gitkeep
+all_documents.zip
