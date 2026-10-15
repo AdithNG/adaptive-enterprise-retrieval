@@ -1,66 +1,153 @@
 # Cost-Aware Adaptive Retrieval for Enterprise Support
 
-Team 13's project investigates whether adaptive retrieval can reduce response
-time and cost while preserving answer quality on enterprise support questions.
-The source proposal is [included in this repository](docs/proposal.pdf).
+Team 13 is exploring whether local retrieval can find useful evidence for
+enterprise support questions. You can try two command-line flows: a tiny
+synthetic keyword demo and interactive or single-query vector search over a checked-in, 100-question
+evaluation subset. Vector search prints ranked source passages, **not a generated
+answer**. Answer generation, adaptive routing, reranking, and evaluation metrics
+are still planned work.
 
-## Current status
+## Before you start
 
-This is a starter skeleton, with shared data contracts, component interfaces,
-an offline keyword-search demo, tests, and CI. The adaptive agent, reranker,
-model integration, benchmark loader, and evaluation runner are planned work.
-Demo results are synthetic search results, not generated answers or benchmark findings.
+- Install [Git](https://git-scm.com/downloads) and Python 3.11 or newer. Python
+  3.11 or 3.12 is recommended for the local embedding dependencies.
+- Open Terminal on macOS or PowerShell on Windows.
+- The commands below run from the repository root. If you already have a clone,
+  skip the `git clone` line and change into that directory.
+- The synthetic demo and tests use only Python's standard library. The vector
+  search needs the packages in [`requirements.txt`](requirements.txt). Installing
+  them and downloading the MiniLM model requires internet access on the first run.
+  No API key is needed.
 
-## Quick start
+## macOS: run it step by step
 
-Use Python 3.11 or newer. From the repository root, these commands work in
-PowerShell, macOS, and Linux without installing dependencies or using API keys:
+```bash
+# 1. Get the project and check Python.
+git clone https://github.com/AdithNG/adaptive-enterprise-retrieval.git
+cd adaptive-enterprise-retrieval
+python3 --version
 
-```sh
-python scripts/demo.py
-python scripts/demo.py "reset password"
-python -m unittest discover -s tests -v
+# 2. Create a virtual environment and install the vector-search dependency.
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+
+# 3. Try the instant, synthetic keyword demo.
+.venv/bin/python src/runner.py demo "reset password"
+
+# 4. Prepare and validate the checked-in 100-question document subset.
+.venv/bin/python src/runner.py prepare-subset
+.venv/bin/python src/runner.py check-subset
+
+# 5. Chunk documents, build the local MiniLM index, and search it.
+.venv/bin/python src/runner.py chunk
+.venv/bin/python src/runner.py embed
+.venv/bin/python src/runner.py search "Medicore operational runbook turnaround timeline"
+.venv/bin/python src/runner.py interactive
+
+# 6. Run the tests.
+.venv/bin/python -m unittest discover -s src/tests -v
 ```
 
-For development, optionally create a virtual environment and install the package:
+## Windows: run it step by step
 
-```sh
-python -m venv .venv
+Run these commands in **PowerShell**:
+
+```powershell
+# 1. Get the project and check Python.
+git clone https://github.com/AdithNG/adaptive-enterprise-retrieval.git
+cd adaptive-enterprise-retrieval
+py -3 --version
+
+# 2. Create a virtual environment and install the vector-search dependency.
+py -3 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+
+# 3. Try the instant, synthetic keyword demo.
+.\.venv\Scripts\python.exe src/runner.py demo "reset password"
+
+# 4. Prepare and validate the checked-in 100-question document subset.
+.\.venv\Scripts\python.exe src/runner.py prepare-subset
+.\.venv\Scripts\python.exe src/runner.py check-subset
+
+# 5. Chunk documents, build the local MiniLM index, and search it.
+.\.venv\Scripts\python.exe src/runner.py chunk
+.\.venv\Scripts\python.exe src/runner.py embed
+.\.venv\Scripts\python.exe src/runner.py search "Medicore operational runbook turnaround timeline"
+.\.venv\Scripts\python.exe src/runner.py interactive
+
+# 6. Run the tests.
+.\.venv\Scripts\python.exe -m unittest discover -s src/tests -v
 ```
 
-Activate with `.venv\Scripts\Activate.ps1` in PowerShell or
-`source .venv/bin/activate` on macOS/Linux, then run `python -m pip install -e .`.
+These commands use the virtual environment's Python directly, so you do not
+need to activate it or change PowerShell's script execution policy. If `py -3`
+selects Python older than 3.11, install a newer Python and select it explicitly
+(for example, replace `py -3` with `py -3.12`).
 
-## Planned pipeline
+## Interactive terminal demo
 
-Question → verified cache lookup → keyword retrieval → reranking → evidence check
-→ grounded answer or one rewritten retrieval attempt → answer or explicit refusal.
+After building the index, start `src/runner.py interactive` with your virtual
+environment's Python (as shown above). Ask as many questions as you like at the
+`Question>` prompt. The index stays in memory, and MiniLM loads on the first
+question and is reused. Each search displays the full retrieved passages with
+similarity scores, document IDs, source paths, and original character offsets.
 
-The cache will need question, context, and corpus-version checks. A retrieval
-score alone must not be treated as proof that an answer is supported.
+```text
+Question> Medicore operational runbook turnaround timeline
+...retrieved source passages...
+Question> /doc 1
+...full source document for the first result...
+Question> /top 5
+Question> What caused the token accounting mismatch?
+Question> /quit
+```
 
-## Repository layout
+Use `/help` for commands, `/doc N` to read a result's original document, and
+`/top N` to change the number of passages shown. `/quit`, `exit`, Ctrl-D, and
+Ctrl-C end the session. The `chat` command is an alias for `interactive`.
+Results quote source text; answer generation and fact verification are still
+planned work. Use `--index`, `--corpus`, or `--top-k` to override defaults.
+
+## What to expect
+
+- `demo` prints a matching synthetic password document immediately. You can
+  replace `"reset password"` with another query. It does not use the evaluation
+  corpus or an embedding model.
+- `prepare-subset` creates `data/processed/subset_questions.jsonl` and
+  `data/processed/subset_corpus.jsonl` from the files committed under
+  `data/subset_documents/`. `check-subset` should finish with
+  `OK: every referenced document is present`.
+- `chunk` writes source-traceable passages to `data/processed/chunks.jsonl`.
+  `embed` downloads `sentence-transformers/all-MiniLM-L6-v2` on first use and
+  writes `data/processed/minilm_index.jsonl`; this step can take several minutes.
+- `search` prints the top passages with a similarity score, source path, and
+  character offsets. Try your own question by replacing the quoted text. It
+  returns evidence for inspection, not a final answer.
+- `interactive` keeps a terminal session open for repeated searches and full
+  source-document inspection.
+- Generated files in `data/processed/` are ignored by Git. You do not need the
+  much larger `data/all_documents/` corpus for this walkthrough.
+
+If you only want the synthetic demo or tests, run those commands with Python
+3.11+ directly and skip the virtual environment and dependency install. If a
+search says the corpus changed, rerun `chunk` and `embed` after `prepare-subset`.
+
+## Project files
 
 | Path | Purpose |
 | --- | --- |
-| `docs/PLAN.md` | Ten-week milestones, six workstreams, evaluation protocol |
-| `src/adaptive_retrieval/models.py` | Shared document, evidence, and result types |
-| `src/adaptive_retrieval/components.py` | Interfaces for future pipeline components |
-| `src/adaptive_retrieval/retrieval.py` | Small in-memory keyword baseline for the demo |
-| `data/sample/` | Synthetic, shareable demo documents |
-| `data/raw/`, `data/processed/` | Local datasets and derived artifacts (ignored) |
-| `scripts/demo.py` | Offline search entry point |
-| `tests/` | Behavioral tests |
-| `outputs/` | Local experiment outputs (ignored) |
+| `src/runner.py` | Entry point for demo, preparation, indexing, and search |
+| `src/adaptive_retrieval/` | Corpus loading, chunking, embedding, and retrieval code |
+| `src/tests/` | Python unit tests |
+| `data/sample/` | Tiny synthetic demo data |
+| `data/subset_documents/` | Committed documents and 100-question file used above |
+| `data/processed/` | Generated local corpus, chunks, model cache, and index |
+| `docs/ARCHITECTURE.md` | Diagram and explanation of the retrieval flow |
+| `docs/PLAN.md` | Project milestones and planned evaluation |
 
-## Working as a team
-
-See [the project plan](docs/PLAN.md) for suggested ownership and
-[CONTRIBUTING.md](CONTRIBUTING.md) for the branch and pull-request workflow.
-Assign actual teammates to the six workstreams together. Keep API keys, private
-company documents, and downloaded benchmark artifacts out of Git.
-
-The benchmark target is a manageable ONYX EnterpriseRAG-Bench subset with at
-least approximately 300 questions and a 70/15/15 development/validation/test
-split. Dataset access and reuse terms still need verification. No dataset or
-model provider has been integrated yet.
+If you have the separate full corpus under `data/all_documents/`, you can run
+`src/runner.py build-subset` with the Python executable used above to
+regenerate the 100-question selection and hard negatives from scratch. That
+command scans the full corpus and takes longer;
+it is not needed to try the project. The current 100-question subset is for
+development and does not yet meet the plan's approximately 300-question target.

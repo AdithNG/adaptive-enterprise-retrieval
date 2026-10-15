@@ -1,0 +1,2 @@
+# Run from the repository root. The optional dependency is defined in pyproject.toml.
+-e .[local-embeddings]

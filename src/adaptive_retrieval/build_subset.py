@@ -4,7 +4,7 @@ Questions are picked per type (round-robin across source types), split
 70/15/15 into dev/val/test within each type, and the corpus is the gold docs
 plus the top BM25 non-gold hits from the full corpus (hard negatives).
 
-Usage: python scripts/build_subset.py [--root all_documents] [--out data/processed]
+Run through ``python src/runner.py build-subset`` from any directory.
 """
 
 import argparse
@@ -16,6 +16,8 @@ from array import array
 from collections import Counter, defaultdict
 from multiprocessing import Pool
 from pathlib import Path
+
+from .paths import FULL_DOCUMENTS_DIR, PROCESSED_DIR
 
 SEED = 13
 QUOTAS = {
@@ -135,11 +137,11 @@ def print_dist(title, counter):
         print(f"  {key:<26}{n:>4}  {n / total:6.1%}")
 
 
-def main():
+def main(argv=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("--root", type=Path, default=Path("all_documents"))
-    parser.add_argument("--out", type=Path, default=Path("data/processed"))
-    args = parser.parse_args()
+    parser.add_argument("--root", type=Path, default=FULL_DOCUMENTS_DIR)
+    parser.add_argument("--out", type=Path, default=PROCESSED_DIR)
+    args = parser.parse_args(argv)
     rng = random.Random(SEED)
 
     questions = [json.loads(l) for l in open(args.root / "questions.jsonl")]
