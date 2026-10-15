@@ -2,10 +2,33 @@
 
 Team 13 is exploring whether local retrieval can find useful evidence for
 enterprise support questions. You can try two command-line flows: a tiny
-synthetic keyword demo and interactive or single-query vector search over a checked-in, 100-question
-evaluation subset. Vector search prints ranked source passages, **not a generated
-answer**. Answer generation, adaptive routing, reranking, and evaluation metrics
-are still planned work.
+synthetic keyword demo and interactive or single-query vector search over a
+checked-in, 100-question evaluation subset. Vector search prints ranked source
+passages, **not a generated answer**. Answer generation, adaptive routing,
+reranking, and evaluation metrics are still planned work.
+
+## Folder preview
+
+```text
+adaptive-enterprise-retrieval/
+├── README.md
+├── requirements.txt
+├── src/
+│   ├── runner.py
+│   └── adaptive_retrieval/
+├── data/
+│   ├── sample/                  # checked-in synthetic demo
+│   ├── subset_documents/       # checked-in 100-question subset documents
+│   ├── all_documents/          # download and extract the full dataset here
+│   │   ├── questions.jsonl     # download separately from the release
+│   │   ├── confluence/
+│   │   ├── gmail/
+│   │   └── ...                 # other source folders
+│   └── processed/              # generated locally by the commands below
+└── docs/
+```
+
+**Full-dataset destination: `data/all_documents/` inside this repository.**
 
 ## Before you start
 
@@ -18,6 +41,44 @@ are still planned work.
   search needs the packages in [`requirements.txt`](requirements.txt). Installing
   them and downloading the MiniLM model requires internet access on the first run.
   No API key is needed.
+
+## Download the full dataset
+
+Get [`all_documents.zip` and `questions.jsonl` from EnterpriseRAG-Bench
+v1.0.0](https://github.com/onyx-dot-app/EnterpriseRAG-Bench/releases/tag/v1.0.0).
+The archive is about 1.17 GB. **Extract its contents into
+`data/all_documents/`**, then put the separately downloaded `questions.jsonl`
+directly in that same folder. Do not leave an extra nested
+`all_documents/all_documents/` directory.
+
+After cloning the project and changing to its root directory, use these commands
+to download and extract the release files on macOS:
+
+```bash
+mkdir -p data/all_documents
+curl -fL https://github.com/onyx-dot-app/EnterpriseRAG-Bench/releases/download/v1.0.0/all_documents.zip -o data/all_documents.zip
+unzip -q data/all_documents.zip -d data/all_documents
+curl -fL https://github.com/onyx-dot-app/EnterpriseRAG-Bench/releases/download/v1.0.0/questions.jsonl -o data/all_documents/questions.jsonl
+ls data/all_documents/questions.jsonl data/all_documents/confluence
+```
+
+Or use PowerShell on Windows:
+
+```powershell
+New-Item -ItemType Directory -Force -Path .\data\all_documents | Out-Null
+Invoke-WebRequest -Uri 'https://github.com/onyx-dot-app/EnterpriseRAG-Bench/releases/download/v1.0.0/all_documents.zip' -OutFile '.\data\all_documents.zip'
+Expand-Archive -LiteralPath '.\data\all_documents.zip' -DestinationPath '.\data\all_documents'
+Invoke-WebRequest -Uri 'https://github.com/onyx-dot-app/EnterpriseRAG-Bench/releases/download/v1.0.0/questions.jsonl' -OutFile '.\data\all_documents\questions.jsonl'
+Test-Path .\data\all_documents\questions.jsonl
+Test-Path .\data\all_documents\confluence
+```
+
+Both PowerShell checks should print `True`. The top level of
+**`data/all_documents/`** should contain `questions.jsonl` and source folders
+such as `confluence/`, `gmail/`, and `slack/`. This full dataset is required for
+`build-subset`. The step-by-step demo below can use the smaller
+`data/subset_documents/` files already committed to Git. Keep the downloaded
+dataset local; Git ignores `data/all_documents/` and `data/all_documents.zip`.
 
 ## macOS: run it step by step
 
