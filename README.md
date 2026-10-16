@@ -1,11 +1,12 @@
 # Cost-Aware Adaptive Retrieval for Enterprise Support
 
 Team 13 is exploring whether local retrieval can find useful evidence for
-enterprise support questions. You can try two command-line flows: a tiny
-synthetic keyword demo and interactive or single-query vector search over a
-checked-in, 100-question evaluation subset. Vector search prints ranked source
-passages, **not a generated answer**. Answer generation, adaptive routing,
-reranking, and evaluation metrics are still planned work.
+enterprise support questions. You can try three command-line flows: a tiny
+synthetic keyword demo, interactive or single-query vector search over a
+checked-in, 100-question evaluation subset, and a retrieval evaluation that
+scores that search on every labeled question (Hit@5 and MRR). Vector search
+prints ranked source passages, **not a generated answer**. Answer generation,
+adaptive routing, reranking, and answer-quality metrics are still planned work.
 
 ## Folder preview
 
@@ -25,6 +26,7 @@ adaptive-enterprise-retrieval/
 │   │   ├── gmail/
 │   │   └── ...                 # other source folders
 │   └── processed/              # generated locally by the commands below
+├── results/                    # retrieval evaluation runs, one folder per run
 └── docs/
 ```
 
@@ -105,7 +107,10 @@ python3 -m venv .venv
 .venv/bin/python src/runner.py search "Medicore operational runbook turnaround timeline"
 .venv/bin/python src/runner.py interactive
 
-# 6. Run the tests.
+# 6. Score retrieval on all 100 questions and save the results.
+.venv/bin/python src/runner.py evaluate
+
+# 7. Run the tests.
 .venv/bin/python -m unittest discover -s src/tests -v
 ```
 
@@ -136,7 +141,10 @@ py -3 -m venv .venv
 .\.venv\Scripts\python.exe src/runner.py search "Medicore operational runbook turnaround timeline"
 .\.venv\Scripts\python.exe src/runner.py interactive
 
-# 6. Run the tests.
+# 6. Score retrieval on all 100 questions and save the results.
+.\.venv\Scripts\python.exe src/runner.py evaluate
+
+# 7. Run the tests.
 .\.venv\Scripts\python.exe -m unittest discover -s src/tests -v
 ```
 
@@ -186,6 +194,16 @@ planned work. Use `--index`, `--corpus`, or `--top-k` to override defaults.
   returns evidence for inspection, not a final answer.
 - `interactive` keeps a terminal session open for repeated searches and full
   source-document inspection.
+- `evaluate` searches every question and checks where its correct document
+  (`expected_doc_ids`) ranks. Chunks are collapsed to documents, ranked by each
+  document's best chunk. It prints two scores over the 90 questions that have a
+  correct document: **Hit@5**, the share with the correct document in the top 5,
+  and **MRR**, the mean of 1 / rank. The current baseline is Hit@5 = 0.844 and
+  MRR = 0.670. The 10 `info_not_found` questions are saved but not scored. Each
+  run writes `per_question.jsonl` (rank, scores, and top 5 documents per
+  question) and `summary.json` (metrics, git commit, and index settings) to
+  `results/retrieval_eval_<timestamp>/`. Use `--questions`, `--index`, or
+  `--out-dir` to override defaults.
 - Generated files in `data/processed/` are ignored by Git. You do not need the
   much larger `data/all_documents/` corpus for this walkthrough.
 
@@ -197,12 +215,13 @@ search says the corpus changed, rerun `chunk` and `embed` after `prepare-subset`
 
 | Path | Purpose |
 | --- | --- |
-| `src/runner.py` | Entry point for demo, preparation, indexing, and search |
+| `src/runner.py` | Entry point for demo, preparation, indexing, search, and evaluation |
 | `src/adaptive_retrieval/` | Corpus loading, chunking, embedding, and retrieval code |
 | `src/tests/` | Python unit tests |
 | `data/sample/` | Tiny synthetic demo data |
 | `data/subset_documents/` | Committed documents and 100-question file used above |
 | `data/processed/` | Generated local corpus, chunks, model cache, and index |
+| `results/` | Saved retrieval evaluation runs from `evaluate` |
 | `docs/ARCHITECTURE.md` | Diagram and explanation of the retrieval flow |
 | `docs/PLAN.md` | Project milestones and planned evaluation |
 

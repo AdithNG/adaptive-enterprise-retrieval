@@ -9,8 +9,11 @@ from adaptive_retrieval.chunking import (
 )
 from adaptive_retrieval.data import DEFAULT_CORPUS, load_documents
 from adaptive_retrieval.embedding import MiniLMEmbedder
+from adaptive_retrieval.evaluate import format_summary, run_evaluation
 from adaptive_retrieval.interactive import SearchSession, run_interactive
-from adaptive_retrieval.paths import FULL_DOCUMENTS_DIR, PROCESSED_DIR, SUBSET_DOCUMENTS_DIR
+from adaptive_retrieval.paths import (
+    FULL_DOCUMENTS_DIR, PROCESSED_DIR, RESULTS_DIR, SUBSET_DOCUMENTS_DIR,
+)
 from adaptive_retrieval.vector_index import file_sha256, write_index
 
 
@@ -55,6 +58,14 @@ def create_parser() -> argparse.ArgumentParser:
     search.add_argument("--index", type=Path, default=DEFAULT_INDEX)
     search.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     search.add_argument("--top-k", type=int, default=5)
+
+    evaluate = commands.add_parser(
+        "evaluate", help="Score document retrieval on every labeled question and save results"
+    )
+    evaluate.add_argument("--questions", type=Path, default=PROCESSED_DIR / "subset_questions.jsonl")
+    evaluate.add_argument("--index", type=Path, default=DEFAULT_INDEX)
+    evaluate.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
+    evaluate.add_argument("--out-dir", type=Path, default=RESULTS_DIR)
 
     interactive = commands.add_parser(
         "interactive", aliases=["chat"], help="Ask repeated questions and inspect source documents"
@@ -120,6 +131,11 @@ def main(argv: list[str] | None = None) -> None:
                 source = chunk.path or chunk.source
                 print(f"{chunk.id} | cosine={score:.3f} | {source} | chars {chunk.start_char}:{chunk.end_char}")
                 print(chunk.text[:350].replace("\n", " "))
+        elif args.command == "evaluate":
+            session = SearchSession(args.index, args.corpus)
+            run_dir, summary = run_evaluation(session, args.questions, args.out_dir)
+            print(format_summary(summary))
+            print(f"\nSaved per-question results and summary: {run_dir}")
         elif args.command in {"interactive", "chat"}:
             session = SearchSession(args.index, args.corpus)
             run_interactive(session, args.top_k)
