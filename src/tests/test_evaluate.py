@@ -1,15 +1,18 @@
 import sys
 from pathlib import Path
 import unittest
+import tempfile
+import json
 from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from adaptive_retrieval.evaluate import evaluate_question, grouped_metrics, summarize_records
+from adaptive_retrieval.evaluate import evaluate_question, grouped_metrics, summarize_records, run_evaluation
 
 
 class FakeSession:
     rows = [1, 2, 3]
+    metadata = {"model": "test-only"}
 
     def search(self, question, top_k):
         return [(SimpleNamespace(document_id=doc, id=str(i)), 1 - i / 10)
@@ -47,6 +50,20 @@ class EvaluationTests(unittest.TestCase):
     def test_empty_summary(self):
         self.assertIsNone(summarize_records([])["p95_retrieval_latency_ms"])
         self.assertEqual(grouped_metrics([], "split"), {})
+
+    def test_saved_run_matches_question_records(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            questions = root / "questions.jsonl"
+            questions.write_text(json.dumps(self.question(["gold"])) + "\n", encoding="utf-8")
+            run_dir, summary = run_evaluation(FakeSession(), questions, root / "results")
+            saved = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+            self.assertEqual(saved, summary)
+            self.assertEqual(saved["by_split"]["dev"]["mrr"], .5)
+            self.assertEqual(saved["scored"], 1)
+            self.assertIn("python", saved["run"]["runtime"])
+            record = json.loads((run_dir / "per_question.jsonl").read_text(encoding="utf-8"))
+            self.assertEqual(record["gold_rank"], 2)
 
 
 if __name__ == "__main__":

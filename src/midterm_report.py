@@ -6,6 +6,7 @@ from pathlib import Path
 
 from adaptive_retrieval.data import load_documents
 from adaptive_retrieval.evaluate import grouped_metrics, summarize_records
+from adaptive_retrieval.vector_index import file_sha256
 
 
 def main():
@@ -15,6 +16,8 @@ def main():
     args = parser.parse_args()
     records = [json.loads(line) for line in (args.run / "per_question.jsonl").read_text(encoding="utf-8").splitlines() if line.strip()]
     summary = json.loads((args.run / "summary.json").read_text(encoding="utf-8"))
+    if file_sha256(args.corpus) != summary["run"]["index"]["corpus_sha256"]:
+        parser.error("Corpus differs from the evaluated corpus; use the original corpus for examples.")
     docs = {doc.id: doc for doc in load_documents(args.corpus)}
     overall = summarize_records(records)
     lines = ["# Midterm evidence brief", "", 
