@@ -1,5 +1,7 @@
 # Cost-Aware Adaptive Retrieval for Enterprise Support
 
+Midterm preparation: see the [reproduced results and experiment protocol](docs/MIDTERM.md).
+
 Team 13 is exploring whether local retrieval can find useful evidence for
 enterprise support questions. You can try three command-line flows: a tiny
 synthetic keyword demo, interactive or single-query vector search over a

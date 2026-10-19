@@ -1,0 +1,119 @@
+{
+  "run": {
+    "timestamp_utc": "2026-10-19T02:35:03+00:00",
+    "git_commit": "930cad6ed7de3a1ba2f6385a3009fd92168ad174",
+    "questions_path": "C:\\Users\\adith\\Desktop\\544\\Project\\adaptive-enterprise-retrieval\\data\\processed\\subset_questions.jsonl",
+    "questions_sha256": "6201031b8a65b1a4f5f4ded00cf5fc89303b438b4f95de7d64ee556643c30fec",
+    "index": {
+      "schema_version": 1,
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "corpus_sha256": "337cc62f4edd9aad7f12e2750a0a023217b2618793920b6bc1bb79b18c89b194",
+      "strategy": "paragraph",
+      "max_words": 120,
+      "overlap_words": 20,
+      "chunk_count": 3358
+    },
+    "runtime": {
+      "python": "3.12.3",
+      "platform": "Windows-11-10.0.26100-SP0",
+      "sentence-transformers": "6.1.0",
+      "transformers": "5.20.1",
+      "torch": "2.14.1",
+      "numpy": "2.5.4",
+      "tokenizers": "0.23.3"
+    }
+  },
+  "questions": 100,
+  "scored": 90,
+  "unscored": 10,
+  "hit@1": 0.5444444444444444,
+  "hit@5": 0.8444444444444444,
+  "mrr": 0.670343487441681,
+  "mean_retrieval_latency_ms": 359.0893989993492,
+  "p95_retrieval_latency_ms": 292.9995999438688,
+  "by_split": {
+    "dev": {
+      "questions": 69,
+      "scored": 62,
+      "unscored": 7,
+      "hit@1": 0.5161290322580645,
+      "hit@5": 0.8387096774193549,
+      "mrr": 0.6554928788499715,
+      "mean_retrieval_latency_ms": 403.15237681236306,
+      "p95_retrieval_latency_ms": 304.5194000005722
+    },
+    "test": {
+      "questions": 16,
+      "scored": 15,
+      "unscored": 1,
+      "hit@1": 0.4666666666666667,
+      "hit@5": 0.8,
+      "mrr": 0.588917748917749,
+      "mean_retrieval_latency_ms": 263.21641249523964,
+      "p95_retrieval_latency_ms": 316.44570000935346
+    },
+    "val": {
+      "questions": 15,
+      "scored": 13,
+      "unscored": 2,
+      "hit@1": 0.7692307692307693,
+      "hit@5": 0.9230769230769231,
+      "mrr": 0.8351222420989863,
+      "mean_retrieval_latency_ms": 258.66421999720234,
+      "p95_retrieval_latency_ms": 292.9995999438688
+    }
+  },
+  "by_question_type": {
+    "basic": {
+      "questions": 35,
+      "scored": 35,
+      "unscored": 0,
+      "hit@1": 0.6285714285714286,
+      "hit@5": 0.9142857142857143,
+      "mrr": 0.7523651320993514,
+      "mean_retrieval_latency_ms": 542.511477136785,
+      "p95_retrieval_latency_ms": 439.19079995248467
+    },
+    "constrained": {
+      "questions": 15,
+      "scored": 15,
+      "unscored": 0,
+      "hit@1": 0.8666666666666667,
+      "hit@5": 1.0,
+      "mrr": 0.9333333333333333,
+      "mean_retrieval_latency_ms": 254.0761666605249,
+      "p95_retrieval_latency_ms": 316.44570000935346
+    },
+    "info_not_found": {
+      "questions": 10,
+      "scored": 0,
+      "unscored": 10,
+      "hit@1": null,
+      "hit@5": null,
+      "mrr": null,
+      "mean_retrieval_latency_ms": 256.63961999234743,
+      "p95_retrieval_latency_ms": 284.0441999724135
+    },
+    "intra_document_reasoning": {
+      "questions": 15,
+      "scored": 15,
+      "unscored": 0,
+      "hit@1": 0.5333333333333333,
+      "hit@5": 0.8666666666666667,
+      "mrr": 0.6717460317460318,
+      "mean_retrieval_latency_ms": 265.19320000661537,
+      "p95_retrieval_latency_ms": 292.9995999438688
+    },
+    "semantic": {
+      "questions": 25,
+      "scored": 25,
+      "unscored": 0,
+      "hit@1": 0.24,
+      "hit@5": 0.64,
+      "mrr": 0.39687775080334065,
+      "mean_retrieval_latency_ms": 262.62406000867486,
+      "p95_retrieval_latency_ms": 275.21400002297014
+    }
+  },
+  "latency_scope": "Sequential query embedding plus exhaustive chunk scoring and document ranking; first query includes lazy model load. Not answer-generation latency."
+}

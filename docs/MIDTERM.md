@@ -4,6 +4,15 @@ Branch: `midterm-presentation`. Purpose: reproduce the existing retrieval
 baseline and produce evidence for the two-slide midterm presentation. No
 threshold or model tuning is performed against validation/test results.
 
+## Completed run
+
+The local reproduction matched all 100 gold-document ranks from the teammate
+baseline. Start with the [results brief](../results/midterm/retrieval_eval_20261019-023503/MIDTERM_BRIEF.md)
+and [manual evidence review](../results/midterm/retrieval_eval_20261019-023503/REVIEW.md).
+The run directory also contains raw per-question results, summary metrics,
+development examples, and the installed package versions. All 16 unit tests,
+compilation, corpus validation, and dependency checks passed.
+
 ## Reproduce on Windows
 
 From the repository root, using Python 3.11+:
