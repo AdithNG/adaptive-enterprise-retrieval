@@ -1,7 +1,11 @@
 """Document-level retrieval evaluation: Hit@5 and MRR over labeled questions."""
 
 import json
+import math
+import platform
+from importlib.metadata import version, PackageNotFoundError
 import subprocess
+from time import perf_counter
 from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
@@ -50,7 +54,9 @@ def rank_documents(session: SearchSession, question: str) -> list[dict]:
 
 
 def evaluate_question(session: SearchSession, question: dict) -> dict:
+    started = perf_counter()
     ranked = rank_documents(session, question["question"])
+    latency_ms = (perf_counter() - started) * 1000
     gold = set(question["expected_doc_ids"])
     gold_rank = next((item["rank"] for item in ranked if item["doc_id"] in gold), None)
     answerable = bool(gold)
@@ -62,12 +68,48 @@ def evaluate_question(session: SearchSession, question: dict) -> dict:
         "expected_doc_ids": question["expected_doc_ids"],
         "answerable": answerable,
         "gold_rank": gold_rank,
+        "retrieval_latency_ms": latency_ms,
+        "hit@1": float(gold_rank == 1) if answerable else None,
         f"hit@{TOP_K}": (
             float(gold_rank is not None and gold_rank <= TOP_K) if answerable else None
         ),
         "reciprocal_rank": (1 / gold_rank if gold_rank else 0.0) if answerable else None,
         "retrieved": ranked[:TOP_K],
     }
+
+
+def summarize_records(records: list[dict]) -> dict:
+    """Unanswerable questions are counted but excluded from retrieval metrics."""
+    scored = [record for record in records if record["answerable"]]
+    latencies = sorted(record["retrieval_latency_ms"] for record in records
+                       if "retrieval_latency_ms" in record)
+    return {
+        "questions": len(records),
+        "scored": len(scored),
+        "unscored": len(records) - len(scored),
+        "hit@1": mean(float(r["gold_rank"] == 1) for r in scored) if scored else None,
+        "hit@5": mean(r["hit@5"] for r in scored) if scored else None,
+        "mrr": mean(r["reciprocal_rank"] for r in scored) if scored else None,
+        "mean_retrieval_latency_ms": mean(latencies) if latencies else None,
+        "p95_retrieval_latency_ms": latencies[math.ceil(.95 * len(latencies)) - 1] if latencies else None,
+    }
+
+
+def grouped_metrics(records: list[dict], key: str) -> dict:
+    return {
+        str(value): summarize_records([r for r in records if r.get(key) == value])
+        for value in sorted({r.get(key) for r in records}, key=str)
+    }
+
+
+def runtime_versions() -> dict:
+    versions = {"python": platform.python_version(), "platform": platform.platform()}
+    for name in ("sentence-transformers", "transformers", "torch", "numpy", "tokenizers"):
+        try:
+            versions[name] = version(name)
+        except PackageNotFoundError:
+            versions[name] = None
+    return versions
 
 
 def _git_commit() -> str | None:
@@ -84,7 +126,6 @@ def run_evaluation(session: SearchSession, questions_path: Path, out_dir: Path) 
     """Evaluate every question and save per-question records plus a summary."""
     questions = load_questions(questions_path)
     records = [evaluate_question(session, question) for question in questions]
-    scored = [record for record in records if record["answerable"]]
     timestamp = datetime.now(timezone.utc)
     summary = {
         "run": {
@@ -93,11 +134,12 @@ def run_evaluation(session: SearchSession, questions_path: Path, out_dir: Path) 
             "questions_path": str(questions_path),
             "questions_sha256": file_sha256(questions_path),
             "index": session.metadata,
+            "runtime": runtime_versions(),
         },
-        "questions": len(records),
-        "scored": len(scored),
-        f"hit@{TOP_K}": mean(record[f"hit@{TOP_K}"] for record in scored) if scored else None,
-        "mrr": mean(record["reciprocal_rank"] for record in scored) if scored else None,
+        **summarize_records(records),
+        "by_split": grouped_metrics(records, "split"),
+        "by_question_type": grouped_metrics(records, "question_type"),
+        "latency_scope": "Sequential query embedding plus exhaustive chunk scoring and document ranking; first query includes lazy model load. Not answer-generation latency.",
     }
     run_dir = Path(out_dir) / f"retrieval_eval_{timestamp:%Y%m%d-%H%M%S}"
     run_dir.mkdir(parents=True, exist_ok=False)
