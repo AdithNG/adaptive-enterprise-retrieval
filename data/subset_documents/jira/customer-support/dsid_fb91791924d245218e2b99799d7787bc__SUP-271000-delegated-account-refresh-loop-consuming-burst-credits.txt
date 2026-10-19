@@ -1,0 +1,53 @@
+Repeating 429s for tenant caused by delegated service-account refresh loop consuming burst credits
+
+Issue summary:
+Customer DataHarbor reports periodic waves of 429 throttles across multiple endpoints during daytime ingest windows. They see server-side rate-limit rejections for a sustained 30–90 minute window even though aggregate token usage reported in their console remains under their committed burst and sustained quotas.
+
+Impact:
+- Multiple background jobs and webhooks failing with 429s (non-idempotent retries cause downstream duplicates).
+- Customer reports increased error rates in their SLA dashboards and two supportable customer incidents.
+- Revenue-impacting: delayed batch commits and retry storms.
+
+Environment:
+- Dedicated tenant on prod-us-east, dedicated GPU pool.
+- Jobs originate from a delegated service account (service-account-managed by DataHarbor) that rotates short-lived credentials every ~2 minutes.
+
+Steps to reproduce (provided by customer):
+1) Deploy connector that rotates delegated SA keys and launches 8 parallel upload workers.
+2) Each worker uses temporary credentials to start streaming SSE connections + periodic background flush jobs.
+3) Observe console & client errors: 429s appear within 3–5 minutes and persist in waves.
+
+Observed behavior:
+- 429 responses have X-RateLimit-Reason header: "burst_credit_exhausted" or sometimes missing header (opaque 429).
+- Console token usage graphs show transient micro-spikes but not sustained over-billing matching the 429 duration.
+- Logs show repeated token bucket refill attempts correlated with many short-lived sessions tied to the delegated SA refresh.
+
+Expected behavior:
+- Short-lived credential rotations should not cause tenant burst credits to be depleted repeatedly; system should amortize transient reconnects and keep background probes/healthchecks excluded where configured for dedicated tenants.
+
+Initial diagnostics attached by customer:
+- Sample logs (redacted) showing auth refresh timestamps and 429 timestamps.
+- Wireshark snippet showing quick TCP teardown/connect cycles.
+- Console screenshots of token bucket and per-route counters.
+
+Immediate ask from customer:
+1) Explanation for why burst credits are consumed faster than console suggests.
+2) Temporary mitigation to stop ongoing 429s while we investigate root cause.
+3) Permanent recommendation for their delegated-credential rotation pattern.
+2026-03-13 10:14 - Support (Aisha): Acknowledged. Escalating to SRE for rate-limiter tracing. Asked customer for redacted auth logs and snapshot of console offsets.
+2026-03-13 11:03 - SRE (Miguel): Pulled rate-limiter traces for tenant. Seeing high token-accounting churn aligned with short session lifetimes. Starting hypothesis: per-connection preflight & health probes being counted as separate requests due to signed URL / header mismatch during reconnect.
+2026-03-13 12:22 - Customer (DataHarbor — Sam Li): We can pause rotation for test; will stand up a test run with 30-minute rotation window in 30 minutes and report back.
+2026-03-13 13:05 - SRE (Miguel): Traced an event where ephemeral session tokens are created and not properly deduped at ingress, leading to double-accounting in edge token counters for ~20% of reconnects. Creating follow-up internal ticket INT-485 to validate edge dedupe behavior.
+2026-03-14 09:41 - Support (Aisha): Applying temporary mitigation: suggested client change to reuse a single long-lived connection per worker and increase credential TTL to 10 minutes while we push edge fix patch. Customer confirmed immediate error-rate drop in test setup.
+2026-03-14 11:02 - SRE (Miguel): We have a patch candidate that deduplicates preflight accounting on reconnect at ingress-proxy; scheduled for canary deploy to us-east edge next 2 hours. Will monitor for reappearance of waves.
+Hypothesis 1: Edge ingress treats each auth handshake + preflight as a fresh request for burst accounting when ephemeral keys rotate rapidly; double-counting occurs during an edge LRU session mapping miss.
+Hypothesis 2: Client creates ephemeral signed callbacks that trigger immediate short-lived webhooks; these callbacks are counted against token buckets separately from main requests (no consumer tag), so bursts not visible on tenant aggregate charts which only sum route-level counters.
+Trace findings: Numerous meter entries with identical client_ip and ~1–2s offsets; suggests reconnect fanout from orchestrator. Correlation with delegated SA rotation events confirmed in customer logs.
+Workaround validated: Reusing connection per worker and increasing credential TTL prevented rapid reconnect churn and stopped repeated burst-credit depletion in the test run.
+Next steps: Roll canary ingress patch to dedupe preflight accounting and add server-side heuristic to suppress counting of health-check probes for dedicated tenants. Also update docs to recommend credential TTL > 3 minutes when using multiple parallel workers.
+Linked internal action: INT-485 created to instrument ingress session-id mapping and add unit tests for reconnect dedupe.
+Mitigation in progress: customer applied temporary client-side change (reuse connection + increase TTL) — immediate improvement observed. Ingress dedupe patch scheduled for canary in us-east; post-canary rollout will be communicated. Post-incident runbook to include recommended TTL and orchestration patterns for delegated creds.
+Canary deploy dedupe patch to us-east edge and monitor rate-limit events for tenant for 48 hours
+Add a refill-accounting dashboard for dedicated tenants that includes per-connection dedupe rate and preflight counts
+Document recommended rotation cadence and example code for connection reuse in SDKs (suggest TTL >= 5 minutes for 8+ worker fanout)
+Close linked internal ticket INT-485 after tests and rollouts

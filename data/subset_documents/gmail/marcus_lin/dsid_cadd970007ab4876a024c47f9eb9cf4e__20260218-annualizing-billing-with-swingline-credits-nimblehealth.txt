@@ -1,0 +1,124 @@
+Re: Proposal to annualize billing + interim swingline credits (NimbleHealth)
+
+From: Sara Lin <sara.lin@nimblehealth.com>
+To: Marcus Lin <marcus.lin@redwoodinference.com>
+Date: Thu, 12 Feb 2026 09:18:00 -0800
+Subject: Converting to annual billing — can we get a workable cadence?
+
+Marcus — thanks for the product walkthrough yesterday. We want to move from our current month-to-month (pay-as-you-go) plan to an annual prepay to simplify procurement and get better unit economics, but finance needs clarity on:
+
+- Net discount for an annual, 12-month prepay vs current monthly spend (we're looking at ~$750k ARR run-rate today)
+- How you handle initial ramp (we expect 40% usage growth in Q1 after enabling more features)
+- True-up cadence and what happens if we miss forecast levels
+- Any credits or concessions for the first quarter while we complete our PO process
+
+We have a hard PO deadline end of Feb. Are you able to send a PO-ready term sheet and an example ramp/true-up schedule? Attaching our initial forecast (see Consumption_Ramp_Model.xlsx).
+
+Thanks — happy to hop on a short call if helpful.
+
+— Sara
+Product & Ops, NimbleHealth
+
+Attachments: Consumption_Ramp_Model.xlsx (xlsx)
+From: Marcus Lin <marcus.lin@redwoodinference.com>
+To: Sara Lin <sara.lin@nimblehealth.com>
+Cc: Ben Carter <ben.carter@redwoodinference.com>
+Date: Thu, 12 Feb 2026 11:03:00 -0800
+Subject: Re: Converting to annual billing — can we get a workable cadence?
+
+Sara — great to hear NimbleHealth is ready to annualize. High level we can do an annual, upfront prepay with a staged true-up and a short interim credit to cover the PO/boarding window. Proposal below (I can convert to a PO-ready term sheet):
+
+1) Commercials (12-month prepay, paid up front):
+   - Year 1 effective discount: 18% off list (applies to the prepay commitment)
+   - Optional year 2 auto-renew discount: 10% (if you commit to 24 months total)
+
+2) Ramp and true-up mechanics:
+   - Forecasted monthly consumption uploaded at contract signing (we'll use your attached sheet as baseline)
+   - Staggered true-up: quarterly true-ups for first 12 months (Q1 true-up at month 3, Q2 at month 6) with cap: +/- 30% band without penalty; overage beyond cap billed at list rate and deducted from prepay balance
+   - If actual consumption exceeds committed prepay early, automatic token drawdown applies; if below, we carry forward the remaining credit.
+
+3) Interim swingline credit (to address PO timing):
+   - Redwood will provide a one-time swingline credit equal to 10% of the year-1 prepay value (applied as a monthly credit across the first 3 months) while the PO is finalized and payment is processed. This is reconciled at first true-up.
+
+4) Add-ons & guardrails:
+   - Burst capacity beyond committed throughput billed at a predictable overage rate (we'll include specific $/token steps in the term sheet).
+
+I'll draft a PO-ready term sheet and send it by end of day. Are you able to confirm whether NimbleHealth would consider a 24-month commit if the Year 2 discount moves to 15%?
+
+If useful I'll put Ben on the thread to confirm pricing math and Laura for onboarding SLOs.
+
+— Marcus
+Director, Strategic Accounts
+Redwood Inference
+
+Attachments: NimbleHealth_Redwood_TermSheet_v1.3.pdf (pdf)
+From: Marcus Lin <marcus.lin@redwoodinference.com>
+To: Laura Bennett <laura.bennett@redwoodinference.com>, Neha Kapoor <neha.kapoor@redwoodinference.com>, Ben Carter <ben.carter@redwoodinference.com>
+Date: Fri, 13 Feb 2026 08:23:00 -0800
+Subject: FW: Converting to annual billing — NimbleHealth asks (internal)
+
+Looping you in — Nimble wants to move to annual prepay and needs PO-ready terms ASAP. Key asks from their side: interim credits while PO completes, a clear true-up cadence that tolerates near-term growth, and consideration for 24-month if we give a deeper second-year discount.
+
+Can you:
+- Ben: confirm whether the 18% / 15% (Y1 / Y2) structure is within our flexible band for a mid-market ARR profile ($750k) and whether we can soften the +/-30% true-up cap to +/-40% for the first true-up only. Include exact overage $/token if possible.
+- Neha: any concerns on contract/legal side for swingline credits and the reconciliation step? Need a 1-paragraph note I can include in the term sheet.
+- Laura: estimate onboarding timeline and whether there's risk to SLOs with a big Q1 ramp (40% expected).
+
+Goal: get a PO-ready term sheet and an internal signoff marker by EOD Monday so we can meet their procurement timeline.
+
+— Marcus
+
+On Fri, Feb 13, 2026 at 08:23 Marcus Lin wrote:
+> Looping you in — Nimble wants to move to annual prepay...
+
+From: Ben Carter <ben.carter@redwoodinference.com>
+To: Marcus Lin <marcus.lin@redwoodinference.com>, Laura Bennett <laura.bennett@redwoodinference.com>, Neha Kapoor <neha.kapoor@redwoodinference.com>
+Date: Mon, 16 Feb 2026 10:40:00 -0800
+Subject: Re: FW: Converting to annual billing — NimbleHealth asks (pricing note)
+
+Marcus / team — pricing note below. I actually ran the numbers against their model (Consumption_Ramp_Model.xlsx). Bottom line: we can accept the 18% year-1 discount with the following commercial guardrails.
+
+Commercial proposal (finalized numbers):
+- Commitment: $900,000 prepay for 12 months (reflects a modest uplift over their current ARR to cover expected ramp).
+- Year 1 effective discount: 18% off standard list.
+- Year 2 optional: 15% if they commit within 30 days to extend to 24 months (we need an exercise window in the contract).
+
+True-up and swingline: 
+- Swingline credit = 10% of the prepay value ($90k) applied as a monthly credit over months 1–3 (appears as negative invoices). Reconciled at first true-up (month 3).
+- True-up cadence: monthly internal tracking; contractual reconciliations quarterly for the first 12 months. For the first true-up (month 3) we relax the cap to +/-40%; subsequent quarters revert to +/-30%.
+
+Overage pricing and safeguards:
+- Overage beyond prepay charged at $0.00009 per token (tier 1). We offer burst throttles to avoid runaway usage; auto-alerts to both customer and their CSM at 70%/90% consumption thresholds.
+- If they overconsume more than 75% in a single month and don't remediate after 5 days, we reserve the right to require immediate top-up or suspend non-critical features (documented in SOW).
+
+Commercial rationale: the swingline credit keeps procurement nimble and buys us time; the staggered true-up with first-quarter leniency addresses their expected growth while protecting Redwood economics.
+
+I'll hand the numbers to legal for term-sheet language and cc the finance team to draft the invoice schedule. Marcus — can you confirm Nimble will accept the $900k prepay figure before I generate the term sheet PDF?
+
+— Ben
+Head of Sales, Mid-Market
+Redwood Inference
+
+From: Sara Lin <sara.lin@nimblehealth.com>
+To: Marcus Lin <marcus.lin@redwoodinference.com>, Tom O'Neill <tom.oneill@nimblehealth.com>
+Cc: Ben Carter <ben.carter@redwoodinference.com>
+Date: Wed, 18 Feb 2026 16:05:00 -0800
+Subject: Re: Proposal to annualize billing + interim swingline credits (NimbleHealth)
+
+Marcus / Ben — thanks for the clear proposal. Quick responses: 
+
+- Nimble is comfortable with a $900k prepay for year 1 and we appreciate the 10% swingline while the PO flows through finance.
+- We accept the relaxed first true-up (+/-40%) for month 3 and quarterly reconciliations thereafter.
+- We will not sign a 24-month auto-extend today but are open to the year-2 option; please include an extension exercise window in the term sheet and note it is not binding.
+
+Next steps for us: I'll route the draft term sheet to procurement today and aim to return a countersigned PO by Feb 26. Can you send the PO-ready PDF and an invoice schedule that shows the swingline applied as 3 monthly credit entries? Once procurement has the doc we should be close.
+
+Thanks — small question: can you include a line in the term sheet that the swingline credit does not reduce our ability to claim an overage refund in the case of under-consumption after final reconciliation? We want clarity that credits only bridge timing, not change refund mechanics.
+
+— Sara
+Procurement & Ops, NimbleHealth
+
+On Wed, Feb 18, 2026 at 12:01 Marcus Lin wrote:
+> Attached the term sheet. Will update with the swingline reconciliation language per your ask.
+
+Attachments: NimbleHealth_Redwood_TermSheet_v1.3.pdf (pdf), Consumption_Ramp_Model.xlsx (xlsx)

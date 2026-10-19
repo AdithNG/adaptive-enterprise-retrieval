@@ -1,0 +1,40 @@
+Cerulean Support Networks
+
+Summary: Cerulean is a B2B contact center operator (outsourced support across retail + fintech customers). They need a Dedicated deployment to guarantee 24/7 capacity for agent-assist and automatic ticket summarization. Primary driver is reliability during spikes (seasonal retail peaks + fintech month-ends) and strict data residency for EU/US customers.
+
+Key requirements / quotes: 
+- "We cannot have agent context timeouts when volume jumps — must have reserved throughput and predictable fallbacks." — Head of Support Ops (R. Delgado)
+- 2000 concurrent active agents at peak, target p95 latency <120-200ms for streaming suggestions, sustained throughput budgeted ~40k-70k inference requests/minute (mix of short prompts + long wrap-up generations).
+- Need isolated capacity (VPC) with explicit burst policy: baseline reserved QPS with ability to burst 2-3x for 30-60 min windows.
+- Use cases: real-time agent suggestions (inline in Zendesk), end-of-interaction ticket summarization (concise, 3-line TL;DR + suggested tags), tool-calling to trigger ticket escalations / CRM field updates, automated quick-replies for chat channels.
+- Integration: Zendesk + Salesforce connectors required; plan to swap to SFDC-case routing for enterprise customers.
+- Metrics for acceptance: p95 latency under 200ms for agent-assist, fallback rate <1%, summarization F1 against human references >0.82, cost per 1k requests within agreed threshold.
+- Security/compliance: SSO/SAML (Okta), SOC2 type II, audit logging with 12-month retention, KMS-managed keys, fine-grained retention controls per customer region. Legal insists on subprocessor list and right-to-audit clause.
+- Observability needs: token-level cost breakdown, per-route latency dashboards, root-cause traces for spike incidents. Must integrate with their SRE PagerDuty rota.
+
+POC notes and findings: 
+- Pilot exposed two issues: 1) short KV cache TTL causing repeated context tokenization; recommended caching config reduced token cost by 22% during pilot. 2) morning shift spike (09:00–10:00 PST) produced throttling on shared pool — motivates Dedicated reserved capacity.
+- SE recommendation: Dedicated pool with autoscale disabled for baseline + scheduled burst windows; pre-warm KV caches and enable prefix caching for common templates.
+
+Commercial / timeline: 
+- Procurement aiming to sign for Q2 2025 (forecast 2025-03).
+- Estimated ARR ask for proposal: $250k–$750k depending on burst SLA and on-prem connector.
+
+Stubs / links: Fireflies ff_20241211_2b7c9d (pilot kickoff), drive deck link above, thread th_1f8a2b3c4d_20241215 (security thread).
+
+Short internal ask: prioritize SOC2 evidence + subprocessor list to unblock legal; schedule network window with Cerulean infra for VPC peering test (target week of 2025-02-19).
+2024-11-20 - Intro call w/ Maya (AE) + Jordan (SE) — overview of Redwood Dedicated; Cerulean outlined 24/7 SLA needs
+2024-12-05 - POC kickoff: 2-week pilot for agent-assist on Zendesk integration (pilot uses 10% of volume)
+2024-12-18 - Security deep-dive with security team; Cerulean requested SOC2 report + KMS options
+2025-01-15 - Pilot review: latency p95 ~180ms, token cost 22% lower with KV caching; ops noted intermittent spike failures during morning shift
+2025-01-28 - Design session w/ networking: require VPC peering + dedicated subnet for isolated capacity
+2025-02-05 - Commercial review: proposed reserved throughput tiers and burst policy; finance requested ARR banding
+Finalize SOW and sign Dedicated contract; legal to sign off on subprocessor and data residency clauses
+legal_subprocessor_list
+budget_commitment_for_q3_reserved_capacity
+network_team_VPC_peering_window
+on_prem_integration_latency_tests
+Prefers 12-month reserved commitment with quarterly true-ups. Wants an explicit SLA for p95 and defined cost for burst usage. Legal: add right-to-audit + data residency appendix.
+Dedicated VPC deployment, reserved GPU-backed pools sized for 2000 concurrent agents, KV/prefix caching prewarm, streaming suggestions API with p95 <200ms target, tool-calling webhook reliability >=99.9%, integration adapters for Zendesk + Salesforce, KMS for key management, audit logs exported to customer SIEM.
+Medium-high: high revenue impact if unavailable during peaks. Main risks are network peering delays, legal subprocessor objections, and achieving strict p95 at scale under mixed prompt lengths.
+Signed SOW for Dedicated + 30-day runbook and on-call handover; pilot metrics meet latency and fallback thresholds; legal sign-off on subprocessor list.

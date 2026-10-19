@@ -1,0 +1,42 @@
+1765554322
+
+jason_support: FYI customer (acme-inc) hit SSO failures right after their IdP cert rotation. Getting 403 on our ACS. Error in our logs: "SAML: Recipient mismatch (assertion recipient=https://redwood.example.com/saml/acs/ vs expected=https://redwood.example.com/saml/acs)". They say nothing changed on SP side. I'm attaching the SAML Response snippet we captured.
+
+jason_support: ```xml
+<saml:Assertion ...>
+  <saml:Subject>...</saml:Subject>
+  <saml:Conditions>...</saml:Conditions>
+  <saml:AuthnStatement>...</saml:AuthnStatement>
+  <saml:SubjectConfirmationData Recipient="https://redwood.example.com/saml/acs/" NotOnOrAfter="..." />
+</saml:Assertion>
+```
+
+alex_sre: Thanks. Can you paste the IdP metadata URL and the SP entityID/ACS configured for the tenant? Also is this hosted or Dedicated for them?
+
+jason_support: Metadata URL: https://idp.example-corp.com/.well-known/saml2/metadata (they reported this started redirecting yesterday).
+SP entityID configured in our dashboard: https://redwood.example.com/saml/acs (no trailing slash).
+ACS they receive in assertion: https://redwood.example.com/saml/acs/ (with trailing slash)
+They're on our Hosted API (normal multi-tenant flow).
+
+anya_dev: That trailing slash difference can trigger RecipientMismatch if we do strict string equality. We usually accept both but with new stricter validation we recently rolled it's stricter for security. If IdP changed the AssertionConsumerService Location in the signed assertion to include a trailing slash, the recipient check will fail.
+
+maria_idp: We rotated our signing cert yesterday and also put the metadata behind our CDN (redirect -> https://cdn.idp.example/metadata?id=...). The metadata XML itself is the same, but the metadata endpoint now returns a 302 and the CDN serves a gzipped payload. Could the redirect or encoding have altered the way our AssertionConsumerService element is canonicalized? We didn't change the ACS value, but our SSO middleware may normalize URLs differently.
+
+alex_sre: Quick repro steps I ran:
+1) curl -I https://idp.example-corp.com/.well-known/saml2/metadata -> shows 302 -> https://cdn.idp.example/metadata?id=...
+2) curl -L --compressed https://idp.example-corp.com/.well-known/saml2/metadata -o idp.xml && grep AssertionConsumerService idp.xml -> shows Location="https://redwood.example.com/saml/acs/" (with trailing slash)
+3) our metadata poller logs (/var/log/metadata-watcher.log) show ETag/If-None-Match 412 around rotation window and then a successful fetch where the final xml had the ACS with trailing slash.
+
+alex_sre: TL;DR looks like IdP metadata final xml has ACS with trailing slash while our configured SP had no slash. We normally tolerate scheme/host/port differences but recent strict recipient enforcement caused this repro.
+
+jason_support: Actions we already tried with customer: 1) asked IdP to re-publish metadata without redirect to CDN (they said not possible short-term), 2) asked them to add an alias ACS entry in their IdP for non-slash variant (they tried but partner IdP UI refused duplicate), 3) we attempted to add trailing-slash ACS alias in our SP config but dashboard validators reject duplicate-looking entityIDs. None fixed the 403.
+
+anya_dev: I'll propose two changes: (A) short-term canary to normalize incoming Assertion Recipient by trimming a single trailing slash before strict equality check for recipients (per-tenant opt-in), (B) longer-term: metadata poller should normalize ACS values on ingest and create internal canonicalization so both variants are accepted and stored. Also add a regression test for CDN redirects + gzipped metadata.
+
+deploy-bot: starting canary rollout: service=auth-validator, version=canary-trim-acs-0.1.1 -> 2 hosts in us-west, 0 failures reported.
+
+alex_sre: After canary, customer confirms login works end-to-end. Root cause summary for ticket: IdP started serving metadata via CDN/redirect after cert rotation which resulted in their published AssertionConsumerService Location including a trailing slash variant; our strict recipient equality rejected the assertion.
+
+anya_dev: Followups: 1) open RFC for SAML robustness: SAML-robustness-2026-01 (normalize ACS/recipient variants, handle 302->CDN metadata canonicalization), 2) coordinate with Hosted Ops to add a grandfathered relaxed recipient check for tenants during IdP rotations, 3) recommend customers avoid redirecting metadata endpoints or ensure ACS values match exact SP config.
+
+jason_support: Customer informed, monitoring enabled for 48h and offered rollback guidance to IdP. Closing ticket after monitoring window. :white_check_mark:

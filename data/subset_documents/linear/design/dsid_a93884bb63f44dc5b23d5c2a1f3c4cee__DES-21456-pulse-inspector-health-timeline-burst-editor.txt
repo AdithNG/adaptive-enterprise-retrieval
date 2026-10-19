@@ -1,0 +1,38 @@
+Pulse Inspector: GPU pool health timeline, autoscale tuning & burst policy editor
+
+Goal: Create a compact, operator-focused inspector panel (codename: Pulse) for Dedicated GPU pools that merges health timeline, topology status, autoscaling controls, and a burst policy editor into a single slide-over UI. The inspector must be glanceable for on-call engineers and also provide safe editing flows for SREs and platform owners.
+
+Scope: initial design covers single-pool view (no multi-select), timeline-based health overview, recent incidents, autoscale target tuning (min/target/max + responsive knobs), burst budget editor, cost impact preview, simple rollback/canary controls, and contextual links to detailed pool logs and metrics dashboards.
+
+Out of scope: full cluster topology management, user-level access controls (handled elsewhere), and deep cost forecasting (only an immediate per-hour estimate shown).
+1) Pulse inspector opens via pool row or pool detail header and fits within 980px slide-over width.
+2) Health timeline shows 24h/7d/30d toggle with anomalies flagged and one-click jump to logs.
+3) Autoscale editor allows safe edits with bounded validation and a 'Preview cost impact' overlay.
+4) Burst policy editor exposes budget, cooldown, and priority class with undo/preview.
+5) All interactive controls provide tooltips and inline help; design tokens match Console theme.
+6) Figma prototypes linked and validated in cross-functional review with Eng and PM.
+
+- Visual hierarchy: top area = pool header (name, region, GPU type, allocated/available counts, SLA badge). Middle = timeline (sparkline + stacked event markers). Lower left = autoscale tuning widget (three knobs + recommended profiles), lower right = burst editor (budget slider, estimated minutes at base load). Footer = actions (Save as draft, Preview cost impact, Apply canary, Save & deploy).
+- Autoscale knob behavior: direct numeric entry but also '±' stepper for small changes and presets for common workloads (interactive batch, low-latency inference, cost-saver).
+- Burst budget: show both absolute minutes and equivalent tokens/sec for context; offer a 'safe cap' toggle that prevents burst from exceeding X% of pool capacity.
+- Error states: if a change violates reserved capacity commitments (Dedicated), surface a clear blocker with link to contract/finance.
+- Accessibility: ensure color contrast on timeline markers, keyboard accessible sliders, and aria-live updates when preview completes.
+- Mobile: slide-over should adapt to narrow widths as a full-screen modal for phone view (primary tasks only).
+
+Use single slide-over inspector vs separate modal to reduce context switching
+Show 24h default timeline but provide quick 7d/30d toggles
+Allow immediate preview of cost impact with best-effort estimate; full forecasting deferred to Optimize team
+Expose only three autoscale controls (min/target/max) to avoid confusion; advanced configs behind 'Advanced' fold
+Burst policy edit is optimistic and requires explicit confirmation for destructive changes
+2026-02-21 — Ava Chen: Initial concept walkthrough with PM/Eng. Feedback: show cost delta earlier and add preset recommendations for autoscale.
+2026-02-24 — Diego Morales (Eng): Feasibility note: backend provides 1h cost estimate via billing API; realtime per-minute estimates require separate endpoint. Recommend using billing API for preview.
+2026-02-26 — Rohit Patel: Updated prototype uploaded (v2) with cost preview panel and presets. Add 'Safe cap' toggle per legal's request.
+2026-03-01 — Maya Singh (PM): Reviewed and suggested inline help content for burst policy to reduce support tickets. Also requested a confirmation step for high-cost changes.
+2026-03-04 — UX Review (Cross-functional): Action items: a) add undo toast for quick reverts, b) highlight SLA violations before allowing apply, c) produce developer handoff with component specs.
+
+- Provide mock API response shapes for cost-preview and recent incidents.
+- Timeline markers should be normalized to UTC in the UI but display local time by default.
+- Autoscale edits should be submitted as a staged rollout (canary) by default with ability to apply immediately behind a toggle.
+- Ensure optimistic UI updates reflect draft state until backend confirms.
+Design Review 2026-03-04: majority approval from Eng, PM, and SRE. Small changes requested (undo toast, explicit SLA blocker, copy updates). No major UX blockers. Ready for developer handoff after component specs and copy finalize.
+Proceed to handoff once component spec and billing contract are agreed. Targeting console-2026.03 minor release for initial rollout behind feature flag.

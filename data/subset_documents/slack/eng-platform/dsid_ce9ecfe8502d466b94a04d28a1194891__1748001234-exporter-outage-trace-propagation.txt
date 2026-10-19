@@ -1,0 +1,54 @@
+eng-platform
+
+mika: Heads up — traces for POST /v1/generate are showing up in Datadog as single root spans only (no child spans) starting ~21:12 UTC. Console traces and per-route dashboards both look incomplete.
+
+alex: Is this only for /v1/generate or broader? Any recent deploys to gateway/exporter?
+
+mika: Only generate so far (high qps route). No infra deploys at 21:00; we did a small SDK rollout at 20:40 but that shouldn't affect server-side span propagation.
+
+priya: I pulled exporter logs. OTLP exporter to Datadog started returning 503s around 21:11 and then we started dropping spans because the buffer got backpressured. Example log:
+```
+ERROR exporter/otlp: send failed (status=503) span_batch_id=78695 size=23
+WARN exporter/otlp: dropping 120 spans due to full queue
+```
+Looks like rate-limiting or datadog ingestion flap.
+
+jorge: FWIW I saw many incoming requests missing the traceparent header at the gateway for the same window. Can anyone confirm if something in the proxy layer is stripping headers?
+
+priya: Good catch. I correlated a subset of requests — when traceparent missing, we still emit server span but it becomes root. If exporter drops child spans and trace propagation is broken, you'll see only the root span.
+
+alex: Can you grep for `traceparent` in the gateway access logs? Also check if the envoy/nginx proxy had a config change that touches `proxy_set_header` or `underscores_in_headers`.
+
+jorge: Found this in the gateway config that was deployed by the platform team yesterday:
+```nginx
+# added to mitigate oversized header errors
+proxy_buffer_size 4k;
+proxy_set_header   Connection "";
+# accidentally removed forwarding of some headers
+# proxy_set_header Traceparent $http_traceparent;
+```
+Looks like the explicit traceparent forward got commented out. The deploy was intended for buffer tuning but clobbered header passthrough.
+
+mika: That would explain missing propagation. But why did exporter start dropping spans simultaneously? Two simultaneous issues?
+
+priya: Timeline: 20:40 SDK rollout (minor). 20:55 gateway buffer change deployed (removed traceparent). 21:11 Datadog OTLP endpoint started returning 503s (regional flare). So first traceparent stopped flowing, which explains root-only traces; then exporter instability caused bulk drop of collected child spans that did get created before propagation was lost (or from other services). Combined effect = lots of orphaned roots and missing children.
+
+sam: Proposed mitigations — immediate: revert gateway change that disables traceparent forwarding (canary to 10% of gateway pods), and failover exporter to our secondary sink (S3 archive + local retention) until Datadog recovers. Longer term: make traceparent passthrough covered by an e2e test and add a policy enforcement check in CI for header forwarding.
+
+mika: +1 for canary revert. Who can roll?
+
+jorge: I'll push a quick revert and roll to 10% canary now. Patch:
+```diff
+-# proxy_set_header Traceparent $http_traceparent;
++proxy_set_header Traceparent $http_traceparent;
+```
+
+sam: I'm flipping exporter routing to fallback archive now: `rbctl exporters route --from otlp.datadog --to s3.archive --duration 2h --reason "dd outage"` — switching batching to 5s to reduce pressure.
+
+sre-bot: Incident created INC-2026-134: Datadog OTLP 503 + trace header strip. Pager duty alerted.
+
+priya: After the revert, gateway logs show traceparent present again. We'll monitor if Datadog resumes. Reprocessing of archived spans will be handled by the pipeline consumer job once ingestion OK.
+
+alex: Can we add a short checklist for postmortem: timeline, root cause (gateway config + exporter outage), blast radius (routes/tenants affected), mitigation steps, and an action to add header-preserve test?
+
+mika: Yep. I'll own the postmortem writeup. Tagging eng-sre for SLAs and customer impact. Thanks everyone — nice quick detection/response. :thumbsup:

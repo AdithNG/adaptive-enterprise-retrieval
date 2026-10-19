@@ -1,0 +1,48 @@
+Private: cross-tenant audit suppression + KMS rotation interaction causing stale SSO attributes and role reconciliation gaps
+
+Summary: A production customer reported that after a scheduled KMS rotation in their Private deployment, audit events for RBAC and SSO role changes stopped being indexed for ~18 minutes and some users observed stale SSO attributes that prevented role reconciliation. The combined effect temporarily allowed cross-tenant permission checks to rely on stale assertions and suppressed audit visibility for the window. This ticket tracks the urgent investigation, rollback/patch, and follow-up hardening work.
+1) In a Private environment with KMS envelope rotation enabled and SSO caching turned on, rotate the envelope key via the rotation API.
+2) Trigger SSO assertion refresh for an identity provider that uses attribute-maps to generate Redwood roles.
+3) Perform RBAC role-change operations (grant/revoke) and perform API calls that should produce audit entries.
+4) Observe that during rotation window audit events are dropped from the audit-forwarder and the SSO attribute cache returns stale claims for some requests.
+- Customer-facing impact: High. One enterprise customer reported missing entries in compliance audit exports and transient incorrect role state for a small percentage (~0.5%) of requests during rotation.
+- Security risk: Medium-High. Although no confirmed data exfiltration, role-reconciliation gaps increase risk surface and reduced audit visibility violates compliance commitments.
+- Affected product: Private deployments (VPC/on-prem), specifically the audit-forwarder + SSO attribute cache + KMS integration path.
+Initial findings:
+- Audit-forwarder drops: During envelope key rotation the audit-forwarder attempted to re-encrypt stored batched events; our retry logic did not handle a transient key ID mapping change and dropped a subset of events when the re-encrypt RPC returned a 403 followed by an unfamiliar key ID.
+- SSO cache staleness: The SSO assertion cache uses a TTL plus an invalidation hook tied to the key fingerprint used to sign the session token. The KMS rotation updated the signer fingerprint index before the assertion invalidation finished propagating, creating a mismatch that let stale attributes be served for up to 18 minutes.
+- Race condition: A race where role binding reconciliation job queries RBAC state and SSO cache simultaneously; if reconciliation reads before assertion invalidation, reconciliation writes stale role grants.
+- Logs: We have matching gaps in audit logs between 2026-03-09T22:11:40Z and 2026-03-09T22:29:55Z on the affected cluster.
+- Reproducible locally in a private test harness with simulated rotation timing and VPC network delays.
+Evidence: console trace ID=trc_0b1f3c, support ticket #CS-8127, canary logs at s3://redwood-incident-logs/2026-03-09/eng11097/
+
+1) Immediate: Activated a temporary policy to pause envelope key auto-rotation on the affected customer's Private cluster and kicked a manual backfill job to re-ingest dropped audit events from forwarder local buffer.
+2) Hotfix deployed: Small change to audit-forwarder retry logic to treat transient key ID mapping changes as retryable and buffer events until a successful re-encrypt. Deployed as hotpatch private-2026.03.1-hotfix. Patch PR: https://github.com/redwood-inference/platform/pull/13340
+3) Feature toggle: Enabled assertion-cache strict invalidation mode for the affected customer which forces cache miss on key/signer fingerprint drift while we validate the full fix.
+4) Customer communication: Security and CSM teams issued an initial incident notice and are scheduling an audit export handoff.
+
+1) Audit-forwarder: Harden re-encrypt flow to support concurrent key rotations by using a key rotation map and exponential backoff with non-dropping buffer; add end-to-end acknowledgement for batched events.
+2) SSO/Cache: Make assertion invalidation synchronous with KMS signer index updates (or gate rotation completion), and add a short pre-rotation quiesce window where caches are proactively invalidated.
+3) RBAC reconciliation: Introduce a reconciliation fence that validates assertion freshness timestamp before committing role changes.
+4) Add integration tests simulating KMS rotations with VPC-induced latency, and add a chaos test to the Private CI job.
+
+- Stage: apply hotfix to staging cluster and run regression suite (30m)
+- Canary: deploy to a single private customer cluster with low activity and monitor for 2 hours (alerts on dropped audit events, SSO stale cache hits)
+- Roll: if canary is green, roll to affected customers in waves (5 clusters per wave) with 30m observation windows
+- Rollback: rollback script available at ops/runbooks/rollback-audit-rotation.sh; in case of regression, pause rotations and revert hotfix
+- Timeline: aim to complete emergency patches for impacted customers by 2026-03-13 02:00 UTC
+1) Run the KMS rotation test harness against patched build and confirm no audit-forwarder drops.
+2) Confirm that SSO cache invalidations occur within 5 seconds of signer index change in the test harness.
+3) Customer validation: provide regenerated audit export and compare event counts to pre-incident baseline.
+4) Add alert for >0 dropped-audit-events per 10m window and ensure it is firing properly in canary.
+
+- Support ticket updated: CS-8127 (privileged) with steps taken and ETA for re-ingest.
+- Incident notice sent to affected customer and security contact.
+- Internal: Slack incident channel #inc-priv-kms-11097, briefing scheduled with SOC and CSM at 2026-03-12T10:30Z.
+1) Follow-up RFC to standardize KMS rotation semantics with forwarders and caches (owner: Priya Nair, due 2026-04-01).
+2) Add permanent integration test coverage in private CI and chaos tests to simulate envelope rotations and signer index drift.
+3) Backfill: Complete audit backfill and share compliance-ready export with the customer.
+4) Run a tabletop incident with SOC/Support to review detection and SLA communication.
+
+Seeking fast-track security review and signoff for the hotpatch (security@redwood.ai). Code owners: infra/audit-forwarder, infra/sso-cache, rbac-service. Please review PR #13340 and the canary logs before 2026-03-12 18:00 UTC.
+Confluence: https://confluence.redwood.ai/display/SEC/Priv+Audit+KMS+Rotation+Incident | Support: https://redwood.helpdesk/tickets/CS-8127 | PR: https://github.com/redwood-inference/platform/pull/13340 | Ops runbook: ops/runbooks/rollback-audit-rotation.sh

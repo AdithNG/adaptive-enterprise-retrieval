@@ -1,0 +1,121 @@
+Leadership briefing coordination and sponsor handover for final close runway
+
+From: Diego Fernandez <diego.fernandez@redwood.com>
+To: Avery Collins <avery.collins@prospectco.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>
+Date: Sun, 13 Sep 2026 09:12:00 -0700
+Subject: Leadership briefing coordination and sponsor handover for final close runway
+
+Avery —
+
+Thanks again for the time earlier. We'd like to lock an EB-style leadership briefing with your exec sponsor and the ProspectCo close team so we can align on the mutual action plan (MAP), the evaluation timeline, and final milestones for sign. Goal is a 45–60 minute sync where we:
+
+- Walk the MAP (roles, owners, deadlines)
+- Validate the evaluation plan and acceptance criteria
+- Confirm exec sponsor availability and any additional attendees
+- Agree on final close milestones and a small set of immediate next actions
+
+Proposed EB slots (PT):
+- Tue 2026-09-20, 10:00–11:00am PT
+- Wed 2026-09-21, 4:00–4:45pm PT
+
+I've attached an updated MAP (Redwood_MAP_v2.pdf) and a one-page evaluation plan. Can you confirm: (1) preferred slot, (2) who from ProspectCo will be the executive sponsor for the briefing (name + email), and (3) any additional pre-reads you want us to include?
+
+We'll bring a pre-read + short slide deck and highlight the acceptance criteria we plan to run in your eval. If those slots don't work, share two alternatives and we'll coordinate.
+
+Thanks — looking forward to locking this in.
+
+Best,
+Diego Fernandez
+Account Executive | Redwood Inference
+D: +1 415-555-0133
+Attachments: Redwood_MAP_v2.pdf (MAP, owners column), EvaluationPlan_ProspectCo.xlsx (test cases summary)
+
+From: Avery Collins <avery.collins@prospectco.com>
+To: Diego Fernandez <diego.fernandez@redwood.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Samir Patel <samir.patel@prospectco.com>
+Date: Sun, 13 Sep 2026 10:03:00 -0700
+Subject: Re: Leadership briefing coordination and sponsor handover for final close runway
+
+Diego —
+
+Appreciate the clear plan. The Tue 9/20 10am PT slot looks best for Samir (he's our product org sponsor). Adding him here — Samir, meet Diego and Marissa from Redwood.
+
+Two quick asks from our side before the EB:
+1) Can you share a short SOC2 summary (or link) and any data residency notes? Our security team will want that in the pre-read.
+2) Can we get a draft agenda (5–6 bullets) and the MAP with owners visible in the doc?
+
+If you can send those today we'll circulate internally and lock the slot.
+
+Thanks — Avery
+Avery Collins
+VP, Product Operations | ProspectCo
+
+From: Diego Fernandez <diego.fernandez@redwood.com>
+To: Avery Collins <avery.collins@prospectco.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Olga Petrov <olga.petrov@redwood.com>
+Date: Sun, 13 Sep 2026 10:20:00 -0700
+Subject: Re: Leadership briefing coordination and sponsor handover for final close runway
+
+Avery / Samir —
+
+Great — locking Tue 9/20 10:00am PT tentatively. Per your asks: attaching SOC2-Summary.pdf and an updated MAP that includes owner columns and target dates (Redwood_MAP_v2.pdf). Also adding Olga Petrov from our Enablement & EB ops team — Olga will own the calendar + logistics and shepherd the pre-read distribution. Marissa will own sponsor onboarding and the mutual action plan delivery.
+
+Draft EB agenda (45 mins):
+- 5 min: Introductions & success criteria recap
+- 10 min: MAP walkthrough (owners, milestones, gating items)
+- 10 min: Evaluation plan & acceptance criteria (who runs which test, timeline)
+- 10 min: Security/compliance Q&A (SOC2 highlights, data handling)
+- 10 min: Final timeline alignment & next steps (sign-off owner + dates)
+
+Action items assigned:
+- Marissa Cole (redwood): Sponsor onboarding, pre-read finalization, M1 checklist
+- Olga Petrov (redwood): Calendar invite + dial-in, collate pre-reads to one link
+- Diego Fernandez (redwood): Final MAP + slide deck, HubSpot deal update (RDW-2026-0423)
+
+HubSpot link for internal reference: https://app.hubspot.com/contacts/12345/company/67890
+
+Will follow up with calendar invite once Samir confirms verbally here.
+
+— Diego
+
+From: Marissa Cole <marissa.cole@redwood.com>
+To: Diego Fernandez <diego.fernandez@redwood.com>, Olga Petrov <olga.petrov@redwood.com>
+Cc: Avery Collins <avery.collins@prospectco.com>, Samir Patel <samir.patel@prospectco.com>
+Date: Mon, 14 Sep 2026 08:05:00 -0700
+Subject: Re: Leadership briefing coordination and sponsor handover for final close runway
+
+Quick update from my side — I will: 
+- Reach out to Samir this morning to confirm his availability for 9/20 10am PT and capture any additional attendees he wants on the call.
+- Finalize the MAP owner column and add a 2-week gating window for the eval tests (attached: EvaluationPlan_ProspectCo.xlsx).
+- Assemble a 1-page pre-read (slide + one-pager) and share the DocuSign-ready mutual action summary (if we need a quick signature on responsibilities).
+
+Proposed pre-read checklist for ProspectCo:
+- 1p: MAP summary with owners and dates
+- 1p: Evaluation plan + who runs each test
+- 1p: SOC2 highlights + data handling note (SOC2-Summary.pdf)
+- 1p: Acceptance criteria & decision checkpoints
+
+Olga — can you create a shared Drive folder and drop the pre-reads there; I'll post the link and the DocuSign draft by 11:30am PT.
+
+Marissa
+Senior Solutions Manager | Redwood Inference
+
+From: Avery Collins <avery.collins@prospectco.com>
+To: Diego Fernandez <diego.fernandez@redwood.com>, Marissa Cole <marissa.cole@redwood.com>, Olga Petrov <olga.petrov@redwood.com>
+Cc: Samir Patel <samir.patel@prospectco.com>
+Date: Mon, 14 Sep 2026 11:15:00 -0700
+Subject: Re: Leadership briefing coordination and sponsor handover for final close runway
+
+Diego / Marissa / Olga —
+
+Thanks — Samir confirmed the 9/20 10am PT slot and he'll be joined by our CTO (Priya Singh) for the EB. That works for our cadence. Agenda looks good — please include the two eval owners on the pre-read.
+
+I've accepted the calendar placeholder (calendar link below). Please send the finalized pre-read + MAP and we'll circulate to security and the CTO ahead of the meeting.
+
+Calendar: https://calendar.google.com/event?eid=RDW-PROSPECT-EB-20260920
+
+See you on the 20th.
+
+Avery
+

@@ -1,0 +1,74 @@
+Streaming responses reset mid-generation in prod us-east (Acme AI) — connection resets / truncated streams
+
+Issue summary
+- Customer (Acme AI) reports streaming responses intermittently resetting mid-generation in prod us-east.
+- Symptoms: SSE stream terminates unexpectedly (client sees ECONNRESET / "stream ended" / truncated output). Non-streaming requests complete successfully.
+
+Customer impact
+- Tier: Enterprise. Customer reports elevated error rate for streaming usage (~2–5% of streaming requests) and increased customer-visible failures in their app.
+- Impact window: observed since 2026-02-03 16:50Z.
+- Scope: prod us-east only per customer (eu-west appears stable).
+
+Environment
+- API: /v1/chat/completions with stream=true (SSE)
+- Customer SDK: redwood-sdk-python 0.9.2 (also reproduced via curl)
+- Regions tested: us-east (failures), eu-west (no failures reported)
+- Models: redwood-chat-large-v3, redwood-chat-medium-v3
+
+Steps to reproduce (customer-provided)
+1) Run a streaming chat completion with long-ish generations (customer reports failures more common > ~60s wall time).
+2) Observe that the stream ends early (no final "[DONE]" / missing end-of-stream event).
+
+Example request (redacted)
+- Endpoint: https://api.redwoodinference.com/v1/chat/completions
+- Parameters: stream=true, max_output_tokens=1200
+- Client behavior: reads SSE chunks until disconnect; retries without idempotency key
+
+Request IDs / evidence (customer-provided)
+- req_01HRXQ9B6W1V7A4KJ0C9Q8M2Z1 (us-east) — connection reset at ~430 output tokens
+- req_01HRXQAXY3P9S0K6V8H3D1T0J7 (us-east) — stream ended without [DONE]
+- req_01HRXQB8R1M4Z9D2F5K7N6C1Q3 (us-east) — truncated output, client saw ECONNRESET
+
+Initial triage checklist (Support)
+- Confirmed account is not being rate limited (no 429 spikes correlated to the timestamps above).
+- No correlated auth issues.
+- Reproduced internally once in prod us-east with a long response while on a corporate network (intermittent).
+
+Current hypothesis
+- Network/proxy timeout or HTTP/2 stream reset between edge and gateway for long-lived streaming connections.
+- Potential keepalive / idle timeout mismatch causing mid-stream disconnects.
+
+Mitigation guidance to customer (temporary)
+- Implement client-side streaming retry with exponential backoff + jitter for disconnects before [DONE].
+- Use an idempotency key to avoid double processing if the request was actually accepted.
+- Reduce max_output_tokens for latency-sensitive paths; keep streaming sessions < ~60s if possible.
+- If using HTTP/2 through a proxy/load balancer, try forcing HTTP/1.1 for SSE streams.
+
+Escalation / coordination
+- Slack bridge created per playbook. SRE paged due to enterprise impact + multi-customer risk.
+- Tracking as Sev1 due to customer-visible errors in a primary region for an enterprise account.
+
+Next actions
+- SRE: check streaming disconnect metrics in us-east, edge/gateway resets, and upstream timeout configs.
+- Platform/runtime: improve error classification and ensure request ID is surfaced reliably for customer logs (ENG-4822 + PR-19321).
+- Docs/DevEx: publish known-issue workaround article and cross-link from SDK troubleshooting.
+
+Customer comms
+- Use enterprise cadence: updates at least hourly while actively investigating, and on mitigation/ETA changes.
+- Avoid promising a permanent fix until rollout is confirmed across us-east.
+
+2026-02-03 17:12Z — Owen Phillips (Support): Opened as customer escalation from Acme AI. Creating Slack bridge per playbook and paging SRE due to enterprise impact. Request IDs captured in description.
+2026-02-03 17:20Z — Priya Shah (Assignee, Support): Acknowledged to customer. Asked for (1) client library version, (2) whether a proxy/LB sits between them and Redwood, (3) whether they can test forcing HTTP/1.1 for streaming. Also requested 2 additional request IDs with approximate timestamps.
+2026-02-03 17:28Z — Rafael Mendes (SRE): Joined bridge. Checking us-east edge/gateway metrics for TCP resets and HTTP/2 stream resets. Not seeing region-wide elevated 5xx, but streaming disconnect dashboard shows a mild uptick starting ~16:45Z.
+2026-02-03 17:41Z — Sean Gallagher (SRE): Hypothesis: keepalive/idle timeout mismatch for long-lived streams. Asking Platform to confirm current edge idle timeout and any recent config changes in us-east. Also requesting whether this correlates to any deploys today.
+2026-02-03 17:55Z — Mina Haddad (Platform, Routing): No routing policy changes in the last 24h that would explain resets. Fallback routing not elevated. Suggest focusing on edge/gateway transport rather than model/runtime.
+2026-02-03 18:10Z — Priya Shah (Support): Shared temporary mitigation with customer: enable retry on disconnect before [DONE], include idempotency key, and try forcing HTTP/1.1 for SSE. Customer confirmed they are currently using default HTTP/2 via their outbound proxy.
+2026-02-03 18:22Z — Rafael Mendes (SRE): Found elevated "upstream reset" counts on one us-east edge pool; looks like a subset of connections. Rolling mitigation: drain/swap the affected edge instances and increase upstream read timeout for streaming routes in us-east.
+2026-02-03 18:39Z — Priya Shah (Support): Customer update sent: investigating transport resets, mitigation in progress (edge pool drain), next update in 60 minutes or sooner if resolved. Confirmed no status page post at this time (impact appears limited but enterprise account affected; monitoring for broader scope).
+2026-02-03 19:15Z — Sean Gallagher (SRE): After edge drain, streaming disconnect rate back to baseline in us-east metrics for the last 20–30 minutes. Keeping incident open until customer confirms. Capturing follow-up to improve error messaging and troubleshooting docs.
+2026-02-03 19:48Z — Priya Shah (Support): Customer confirms improvement after they forced HTTP/1.1 for SSE + our mitigation. Remaining sporadic disconnects are significantly reduced; they can proceed with their traffic ramp. Keeping ticket open pending 24h monitoring and engineering follow-ups.
+2026-02-04 16:05Z — Owen Phillips (Support): Creating/attaching known-issue write-up draft for streaming timeouts/reconnect guidance; requesting Docs review to remove any customer-specific details. Linking to proposed KB: workaround-streaming-timeouts-and-reconnect.
+2026-02-05 20:12Z — Ethan Park (Platform): Opened ENG-4822 to improve client-facing error messages for streaming disconnects (include request IDs + retry guidance). PR-19321 in progress for request ID propagation and clearer classification.
+2026-02-06 18:30Z — Rafael Mendes (SRE): Monitoring looks stable. No further elevated reset metrics in us-east. Recommendation: close as resolved with documented workaround + engineering improvements in flight.
+2026-02-07 09:10Z — Priya Shah (Support): Marking Resolved. Customer confirmed stable streaming in us-east for the last 24h. Permanent fix follow-ups tracked in ENG-4822 and PR-19321; docs cross-links tracked in PR-2843. Resolution notes: drained affected edge pool + tuned streaming route timeout; customer mitigation: force HTTP/1.1 for SSE via proxy and implement safe retry with idempotency key.
+Mitigated by draining an affected us-east edge pool and adjusting streaming route timeout/transport settings. Customer-side workaround confirmed: force HTTP/1.1 for SSE (avoid HTTP/2 proxy resets) and implement retry-on-disconnect before [DONE] using an idempotency key. Follow-ups filed to improve streaming disconnect error details (ENG-4822 / PR-19321) and publish/cross-link troubleshooting guidance (workaround article + SDK docs PR-2843).

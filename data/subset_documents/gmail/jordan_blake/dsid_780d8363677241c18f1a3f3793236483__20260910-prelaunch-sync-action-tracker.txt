@@ -1,0 +1,131 @@
+Weekly MAP checkpoint: CardiaTech launch & cutover timeline
+
+From: Jordan Blake <jordan.blake@redwood.com>
+To: Lena Ortiz <lena.ortiz@cardiatech.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>
+Date: Tue, 1 Sep 2026 09:12:00 -0700
+Subject: RE: Prelaunch schedule - MAP kickoff and weekly checkpoints
+
+Lena / Devin —
+
+Following our kickoff last week, attaching the first draft of the mutual action plan (CardiaTech_MAP_v1.xlsx) and a short checklist for the cutover window. This thread will be our weekly standing checkpoint to track:
+- status updates by workstream
+- outstanding evaluation tests and owners
+- cutover & rollback readiness items
+
+Key dates (proposed):
+- Soft launch (internal UAT): 2026-09-20
+- Production launch (cutover window): 2026-09-30 02:00-04:00 UTC
+- Post-launch validation window: 2026-09-30 04:00-12:00 UTC
+
+Immediate asks (this week):
+1) Security evidence: Lena, can you confirm the SOC2 control worksheet is in your vendor portal by EOD Thu (2026-09-03)? Owner: CardiaTech security (Lena).
+2) Performance eval: Devin to run the 10k token throughput test against the staging endpoint and share traces by Mon 9/7. Owner: Devin Park.
+3) Runbook review: Marissa will circulate runbook draft (CT_cutover_runbook_v2.pdf). Please flag any rollback steps you want added. Owner: Marissa Cole.
+
+I'll host the weekly MAP checkpoint on Fridays at 11am PT (starting 9/3). If that works I will send a recurring invite.
+
+Thanks,
+Jordan Blake
+Account Executive
+Redwood Inference
+---
+Attachments: CardiaTech_MAP_v1.xlsx (spreadsheet), CT_cutover_runbook_v2.pdf (PDF), cutover-checklist.docx (doc)
+
+----
+From: Lena Ortiz <lena.ortiz@cardiatech.com>
+To: Jordan Blake <jordan.blake@redwood.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Devin Park <devin.park@cardiatech.com>
+Date: Thu, 3 Sep 2026 08:45:00 -0700
+Subject: Re: Prelaunch schedule - MAP kickoff and weekly checkpoints
+
+Jordan —
+
+Thanks for pulling this together. Quick answers:
+- SOC2 evidence: Upload scheduled for 9/3 EOD; I'll confirm when live.
+- Throughput tests: Devin will run the test on 9/6 and share results.
+- Runbook: we'll review and propose two rollback variants (Hot swap + DNS rollback).
+
+A couple of items to add to the MAP:
+- Data retention and purge verification (legal needs a note) — Owner: CardiaTech Legal (TBD).
+- SAML SSO switchover smoke tests — Owner: Devin.
+
+Recurring meeting time 11am PT on Fridays works. Please add a calendar invite.
+
+Appreciate it,
+Lena
+Director of Ops
+CardiaTech Inc.
+
+----
+From: Marissa Cole <marissa.cole@redwood.com>
+To: Jordan Blake <jordan.blake@redwood.com>, Lena Ortiz <lena.ortiz@cardiatech.com>
+Cc: Karthik Iyer <karthik.iyer@redwood.com>
+Date: Mon, 7 Sep 2026 10:02:00 -0700
+Subject: Re: Prelaunch schedule - MAP kickoff and weekly checkpoints
+
+Bringing in the cutover/runbook details we agreed during the ops sync. High-level runbook sections attached (CT_cutover_runbook_v2.pdf):
+- Pre-cutover: config freeze, final sync, notification checklist (15m before window)
+- Cutover steps: start green traffic to staging model variant, route 10% traffic for 20m, verify latency/error budget, then ramp to 100% if all checks pass
+- Rollback: immediate rollback plan via traffic split reversion + DNS TTL reduction, and a fallback region plan (ap-southeast-1 standby)
+
+Action updates:
+- Marissa: I'll own the runbook during cutover and run the post-launch validation checklist.
+- Jordan: please confirm the final model variant names we will serve in production and the expected token sizes for load test (so I can update thresholds).
+
+I added two new files to the shared doc: runbook checklist and failure-mode decision tree.
+
+Cheers,
+Marissa Cole
+Customer Success Manager
+Redwood Inference
+
+----
+From: Karthik Iyer <karthik.iyer@redwood.com>
+To: Marissa Cole <marissa.cole@redwood.com>, Jordan Blake <jordan.blake@redwood.com>, Lena Ortiz <lena.ortiz@cardiatech.com>
+Date: Wed, 9 Sep 2026 09:18:00 -0700
+Subject: Re: Prelaunch schedule - MAP kickoff and weekly checkpoints
+
+Quick note from me: good progress. A couple of asks from the leadership side before we lock dates:
+- Need an exec decision on a 30% launch discount (CardiaTech was offered as part of the renewal conversation). Jordan, please confirm the commercial ask so I can greenlight.
+- Confirm fallbacks: if we use apac standby, who owns escalation on-call? Marissa, can you confirm the on-call list for the cutover window?
+
+Also: please update the MAP with the current owners by EOD 9/9. Karthik will review runbook and sign off on rollback language before the final cutover.
+
+- Karthik
+Head of Sales Ops
+Redwood Inference
+
+----
+From: Jordan Blake <jordan.blake@redwood.com>
+To: Lena Ortiz <lena.ortiz@cardiatech.com>, Devin Park <devin.park@cardiatech.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>, Karthik Iyer <karthik.iyer@redwood.com>
+Date: Fri, 10 Sep 2026 16:30:00 -0700
+Subject: Weekly MAP checkpoint — 2026-09-10 summary + actions
+
+Lena / Devin / team —
+
+Summary from today’s checkpoint and next steps ahead of the cutover:
+
+Status snapshot:
+- SOC2 evidence: upload confirmed (Lena) — status: DONE
+- Throughput test: results shared; staging handled 8.7k tokens/sec with 99.9th pctl latency within SLO (Devin) — status: OK, follow-up on a specific vectorized request that spiked CPU (see notes)
+- Runbook: v2 posted, Marissa added failure-mode tree — status: REVIEWED
+
+Open action items (owners / due):
+1) Final model variant names and token profile for load test — Owner: Jordan — Due: 9/14
+2) Add legal/data-retention note to MAP + contact — Owner: CardiaTech Legal (Lena) — Due: 9/16
+3) On-call escalation list for cutover window — Owner: Marissa — Due: 9/20
+4) Commercial confirmation on launch discount — Owner: Jordan/Karthik — Due: 9/15
+
+Confirmed launch/cutover window: 2026-09-30 02:00-04:00 UTC. Cutover runbook: CT_cutover_runbook_v2.pdf attached.
+
+Next checkpoint: Friday 9/17, 11:00 AM PT (recurring invite sent). Please update the MAP spreadsheet with progress flags before the meeting.
+
+Thanks everyone — looking forward to a smooth launch.
+
+Jordan Blake
+Account Executive
+Redwood Inference
+---
+Attachments referenced in thread: CardiaTech_MAP_v1.xlsx, CT_cutover_runbook_v2.pdf, cutover-checklist.docx

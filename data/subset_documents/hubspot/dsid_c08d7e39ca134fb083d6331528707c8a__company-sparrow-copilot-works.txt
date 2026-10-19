@@ -1,0 +1,30 @@
+Sparrow Copilot Works
+
+IDE copilot that requires ultra-low-latency streaming for code completions, plus nightly large-scale embedding refresh and search index pipelines. Needs model pinning for stable releases and fallback quantized runtime for cost-sensitive background jobs.
+Background: small YC-scale startup turned scale-up; product = IDE-first copilot + repo-level search
+Primary ask: native-feel streaming in VS Code plugin + daily codebase embedding refresh for search/indexing
+Perf targets: <50ms token latency perceived in editor, 200+ concurrent dev sessions, embedding refresh of ~3M files nightly or incremental near-realtime
+Cost sensitivity: high for background jobs (embedding/indexing) — want optimize suggestions and dedicated pricing for batch pipelines
+Security: must support SSO (SAML), audit logs for admin, KMS integration for key material, US data residency for source code
+Quote from CTO: "Streaming has to feel native — anything >50ms and devs complain. Also need model pinning for rollout control."
+Prefers: model/version pinning and canary rollouts; fallbacks to quantized variants for offline/low-cost tasks
+SE note: POC will validate KV-cache reuse across streaming sessions and batching efficiency for nightly embed refresh
+Run POC: 72h throughput/latency run for embedding refresh + live IDE streaming; tech call to map VPC connectivity and compliance checklist
+embedding pipeline performance unknown
+legal wants U.S. data residency proof
+concurrency SLA for IDE streaming (perceived latency)
+sub-50ms token latency perceived in-editor for streaming completions
+support continuous batching for background embedding jobs (3M files nightly / incremental updates)
+KV/prefix caching reuse across interactive sessions
+model pinning and canary rollouts with fast rollback
+integrations: SSO (SAML), KMS, audit logging, VPC peering
+Week 0: NDA + security questionnaire completed
+Week 1: POC infra handoff + sample dataset (10k files) — baseline runs
+Week 2: 72h throughput/latency run (embedding refresh + 200 dev sessions streaming)
+Week 3: Performance tuning, batching/quantization tests
+Week 4: Executive demo + procurement discussion
+2026-01-12: Intro call (Jordan + Priya) — high-level reqs, agreed to PoC scope
+2026-01-28: Deep dive (fireflies ff-2026-01-28-5501) — architecture, VPC questions, concurrency targets
+2026-02-03: Sent security checklist + draft NDA; legal review requested data residency proof
+2026-02-05: Tech POC kickoff (fireflies ff-2026-02-05-6119) — infra handoff, sample dataset delivered
+2026-02-08: Follow-up email with PoC runbook and SSO test plan

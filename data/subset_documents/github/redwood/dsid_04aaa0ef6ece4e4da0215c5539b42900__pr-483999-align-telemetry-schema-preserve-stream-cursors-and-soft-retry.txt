@@ -1,0 +1,71 @@
+align-telemetry-schema-preserve-stream-cursors-and-soft-retry-profiles-across-py-ts-go
+
+Motivation: SDKs had subtle divergences in telemetry keys and streaming reconnect behaviour that make cross-language observability and incident triage harder. In particular: (1) telemetry field names and types were inconsistent across Python/TypeScript/Go, (2) streaming clients in TS/Go could drop/lose a cursor when a reconnect happened during a partial frame, and (3) retry defaults were aggressive for short-lived network blips and caused short-lived request storms. This PR synchronizes a compact telemetry schema, preserves stream cursor state across reconnects, and relaxes retry presets to 'soft' profiles across all three SDKs.
+
+Design summary:
+- Introduce a canonical telemetry envelope (telemetry.v=1 -> telemetry.schema=redwood_sdk_v1) and add typed fields: request_id, sdk.name, sdk.version, route.hash, client.sequence_hint. Old keys are mapped in a one-time shim for backwards compatibility.
+- Streaming: add a small resume protocol that atomically persists the last completed frame id and pending buffer during reconnect; implement idempotent resume handshake in TS and Go streaming clients, and ensure Python client exposes the same resume token.
+- Retries: change default retry/secondary backoff parameters to be less aggressive (lower attempt multiplier, wider jitter window, short circuit on HTTP 429->respect Retry-After).
+
+Implementation notes:
+- Python: sdks/python/redwood/telemetry.py added telemetry envelope; streaming client updated to expose resume_token; bumped python SDK to 0.12.5.
+- TypeScript: packages/sdk-stream/src/resume.ts implements client-side cursor preservation; telemetry mapper added; bumped ts SDK to 1.27.1.
+- Go: sdk-go/telemetry/map.go and stream/resume.go add mapping and resume support; adjusted retry.Backoff presets; bumped go SDK to v1.8.1.
+
+Commits (high-level):
+- refactor(telemetry): canonical telemetry envelope and compat shim
+- feat(stream): resume-token persistence and atomic handshake (ts/go/py)
+- fix(retry): soften default backoff and add Retry-After handling
+- test: cross-language integration tests for resume and telemetry propagation
+- docs: API surface update and migration notes
+
+Tests & CI: unit test additions for all three SDKs, an integration matrix job that exercises reconnect/resume with a mocked server, and telemetry contract tests. The CI run initially had a flaky e2e for TS streams (timeout on first run) which was re-run; all checks passed on the second run.
+
+Files changed (high level):
+- sdks/python/redwood/telemetry.py
+- sdks/python/redwood/streaming/client.py
+- packages/sdk-stream/src/resume.ts
+- packages/sdk-stream/src/telemetry-mapper.ts
+- sdk-go/telemetry/map.go
+- sdk-go/stream/resume.go
+- sdk-go/retry/backoff.go
+- docs/sdks/migration/telemetry.md
+- tests/integration/stream-resume-matrix.yaml
+
+Migration & compatibility: The telemetry shim maps legacy keys (trace_id -> telemetry.request_id, SDK -> sdk.name) for one release cycle; no customer-facing breaking changes expected. Streaming resume uses a resume_token that is sent by the client on reconnect; servers that don't understand it fall back to full restart, so behavior is graceful.
+
+Release plan: squash-merge to main, then publish patch releases for py/ts/go SDKs. Bump notes: py 0.12.4 -> 0.12.5, ts 1.27.0 -> 1.27.1, go v1.8.0 -> v1.8.1
+
+Review summary & discussion:
+- Marco: "Telemetry mapping looks sane; can we add a metric for number of resume attempts?" Author: "Added sdk.resume.attempts counter in telemetry patch; included unit tests."
+- Sophie: "TS resume handshake needs a deterministic timeout for partial frame reassembly." Author: "Added a 250ms default reassembly window with override in client options."
+- Diego (security): "Confirm resume token doesn't leak sensitive prompt text." Author: "Resume token contains only sequence ids and short checksums; no payload is stored or transmitted."
+
+CI notes:
+- unit-tests (py): pass
+- unit-tests (ts): pass
+- unit-tests (go): pass
+- integration/stream-resume-matrix: initial fail (ts timeout) -> rerun -> pass
+- lint: pass
+
+Merge: merged with squash via GitHub UI; commit message prefixed with "sdk: sync telemetry & resume across sdks". Post-merge: published SDK patch releases and updated SDK compatibility table in docs.
+
+Observability: added a dashboard query snippet to Console docs (docs/sdks/migration/telemetry.md) showing join keys to use when correlating cross-lang traces.
+
+Follow-ups (tracked in ENG-2021):
+- monitor resume success rate and surface alert if resume attempts exceed 2% of stream sessions.
+- consider server-side resume token acknowledgement to reduce fallback restarts.
+
+Overall impact: improved cross-language parity for telemetry and streaming ergonomics; fewer noisy retries during transient network issues; better observability for triage.
+Backwards-compatible telemetry schema alignment for SDKs; streaming cursor preservation on reconnect; softer retry defaults to reduce downstream rate spikes. Patch-level SDK bumps (py/ts/go).
+refactor(telemetry): add canonical telemetry envelope and compat shim
+feat(stream): implement resume-token persistence and handshake (py/ts/go)
+fix(retry): soften default backoff and honor Retry-After on 429
+test: add cross-language integration matrix for stream resume
+docs: add migration guide and release notes
+Marco Ruiz: Telemetry mapping looks sane; can we add a metric for number of resume attempts?
+Evelyn Park: Added sdk.resume.attempts counter and tests in telemetry unit suite.
+Sophie Turner: TS resume handshake needs deterministic timeout for partial frame reassembly.
+Evelyn Park: Added 250ms default reassembly window with client override option.
+Diego Hernandez (security): Confirm resume token doesn't leak sensitive prompt text.
+Evelyn Park: Resume token contains only frame ids and checksums; no payload; updated docs to clarify.

@@ -1,0 +1,102 @@
+Live channel pacing regression impacting streaming SDK - quick mitigations and next steps
+
+From: Alex Torres <alex@apexsoft.com>
+To: Soojin Lee <soojin@redwood.ai>
+Date: Tue, 29 Sep 2026 08:13:21 -0700
+Subject: Realtime channel: intermittent slow tokens in streaming SDK
+
+Hi Soojin,
+
+We're seeing a regression this morning on our production LiveChat channel (env: prod-us-east). Starting ~07:40 PDT, streamed responses from Redwood's streaming endpoint are arriving in long pauses — partial chunks of tokens delayed by 1.5-3s each. This is breaking our UI's progressive render and increasing apparent latency for end users.
+
+Impact: ~30% of sessions show >2s pause between chunks; user complaints and one automated alert from our uptime check.
+
+What we've tried: restarted our client workers, reduced request concurrency, and downgraded max_tokens to 256 — no change.
+
+Helpful IDs:
+- sample request-id: rwd-req-61e7c9f2
+- client SDK version: 1.14.2 (web)
+
+I attached a short client-side trace and the SDK logs. Can your ops team confirm whether this matches any backend artifact (edge congestion, KV cache misses, or deployment rollout)? We need quick mitigations we can apply client-side if possible.
+
+Thanks,
+Alex
+Support Lead, ApexSoft
+--
+Attachment: apex_logs_20260929.txt (text/plain, 48KB)
+From: Soojin Lee <soojin@redwood.ai>
+To: Alex Torres <alex@apexsoft.com>
+Cc: Kyle Murray <kyle.m@apexsoft.com>
+Date: Tue, 29 Sep 2026 08:35:02 -07:00
+Subject: Re: Realtime channel: intermittent slow tokens in streaming SDK
+
+Hi Alex — thanks for the signal and the traces. We see the sample request-id on our side and are triaging now.
+
+Short-term guidance you can try immediately (client-side) while we investigate infra traces:
+1) Enable client fallback to shorter-chunk buffering: set streaming.chunk_ms to 1500 (was 500); this lets the UI assemble partial tokens locally if network pacing is variable.
+2) Use the non-streaming finite-response endpoint for long-running conversations (model=redwood-medium) where progressive tokens aren't essential.
+3) If you have session pinning to a specific edge region, try switching to region=us-west-1 to test routing differences.
+
+We're opening a priority support ticket (SR-7894) and coordinating with infra. I'll update you within the hour with any platform-side mitigations.
+
+Soojin
+Senior Solutions Engineer, Redwood Inference
+--
+Attachment: support_trace_20260929.zip (log bundle, 6MB)
+From: Soojin Lee <soojin@redwood.ai>
+To: Ben Carter <ben@redwood.ai>, Marissa Cole <marissa@redwood.ai>
+Date: Tue, 29 Sep 2026 09:02:11 -07:00
+Subject: Fwd: Realtime channel: intermittent slow tokens in streaming SDK — urgent triage
+
+Team — forwarding customer ApexSoft (prod-us-east) reporting a streaming pacing regression causing 1.5-3s pauses between token chunks. Customer provided request-id rwd-req-61e7c9f2 and attached client logs + a bundled trace.
+
+Initial client-side mitigations suggested: increase chunk_ms to 1500, fall back to non-streaming finite responses, try region us-west-1.
+
+Ask list (please action):
+- Infra (Ben) — check edge shard health and recent routing policy changes for us-east (especially any new quantized variant rollout or kernel change around 07:30-08:00 PDT). Look for increased KV cache miss rates or elevated queueing on the realtime workers.
+- Runtime (Marissa) — verify whether we rolled out a kernel/quantization change in the last 12 hours; check sequence-length kernel selection logs for anomalies.
+- Recommendations — confirm whether a temporary rollback or routing change (route ApexSoft to stable model variant or different pool) is feasible without a broader impact.
+
+Customer expects an update within the hour. SR-7894 created; linking drive bundle: https://drive.redwood.ai/sr-7894
+
+Thanks — Soojin
+
+---------- Forwarded message ----------
+From: Alex Torres <alex@apexsoft.com>
+Date: Tue, Sep 29, 2026 at 8:13 AM
+Subject: Realtime channel: intermittent slow tokens in streaming SDK
+To: Soojin Lee <soojin@redwood.ai>
+
+> We're seeing a regression this morning on our production LiveChat channel (env: prod-us-east). Starting ~07:40 PDT, streamed responses from Redwood's streaming endpoint are arriving in long pauses — partial chunks of tokens delayed by 1.5-3s each.
+> 
+> Impact: ~30% of sessions show >2s pause between chunks; user complaints and one automated alert from our uptime check.
+> 
+> Helpful IDs: rwd-req-61e7c9f2, SDK 1.14.2 (web).
+> 
+> Attachment: apex_logs_20260929.txt
+
+From: Ben Carter <ben@redwood.ai>
+To: Alex Torres <alex@apexsoft.com>, Soojin Lee <soojin@redwood.ai>
+Cc: Marissa Cole <marissa@redwood.ai>
+Date: Tue, 29 Sep 2026 13:02:00 -07:00
+Subject: Re: Realtime channel: intermittent slow tokens in streaming SDK — actions taken
+
+Alex / Soojin — quick update from infra and runtime after triage: we've identified a traffic shift on the us-east realtime cluster that increased inter-request batching latency for streaming clients pinned to a small set of edge nodes. Root cause appears to be a combination of a recent experiment that broadened batch windows for efficiency plus an edge routing policy that concentrated ApexSoft sessions to a hot subset of nodes.
+
+Actions we performed (platform-side):
+- Routing tweak: rebalanced ApexSoft sessions away from the hot subset to additional edge pools (small, safe change) — immediate improvement observed.
+- Reverted the batch-window experiment for the affected pool (reduced batch window from 40ms back to 10ms for streaming paths).
+- Warmed KV caches for the affected shards and cleared a stale kernel selection flag that was causing unnecessary path selection overhead.
+
+Customer guidance (client-side) we still recommend:
+1) Apply streaming.chunk_ms=1500 temporarily to smooth UI rendering during residual variance.
+2) For critical flows, use the non-streaming finite-response call until you can validate stability in the next 24 hours.
+3) If you can, route a small percentage of traffic to region=us-west-1 as a quick A/B.
+
+We've kept SR-7894 open and will monitor for 24 hours. We'll follow up with a short postmortem within 72 hours that includes timeline, root cause detail, and mitigation to prevent experiment-induced routing concentration. Apologies for the impact — we'll coordinate crediting with your account lead if required.
+
+Ben Carter
+Senior Technical Account Manager, Redwood Inference
+--
+References: SR-7894, drive: https://drive.redwood.ai/sr-7894
+Attachments: support_trace_20260929.zip, apex_logs_20260929.txt

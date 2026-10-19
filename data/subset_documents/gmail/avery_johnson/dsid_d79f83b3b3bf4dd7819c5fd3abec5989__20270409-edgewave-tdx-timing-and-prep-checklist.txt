@@ -1,0 +1,109 @@
+Next steps: technical deep dive (60-90m) — timing & draft agenda
+
+From: Avery Johnson <avery.johnson@redwood.ai>
+To: Tom Reynolds <tom.reynolds@edgewave.com>, Samantha Li <sam.li@edgewave.com>
+Cc: Ben Carter <ben.carter@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Date: Fri, 09 Apr 2027 10:15:00 -0700
+Subject: Next steps: technical deep dive (60-90m) — timing & draft agenda
+
+Hi Tom & Samantha,
+
+Thanks again for taking the time today — really useful call. Quick recap from our side and proposed next steps so we can lock a technical deep dive with our ML/infra engineers:
+
+Summary (1 line): you want to validate Redwood’s serving characteristics for latency-sensitive prompt completion at 1–2k qps equivalent traffic patterns and discuss data residency and audit logs.
+
+Suggested next step: 60–90 minute technical deep dive with our ML + infra team to walk architecture, performance expectations, and a short lab/demo on a representative workload.
+
+Proposed slots (Pacific Time):
+- Tue Apr 13, 10:00–11:30am PT
+- Wed Apr 14, 1:00–2:30pm PT
+
+Draft agenda (60–90m):
+1) 5m — Introductions & goals for the session
+2) 20m — Architecture overview (model variants, routing/fallback, VPC options) — Avery
+3) 20m — Runtime deep dive (batching, KV cache, quantization tradeoffs) — Ben
+4) 15m — Live perf demo & telemetry (latency breakdowns, tracing) — Marissa
+5) 10–20m — Q&A + next actions (rollout plan / POC scope)
+
+I attached a one-page agenda (EdgeWave-tdx-agenda-v1.docx) and included HubSpot deal link in case you want to add notes. If neither slot works, share 2–3 windows that do and we’ll fit the team.
+
+Thanks — looking forward to it.
+
+Avery Johnson
+Account Executive, Redwood Inference
+avery.johnson@redwood.ai
+(415) 555-0198
+
+---
+Attachment: EdgeWave-tdx-agenda-v1.docx (document stub)
+
+From: Tom Reynolds <tom.reynolds@edgewave.com>
+To: Avery Johnson <avery.johnson@redwood.ai>, Samantha Li <sam.li@edgewave.com>
+Cc: Ben Carter <ben.carter@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Date: Fri, 09 Apr 2027 11:02:00 -0700
+Subject: Re: Next steps: technical deep dive (60-90m) — timing & draft agenda
+
+On Fri, Apr 9, 2027 at 10:15 AM Avery Johnson <avery.johnson@redwood.ai> wrote:
+> Thanks again for taking the time today — really useful call. Quick recap from our side and proposed next steps so we can lock a technical deep dive with our ML/infra engineers:
+
+Thanks Avery — that summary is spot on.
+
+We can do Tue Apr 13 10:00–11:30am PT. I'll be joined by Samantha (ML lead) and Julian (platform eng). Samantha — I’ve looped you so you have context.
+
+Couple of asks from our side for the session:
+- Can you include a short segment on how Redwood handles long-running KV cache warmups and eviction behavior? We saw some variability in a POC last year and want to understand tradeoffs.
+- We'd like a brief discussion of RBAC / audit log retention and whether logs include token-level tracing.
+
+If you can confirm the invite and share a calendar link, we’ll accept.
+
+Tom Reynolds
+Head of Solutions — EdgeWave
+Tom.Reynolds@edgewave.com
++1 617 555 0102
+
+From: Avery Johnson <avery.johnson@redwood.ai>
+To: Ben Carter <ben.carter@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Cc: Tom Reynolds <tom.reynolds@edgewave.com>, Samantha Li <sam.li@edgewave.com>
+Date: Fri, 09 Apr 2027 12:05:00 -0700
+Subject: FW: Next steps: technical deep dive (60-90m) — timing & draft agenda
+
+Ben / Marissa — Tom confirmed Tue Apr 13 10:00–11:30am PT and wants the items below included. Can you take point on the technical segments? I attached the draft agenda; please review and suggest edits.
+
+Tom's asks:
+- KV cache warmup/eviction behavior and mitigation strategies (Ben)
+- RBAC and audit log retention + token-level tracing coverage (Marissa)
+
+Prep checklist:
+- Ben: short slide + 10min demo showing KV cache warmup on a 2k qps replay (can be simulated).
+- Marissa: 5–10m on audit/auditing, retention, and who has access in Private deployments; include sample log fields we surface.
+- I'll cover high-level routing, model variants, and can run the short perf demo if we need to exercise failover.
+
+Please reply with any blockers or if you want to split topics differently. Also note: EdgeWave asked for brief POC/rollout next steps at the end — keep 10–15 minutes for that.
+
+Thanks — aiming to send a calendar invite in ~15m once you confirm.
+
+Avery
+
+From: Ben Carter <ben.carter@redwood.ai>
+To: Avery Johnson <avery.johnson@redwood.ai>, Marissa Cole <marissa.cole@redwood.ai>
+Cc: Tom Reynolds <tom.reynolds@edgewave.com>, Samantha Li <sam.li@edgewave.com>
+Date: Fri, 09 Apr 2027 14:02:00 -0700
+Subject: Re: Next steps: technical deep dive (60-90m) — timing & draft agenda
+
+On Fri, Apr 9, 2027 at 12:05 PM Avery Johnson <avery.johnson@redwood.ai> wrote:
+> Ben / Marissa — Tom confirmed Tue Apr 13 10:00–11:30am PT and wants the items below included. Can you take point on the technical segments?
+
+All good from my side — I’ll own KV cache warmup/eviction and demo. Plan: 8–10m slides, 8–10m replay on a 2k qps trace using a shortened prompt set, then a short table of tuning levers (batch size, prefix cache, quantization profile).
+
+Marissa — happy to coordinate the log fields we surface so we don't duplicate slides.
+
+Avery — I created the calendar event and invited EdgeWave. Link below (calendar invite stub). I attached the v1 agenda that Avery originally sent and added a one-line POC next-step slot at the end.
+
+Calendar: https://calendar.redwood.com/event?eid=EW-4821-tdx
+
+See you Tue.
+
+Ben Carter
+Senior Infra Engineer, Redwood Inference
+ben.carter@redwood.ai
+Attachment: EdgeWave-tdx-agenda-v1.docx (updated draft; document stub)

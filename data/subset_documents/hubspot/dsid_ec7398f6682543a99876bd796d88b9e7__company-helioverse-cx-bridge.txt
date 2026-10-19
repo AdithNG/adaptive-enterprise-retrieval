@@ -1,0 +1,39 @@
+Helioverse CX Bridge
+
+Account background: global DTC retailer, strong presence in NA/EU/APAC. Multi-brand support org (~350 agents). Currently using mix of outsourced vendors + narrow vendor NLP for routing. Wants to centralize multilingual automation and reduce TTR by 30-40%.
+
+Discovery highlights:
+- 2026-02-24: Intro call (Jordan + Aisha) w/ Head of CX Ops (M. Nguyen) and Eng PM (R. Silva). Quick wins interest: ticket summarization + agent suggestions.
+- 2026-03-02: Technical deep-dive with infra and security (Aisha, infra lead). Customer asked about VPC private control plane and on-prem edge for EU data residency.
+- 2026-03-05: Fireflies transcript ff_2026-03-05_helio-dive (linked). Customer: "need tone preservation by locale — French in France wants formal, Quebec more casual".
+- 2026-03-08: Demo of hosted API streaming + tool-calling prototype. SE notes: quality good for EN/ES, FR and JP show hallucination on ticket meta. Need eval on domain-adapted smaller model + fallback to larger for edge cases.
+
+Requirements summary (from call notes):
+- Workload: agent-assist real-time suggestions (multichannel chat + voice->text), ticket summarization at end-of-interaction, automated tool-calls (order lookup, refund initiation).
+- Latency/throughput targets: p95 latency for suggestions < 300ms; batch summarization SLA within 5s; scale target 400 concurrent agents (peak 1200 agents during promos).
+- Cost sensitivity: mid-high. Looking for predictable reserved capacity for promos + burst.
+- Model preferences: multilingual models with locale-aware tone control, deterministic summarization for compliance, ability to pin model versions. Want explicit fallback routing to larger model variant on confidence threshold.
+- Routing/fallback: region-aware routing (EU traffic must prefer EU-resident infra), tiered fallback (small quantized model -> medium -> full-precision).
+- Security/compliance: SSO/SAML, audit logs for all token-level actions, KMS-managed keys for model inputs/outputs, data residency for EU/UK, 7-year retention for selected transcripts for legal disputes.
+
+POC plan / milestones:
+- POC scope: 6-week eval: (1) real-time agent-assist on EN/ES/FR (5 pilot agents), (2) nightly batch summarization and indexing to search, (3) tool-calling flow for refund lookup to sandbox order API.
+- Metrics to validate: suggestion latency p95, token-cost per session, summarization ROUGE/precision on labeled set, failure rate on tool-calls, regional routing accuracy.
+- Infrastructure: customer will provide VPC peering and a small on-prem EU edge for residency testing. Redwood to provide dedicated pool config and quantization profiles.
+- 2026-03-10: POC kickoff scheduled. Legal requested MSA redline; shared pricing deck (drive: /Drive/Helioverse/Redwood_pricing_v2).
+
+Risks/concerns noted by customer:
+- "We cannot have a 3-4s hit during Black Friday spikes" — needs proven autoscale + burst with predictable costs.
+- Auditability: must be able to trace which model version suggested an agent edit.
+
+Stubs/linked artifacts:
+- Fireflies: ["ff_2026-03-05_helio-dive", "ff_2026-02-24_kickoff-intro"]
+- Gmail threads: ["thread-1a9b2c-helio-legal", "thread-2b7f4d-poc-kickoff"]
+- Drive docs: ["https://drive.google.com/drive/folders/helioverse/redwood_poc_playbook", "https://drive.google.com/file/d/helio-pricing-v2.pdf"]
+- Jira tickets: ["INF-3421", "SEC-7730"]
+
+AE notes / next immediate actions (choppy):
+- send POC checklist + sample ingestion script to infra (Aisha)
+- confirm on-prem edge sizing numbers by 3/16
+- legal to confirm redline response by 3/19
+- run controlled load test simulating 1k agents during 3/22 infra review

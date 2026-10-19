@@ -1,0 +1,56 @@
+Initiative threading and capability mapping playbook
+
+Goal:
+Create a repeatable playbook and lightweight registry for threading company-level initiatives down to team-level work and mapping them to capabilities, metrics, and dependencies. The intent is to reduce ambiguity when translating strategic pillars into quarterly commitments and to provide a single source of truth for cross-functional trade-offs.
+
+Scope:
+- In scope: company-level initiatives, cross-functional dependencies, capability mapping (runtime, console, dedicated, private), decision rubric, rollout guardrails, and a living registry accessible from the roadmap board.
+- Out of scope for this ticket: implementation of new metrics collection pipelines (separate ENG project).
+
+Success metrics (what done looks like):
+1) A published playbook page and initiative registry table in Confluence with owner, top 3 milestones, expected impact metric, and primary dependencies.
+2) Mapping matrix that ties 12 company initiatives to the three strategic pillars and top 5 platform capabilities.
+3) < 2 review cycles to reach alignment with Eng, Design, and Sales leadership.
+4) Two pilot initiatives threaded across teams during the next planning cycle with documented decisions and dependency resolutions.
+
+Approach and components:
+1) Intake rubric: a 6-question form (strategic alignment, customer impact, revenue/ops impact, estimated effort, primary dependencies, launch risk) that yields a 1–9 priority score.
+2) Capability map: canonical list of platform capabilities (serving runtime, caching/batching, kernel selection, routing, dedicated autoscale, private deployment, console observability, cost tooling). Each initiative gets 1–3 capability tags.
+3) Initiative registry: a single table (Confluence + CSV export) with columns: Initiative key, owner, strategic pillar, capability tags, top metrics, top dependencies (keys), risk level, rollout windows, and notes.
+4) Decision rubric: clear thresholds for canary vs. full rollout, required contract with Sales for customer-impacting changes, and fallback model policy for runtime regressions.
+5) Governance: monthly cross-functional sync (PM/ENG/Design/Support) for initiatives flagged as high risk or high dependency.
+
+Trade-offs considered:
+- Lightweight registry vs. heavy process: we prioritize discoverability and speed; intake form must be quick (<10 mins) to avoid bureaucratic slowdown.
+- Centralized ownership vs. team autonomy: playbook enforces a small set of mandatory fields but leaves execution details to team owners.
+- Manual tagging vs. automated detection: start manual to capture context, add automation in later iteration when patterns stabilize.
+
+Rollout plan:
+- Week 0–2: Draft intake rubric and registry schema; validate with Eng leads and Solutions.
+- Week 3: Publish Confluence playbook; create roadmap board view and labels in Linear.
+- Week 4–8: Pilot on two initiatives (one runtime-focused, one console/product-focused). Capture lessons and refine.
+- Week 9: Finalize playbook and add to onboarding docs for PMs and EMs.
+
+Owner responsibilities:
+- PM owner: ensure initiative entry is complete, maintain milestone updates, escalate dependencies.
+- ENG owner: provide dependency windows and highlight capacity constraints early.
+- Design owner: confirm UX milestones and sign off on any console changes.
+
+Tooling and artifacts:
+- Confluence playbook page (canonical source).
+- CSV export of registry for program managers and reporting.
+- Linear labels: roadmap:initiative, roadmap:pillar-(x), roadmap:capability-(y).
+- Templates: intake form, milestone checklist, risk assessment checklist.
+
+Next steps (this ticket):
+- Finalize intake rubric (action: Aisha, due 2026-02-19).
+- Create Confluence skeleton and spreadsheet schema (action: Marco, due 2026-02-22).
+- Schedule validation sessions with Eng/Design leads (action: Aisha, complete by 2026-02-26).
+
+1) Playbook page published in Confluence; 2) Registry CSV schema exists and is importable to the roadmap board; 3) Two pilot initiatives have entries with owners and dependencies logged; 4) Sign-off from Eng and Design leads (emails/threads linked)
+2026-02-16 - Aisha: Drafted the 6-question intake rubric; shared with Eng leads for quick feedback. Main concern: how to score effort consistently across infra vs. product work.
+2026-02-18 - Daniele (Eng): Suggested adding a required field for 'expected GPU-hours' or a rough estimate for Dedicated/private infra work. Marked as dependency for ENG-3421.
+2026-02-19 - Marco: Updated Confluence skeleton and added capability tag list. Link: https://confluence.redwood.ai/display/STRAT/Initiative+Threading+Template. Requested Design review next week.
+2026-02-21 - Priya (Design): Reviewed registry columns; requested an additional 'UX Impact' flag for console changes. Accepted as optional tag.
+2026-02-24 - Aisha: Pilot initiatives selected (PM-20001 operationalizing-company-objectives and ENG-1842 runtime-batching-caching-optim). Scheduled cross-functional sync 2026-02-28.
+2026-02-27 - Blocker noted by Eng: ENG-3421 needs capacity estimates before we finalize rollout windows. Reassigned to ENG lead for input (blocked until 2026-03-04).

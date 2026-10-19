@@ -1,0 +1,135 @@
+Connectivity options for EdgeBank private deploy — control plane vs data plane
+
+From: Jana Perez <jana.perez@edgebank.com>
+To: Ben Carter <ben_carter@redwood.com>, Kimberly Park <kimberly_park@redwood.com>
+Cc: devops@edgebank.com
+Date: 2026-09-18T09:12:00-07:00
+Subject: Re: connectivity for private deploy — quick topology ask
+
+Hi Ben / Kim,
+
+Thanks again for the walkthrough earlier. Were finalizing the network architecture for our Redwood Private deployment (production inference endpoints in us-east-1 and eu-west-1) and want a concise recommendation: for our use-case (regulated financial workflows with strict egress auditing, sub-100ms inter-region control calls, and up to ~400MB/s sustained traffic per region) should we:
+
+- use AWS VPC Peering between accounts/regions where possible,
+- expose endpoints via AWS PrivateLink (interface endpoints) per-region, or
+- rely on site-to-site VPN tunnels from our Equinix colo to each region (BGP + IPsec)?
+
+Other constraints: 
+- We must show immutable egress IPs for outbound model calls for allowlisting with third parties.
+- We prefer minimal changes to our on-prem network appliance set (we currently run BGP-capable routers in Equinix).
+- We need a plan for HA and predictable failover across regions.
+
+Attached is a simplified infra diagram. Can you outline tradeoffs + a recommended staged approach (pilot -> prod) and any gotchas we should watch for?
+
+Appreciate it,
+Jana
+VP, Cloud Architecture
+EdgeBank
+(attachment: edgebank_infra_diagram.png)
+
+From: Ben Carter <ben_carter@redwood.com>
+To: Jana Perez <jana.perez@edgebank.com>
+Cc: Kimberly Park <kimberly_park@redwood.com>, Marcus Lin <marcus_lin@redwood.com>
+Date: 2026-09-18T11:03:00-07:00
+Subject: Re: connectivity for private deploy — quick topology ask
+
+Hi Jana,
+
+Thanks for the clear constraints and the diagram — helpful. High-level summary first, then a recommended phased plan.
+
+Quick tradeoffs (short):
+- VPC Peering:
+  * Pros: Lowest latency intra-region/peer-account; straightforward routing; no per-flow NAT by default.
+  * Cons: No cross-region peering without inter-account Transit solutions; scales poorly as number of accounts/regions grows (mesh complexity); does not expose single stable egress IP for external services.
+
+- PrivateLink (interface endpoints):
+  * Pros: Endpoint sits in your VPC subnets; stable endpoint ENIs that can be fronted by NLB or used with AWS endpoint policies; reduces blast radius (service owner exposes only the interface).
+  * Cons: Per-region setup, per-AZ ENIs, cost per hour/GB; not ideal for very high sustained throughput unless fronted by dedicated NLB or regional load-balancing; cross-account access is supported but you still need endpoint configuration per region.
+
+- Site-to-site (S2S) VPN with BGP (from Equinix):
+  * Pros: Familiar operational model for your team; gives you control-plane and data-plane via routable prefixes; can provide stable egress IPs via NAT at your edge; easy to put behind your firewall/IDS.
+  * Cons: IPsec MTU issues, variable throughput on managed VPN, need HA tunnels per region and careful BGP path preference to avoid asymmetric routing. For large sustained throughput, youll likely look at Direct Connect or colocation + accelerated VPN appliances.
+
+Recommendation (opinionated, staged):
+1) Control plane over PrivateLink (pilot in us-east-1):
+   - Expose Redwood control/management endpoints via PrivateLink in each region. This gives you a stable, least-privileged control channel and avoids touching your public egress. PrivateLink keeps the control plane traffic entirely in the region and supports endpoint policies for RBAC.
+2) Data plane over BGP-enabled S2S (pilot to start in us-east-1):
+   - Use your existing Equinix routers to terminate BGP sessions into the VPC (via VGW/Transit Gateway + Direct Connect if bandwidth requires). This gives you predictable routing and the ability to NAT at your colocation to present immutable egress addresses.
+3) Use Transit Gateway (or cloud carrier interconnect) as the regional backbone if you need cross-account/cross-VPC scale:
+   - For multi-region scaling (eu-west-1), prefer TGW + Transit Gateway Inter-Region Peering or a central hub to avoid mesh peering. This keeps route tables manageable and lets you centralize inspection/NAT if desired.
+4) Fallback and HA:
+   - PrivateLink for the control plane acts as a fallback if a VPN path degrades; you can configure health checks and failover to another region. For data-plane HA, plan active/active BGP with local preference tuning and a well-defined path-preference matrix.
+
+Gotchas weve seen:
+- MTU/path MTU discovery failures when IPsec + VXLAN are layered; test with your packet sizes (we push large payloads frequently).
+- Asymmetric routing when you mix TGW and direct peering: keep source/destination checks and return path determinism in mind.
+- PrivateLink throughput: many teams underestimate per-ENI bandwidth limits if youre doing large concurrent streams; front it with NLB and ensure cross-AZ capacity.
+- Auditing: ensure flow logs and VPC ENI-level logging are enabled so you can produce forensics for compliance.
+
+If youd like, we can draft a minimal pilot MOP (network changes, BGP community settings, mtur test plan). Ill loop in Marcus to call out performance tuning and Kimberly for operational runbook items.
+
+Best,
+Ben Carter
+Senior Solutions Engineer | Redwood Inference
+ben_carter@redwood.com | +1 (415) 555-0137
+
+From: Kimberly Park <kimberly_park@redwood.com>
+To: Ben Carter <ben_carter@redwood.com>, Marcus Lin <marcus_lin@redwood.com>
+Date: 2026-09-19T08:42:00-07:00
+Subject: Re: connectivity for private deploy — quick topology ask
+
+Ben / Marcus,
+
+Adding operational considerations and a suggested pilot checklist:
+
+Operational bullets:
+- IPAM and route ownership: decide whether EdgeBank owns the on-prem CID space advertised into the cloud or if we allocate a separate overlay. Avoid overlapping CID ranges.
+- Observability: require VPC Flow Logs at the subnet ENI level + VPN/NVA telemetry shipped to your SIEM. Include packet captures during pilot windows.
+- Throttling & rate limits: test sustained concurrency against model endpoints; if we see request-level throttles, well need to introduce sticky sessions or connection pooling at the NLB/NVA layer.
+- Egress NAT: to provide immutable egress IPs, place NAT64/NAT64-equivalent at the colocation (recommended) and advertise those IPs via BGP to cloud region.
+- Security: mutual TLS for service-to-service control plane, and mTLS + client certs on PrivateLink if you want defence-in-depth.
+
+Pilot checklist (minimum viable):
+1) Setup PrivateLink interface endpoint in us-east-1 and grant access to EdgeBank AWS account (endpoint acceptance flow).
+2) Configure BGP session from Equinix router to a TGW/VGW in us-east-1; advertise EdgeBank prefixes.
+3) Run perf tests: 1h steady-state at 50% expected throughput, 30m spike tests with max payloads, and MTU flood test.
+4) Observability baseline: enable flow logs and sampling pcap, demo dashboard for compliance report.
+5) Failover test: shut VPN1 down and validate control plane over PrivateLink +/- failover routing.
+
+Costs we should call out: PrivateLink per-GB + endpoint hours, TGW attachments, and data-transfer for inter-region traffic. If EdgeBank wants true predictable bandwidth for sustained 400MB/s, discuss Direct Connect or colocated NICS with Equinix Fabric instead of VPN.
+
+Ill prepare a short MOP with exact BGP community hints and MTU recommendations once Ben shares the expected packet sizes.
+
+-Kim
+Kimberly Park
+Manager, Customer Solutions | Redwood Inference
+
+From: Ben Carter <ben_carter@redwood.com>
+To: Jana Perez <jana.perez@edgebank.com>
+Cc: Kimberly Park <kimberly_park@redwood.com>, Marcus Lin <marcus_lin@redwood.com>, Rishi Malhotra <rishi_malhotra@redwood.com>
+Date: 2026-09-21T15:18:00-07:00
+Subject: Re: connectivity for private deploy — quick topology ask
+
+Hi Jana — quick follow-up with a practical path forward and next steps.
+
+Recommended plan (concrete):
+1) Pilot (2 weeks):
+   - PrivateLink: create interface endpoints for Redwood control APIs in us-east-1; acceptance flow granted to EdgeBank account.
+   - VPN BGP: terminate two BGP IPsec tunnels from Equinix into a TGW (active/active), advertise EdgeBank prefixes; NAT at colo to present two stable egress IPs.
+   - Tests: MTU verification, 1h steady-state 200MB/s, failover (bring down Tunnel A).
+2) Scale (4-8 weeks):
+   - Deploy TGW inter-region peering (or a second TGW in eu-west-1 depending on your compliance boundaries).
+   - Move heavy sustained traffic to Direct Connect/Equinix Fabric if test shows VPN throughput ceiling.
+3) Harden & Audit:
+   - Enable VPC Flow Logs, endpoint ENI logs, mTLS for control plane, and a short runbook for failback.
+
+Attachments: proposed_mop.pdf (draft pilot MOP).
+
+If that sounds good we can schedule an implementation window next week; Marcus will run perf verification and well bring Paul from Equinix into the call to confirm colo-level NAT and BGP details.
+
+Would you prefer Wednesday or Thursday for a 60-minute pilot kickoff?
+
+Thanks,
+Ben Carter
+Senior Solutions Engineer | Redwood Inference
+(attachment: proposed_mop.pdf)

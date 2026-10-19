@@ -1,0 +1,128 @@
+Recap & proposed onramp playbook — Arcadia Retail pilot
+
+From: Naomi Feldman <naomi_feldman@redwood.com>
+To: Sofia Moreno <sofia.m@arcadia-retail.com>, Ben Thomas <ben.thomas@arcadia-retail.com>
+Cc: Ben Carter <ben_carter@redwood.com>, Monica Patel <monica_patel@redwood.com>, Karthik Iyer <karthik_iyer@redwood.com>, Laura Bennett <laura_bennett@redwood.com>
+Date: 2027-03-28T15:12:00-07:00
+Subject: Recap & proposed onramp playbook — Arcadia Retail pilot
+
+Hi Sofia / Ben —
+
+Thanks again for taking the time today. Quick recap from my side and a suggested onramp playbook so we can lock dates and owners. Please flag anything I missed.
+
+Top pains you called out
+- Slow NLU response times when peak traffic hits (affects checkout suggestions).
+- High token costs from current vendor for template generation workflows.
+- Security & data residency constraints for PII in customer transcripts.
+
+Primary goals for the pilot
+1) Measure inference latency at scale: target 95th percentile < 150ms for typical 64-token requests.
+2) Validate cost delta vs incumbent at pilot volume (~100k queries/mo).
+3) Confirm model quality on your template generation & intent classification metrics (precision/recall targets TBD).
+
+Proposed mutual action plan (draft)
+- Milestone A — Environment readiness (network peering + test dataset): owner Arcadia (Priya) / Redwood infra (Monica) — target by 2027-04-08.
+- Milestone B — Technical onboarding + baseline run (1st week of pilot): owner Redwood SE (Ben Carter) — target start 2027-04-11.
+- Milestone C — Pilot data collection & eval (2 weeks): owner Arcadia analytics (Ben Thomas) / Redwood ML (Karthik) — complete by 2027-04-25.
+- Milestone D — Joint evaluation & decision meeting (contract / capacity ask): stakeholders: Arcadia CTO, Redwood Sales + Product — scheduled 2027-05-02.
+
+Decision process & criteria
+- Arcadia will make a go/no-go procurement decision after the joint evaluation on 2027-05-02, based on performance (latency SLA), quality (sample pass-rate), and unit economics. Legal/procurement sign-off expected within 2 weeks after the decision meeting.
+
+Open asks from Redwood
+- Can you confirm Priya as the procurement point of contact and provide SOC 2/attestation recipient?
+- Share a small anonymized sample of the most common request types (SaaS templates + checkout messages) for pre-run validation.
+
+Attachments
+- Arcadia_Onramp_Playbook_v1.xlsx (proposed milestones + owners)
+
+Next steps
+1) Sofia — confirm stakeholders and SOC2 recipient by Tue, 2027-03-30.
+2) Naomi/Ben — propose technical onboarding slots for week of 2027-04-11.
+3) Monica — prepare network peering checklist and initial test dataset requirements.
+
+Thanks — looking forward to moving this forward.
+
+Best,
+Naomi Feldman
+Sales Director, Redwood Inference
+naomi_feldman@redwood.com
++1 (415) 555-0128
+
+From: Sofia Moreno <sofia.m@arcadia-retail.com>
+To: Naomi Feldman <naomi_feldman@redwood.com>
+Cc: Ben Thomas <ben.thomas@arcadia-retail.com>, Priya Nair <priya.nair@arcadia-retail.com>
+Date: 2027-03-28T17:03:00-07:00
+Subject: Re: Recap & proposed onramp playbook — Arcadia Retail pilot
+
+Hi Naomi —
+
+Thanks for the clear write-up — this looks aligned with our notes. Quick replies inline: 
+- Priya Nair (procurement) is confirmed as primary procurement contact; copied here.
+- SOC 2 evidence: please send the SOC2 Type II report or a SOC attestation link; our security team will need it before peering.
+- The 150ms 95p target is aggressive but reasonable as a pilot goal — we also want to track median and p50 so we can understand distribution.
+
+One small ask on the schedule: can we aim to complete the environment readiness milestone by 2027-04-06 instead of 04-08? We have a regional blackout scheduled the week of 2027-04-18 and would like the technical onboarding earlier if possible.
+
+We approved the playbook in principle — please proceed with scheduling.
+
+Thanks,
+Sofia
+Head of ML Product, Arcadia Retail
+sofia.m@arcadia-retail.com
+
+From: Ben Carter <ben_carter@redwood.com>
+To: Sofia Moreno <sofia.m@arcadia-retail.com>, Naomi Feldman <naomi_feldman@redwood.com>
+Cc: Monica Patel <monica_patel@redwood.com>, Karthik Iyer <karthik_iyer@redwood.com>, Laura Bennett <laura_bennett@redwood.com>
+Date: 2027-03-29T08:10:00-07:00
+Subject: Re: Recap & proposed onramp playbook — Arcadia Retail pilot
+
+Sofia — great to meet you on the call. A few technical clarifications and a suggested condensed timeline to hit your preferred dates: 
+
+Technical notes
+- We'll provision a dedicated VPC peering and can enforce egress rules so PII never leaves your region. Monica will own the peering templates.
+- For latency, initial recommendation is a mixed-precision quantized model with a 4-shard GPU pool; this typically hits sub-150ms P95 for 64-token prompts in our prior pilots.
+- We'll instrument tracing (per-request token timing) and stream logs into the shared Drive folder for visibility.
+
+Condensed timeline proposal (to meet blackout constraint)
+- Environment readiness: target 2027-04-05 (redwood infra + Arcadia Priya).
+- Technical onboarding + baseline run: 2027-04-08 through 2027-04-12 (Ben leading).
+- Pilot collection: 2027-04-13 through 2027-04-24.
+- Joint evaluation meeting: 2027-04-29 (earlier than initial suggestion).
+
+I've attached a minimal pilot-config and checklist to speed setup.
+
+Attachments:
+- pilot-config.yaml (placeholder — small sample of prod-like settings)
+
+I can run a pre-onboarding dry run the week of 2027-04-04 if that helps.
+
+Cheers,
+Ben Carter
+Senior Sales Engineer, Redwood Inference
+ben_carter@redwood.com
+
+From: Naomi Feldman <naomi_feldman@redwood.com>
+To: Sofia Moreno <sofia.m@arcadia-retail.com>, Ben Thomas <ben.thomas@arcadia-retail.com>
+Cc: Ben Carter <ben_carter@redwood.com>, Monica Patel <monica_patel@redwood.com>, Karthik Iyer <karthik_iyer@redwood.com>, Laura Bennett <laura_bennett@redwood.com>, Priya Nair <priya.nair@arcadia-retail.com>
+Date: 2027-03-29T09:03:00-07:00
+Subject: Re: Recap & proposed onramp playbook — Arcadia Retail pilot
+
+Perfect — thank you, Sofia and Ben.
+
+Action items summarized (I'll follow up with calendar invites):
+- Priya (Arcadia) — confirm procurement contact and SOC2 recipient (due 2027-03-30) — status: Priya onboarded.
+- Monica (Redwood Infra) — deliver peering checklist and shared Drive link to Arcadia (target 2027-04-02).
+- Ben (SE) — run pre-onboarding dry run the week of 2027-04-04 and lead technical onboarding 2027-04-08 to 04-12.
+- Karthik (ML) — prepare evaluation rubric and baseline metrics to capture during pilot (target 2027-04-06).
+- Laura (Redwood Partnerships) — prepare procurement playbook + estimated committed capacity pricing for a Dedicated pool (due 2027-04-20).
+
+Confirmed revised milestones: environment ready by 2027-04-05; onboarding 2027-04-08; pilot run complete 2027-04-24; joint evaluation 2027-04-29. Decision window expected within two weeks after the evaluation.
+
+Deal reference: RDW-2027-ARC-045 — I'll add to HubSpot and share the calendar invites shortly.
+
+Thanks all — looking forward to the dry run.
+
+Best,
+Naomi
+Sales Director, Redwood Inference

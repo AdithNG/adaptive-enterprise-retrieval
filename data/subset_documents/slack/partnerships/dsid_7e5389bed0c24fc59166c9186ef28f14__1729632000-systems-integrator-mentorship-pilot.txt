@@ -1,0 +1,50 @@
+partnerships
+
+Lia Park: Quick heads-up — launching a 6-week Systems Integrator Mentorship pilot to speed up SI onboarding and enablement. Goal: cut onboarding time from ~4wks to ~2wks, ship a micro-credential, and run weekly office hours. Looking for engineering mentors and enablement owners. Details + ask below.
+
+Oliver Chan: I'm in for week-of-Aug 5 office hours. Can help with private-deploy walkthroughs and logs troubleshooting.
+
+Sanjeev Gupta: happy to mentor on quantization and latency tuning. Do we have a canonical slide deck or runbook?
+
+Lia Park: yes — draft slides and a short runbook live in the SI playbook doc: https://redwood.workbench/si-playbook (internal). I'll drop a scheduling poll after this thread.
+
+Emma Li: we should ship a 30-min hands-on lab (guided). I can build a repo with a minimal dataset + quickstart notebook.
+
+Jen Morales: recommend we attach a digital badge for the micro-cred and tie it to partner portal permissions. Any legal/trademark blockers?
+
+David Rivera: cc @Jen — we'll need SOW language + a quick trademark check for external badges. If badge copy doesn't use Redwood logo outside the portal, we can fast-track.
+
+ops-bot: Reminder — partner onboarding budget request form needs to be submitted: /forms/partner-budget
+
+Sanjeev Gupta: For hardware partners, who will coordinate driver/test image access? We need a small matrix of supported GPUs and OS versions. @Oliver?
+
+Oliver Chan: I'll loop in hw-partners and request test nodes + a minimal infra checklist. Will share tracker.
+
+Emma Li: proposed cadence (rough): Week1: intro & private deploy walkthrough; Week2: perf tuning workshop; Week3: hands-on lab + quiz; Week4: customer shadowing; Week5: certification exam; Week6: retro & rollout. Quick snippet: ```Week1: intro
+Week2: perf tuning
+Week3: lab + quiz
+Week4: shadow
+Week5: cert exam
+Week6: retro```
+
+Lia Park: love the cadence. Volunteers so far: @Emma, @Sanjeev, @Oliver, @Jen. KPI targets to track: time-to-first-deploy, number of certified SIs, and first joint announcement within 90 days of certification.
+
+Oliver Chan: can we also produce a one-pager cloud marketplace checklist (AMI/VM images, listing assets, pricing tiers)? I can draft an outline this week.
+
+Emma Li: I'll add the lab and quiz to our LMS and create a short follow-up assessment.
+
+Jen Morales: sales/partnerships will prep co-marketing if pilot gets >=3 certified integrators. Could be a joint announcement + partner spotlight.
+
+Lia Park: excellent — I'll sync with marketplace ops tomorrow at 11:00am PST. Action items: 1) mentors list (Emma/Sanjeev/Oliver) 2) draft playbook -> Lia 3) legal review -> David 4) budget form -> Jen. Please react with :raised_hands: if you volunteer.
+
+David Rivera: noted. Legal will aim to review within 48 hours (unless there's trademark usage outside portal).
+
+Emma Li: :raised_hands:
+
+Sanjeev Gupta: :raised_hands:
+
+Oliver Chan: :raised_hands:
+
+Jen Morales: :thumbsup: 
+
+ops-bot: Event created — "SI Mentorship Pilot - Kickoff" scheduled for 2024-08-05 10:00 PDT.

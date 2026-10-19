@@ -1,0 +1,88 @@
+incidents
+
+PagerDuty Bot: PAGER: High generation latency detected in eu-west-1 (INC-20260317-01). Requests >500ms and some 5xx. @Eva is on call.
+
+Eva (oncall): I'm on it. joining the call now. starting with genqueue logs.
+
+Mike SRE: I see queue depth jump on genqueue-03 and retry spikes. Possible upstream DB connection saturation. grabbing metrics dashboard: https://grafana.redwood.internal/d/queues
+
+Eva (oncall): repro locally with a small load test, seeing KV cache misses. rolling a soft-restart of genqueue-03 to drain backlog.
+
+Ana PM: Heads-up: customers may see slower responses for text-generation and streaming delays. Any rough ETA for mitigation?
+
+Mike SRE: Drain started, backlog dropping. if drain completes and no new influx, should be within ~12-18 minutes. will monitor.
+
+Sam Comms: Drafting initial status page copy. please review quick — we should publish initial notice within 20m. Draft below: 
+
+```
+We are investigating increased generation latency impacting some requests in eu-west-1. Customers may experience slower responses or occasional errors. Our on-call team is actively mitigating and will post updates as we learn more.
+Affected services: Hosted API (generation) — eu-west-1 region.
+Impact: Elevated latency and intermittent 5xx for a subset of requests.
+Next update: in 30 minutes.
+```
+
+Eva (oncall): Minor nit: change "intermittent 5xx" -> "intermittent 5xx/timeout errors". Also add a sentence: "No customer data has been exposed."
+
+Sam Comms: updated: 
+```
+We are investigating increased generation latency and intermittent 5xx/timeout errors impacting requests routed to eu-west-1. Customers may experience slower responses or occasional errors. Our on-call team is actively mitigating and will post updates as we learn more. No customer data has been exposed.
+Affected services: Hosted API (generation) — eu-west-1 region.
+Impact: Elevated latency and intermittent 5xx/timeout errors for a subset of requests.
+Next update: in 30 minutes.
+```
+
+Legal: quick check — wording looks fine. please avoid definitive root cause language until confirmed. keep "investigating" phrasing.
+
+Sam Comms: ok holding; preparing publish. @statuspage-bot prepare publish window and set update cadence 30m.
+
+statuspage-bot: Draft created: https://status.redwood.ai/incident/INC-20260317-01 (private draft). Use `/statuspage publish INC-20260317-01 initial` to publish.
+
+Mike SRE: backlog drained on genqueue-03, error rate dropping. still watching connections to external DB pool.
+
+Eva (oncall): Will run one more stability pass before we call it mitigated. If error rate stays <= baseline for 20m we can move to post-update and then resolve.
+
+Sam Comms: Publishing initial notice now. Executing: `/statuspage publish INC-20260317-01 initial`
+
+statuspage-bot: Initial notice published: https://status.redwood.ai/incident/INC-20260317-01 (public).
+
+Minor customer question in support: "Are embeddings affected?" — Sam Comms: reply: "This is limited to generation endpoints in eu-west-1; embeddings not impacted."
+
+~25 minutes later~
+
+Mike SRE: metrics stable, error rate down to baseline, tail latency improving. DB pool fd usage normalized.
+
+Eva (oncall): still seeing occasional 500s but <0.1% of traffic. holding for 20 more minutes then resolve if stable.
+
+Ana PM: Preparing customer-facing post-incident note—can someone add the final timeline and root cause after we resolve? I'll consolidate.
+
+Sam Comms: Agreed. I'll add timeline and impact numbers to the status page when we resolve.
+
+~40 minutes after initial~
+
+Mike SRE: no regressions for 25 minutes. declaring incident mitigated.
+
+Sam Comms: Drafting resolve notice for status page: 
+
+```
+Resolved — Generation latency in eu-west-1 (INC-20260317-01)
+
+Summary: At 12:08 UTC we observed increased generation latency and intermittent 5xx/timeout errors affecting a subset of requests in eu-west-1. Our on-call team identified a spike in genqueue backlog tied to transient connection saturation to an upstream datastore. We drained the affected queue and adjusted connection settings which restored normal throughput.
+
+Impact: Some requests experienced higher latency and occasional errors between 12:08 UTC and 12:52 UTC. Estimated affected requests: <0.5% of total generation traffic in the region. No customer data was exposed.
+
+Remediation: Drained the affected genqueue shard, increased connection pool limits, and added a circuit-breaker to prevent quick saturation. We will follow up with a permanent fix and a post-incident RCA.
+
+If you continue to see issues, please contact support or reply to this thread.
+```
+
+Legal: double-check timeline phrasing — fine. Suggest adding "post-incident RCA forthcoming" (included).
+
+Sam Comms: Publishing resolve notice now. `/statuspage publish INC-20260317-01 resolved`
+
+statuspage-bot: Incident INC-20260317-01 marked resolved and public update posted.
+
+Eva (oncall): great work team. I'll open the RCA ticket and assign to infra for full investigation.
+
+Ana PM: I'll draft the customer email summary with impact numbers once RCA has details.
+
+PagerDuty Bot: INCIDENT: INC-20260317-01 transitioned to RESOLVED by Eva (oncall). Thanks to responders: Mike SRE, Sam Comms, Ana PM, Legal, statuspage-bot.

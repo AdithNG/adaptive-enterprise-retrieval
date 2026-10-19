@@ -1,0 +1,40 @@
+QuillStack Studios
+
+Lead source: self-serve signup (product-led growth).
+
+Summary:
+- Indie dev shop (founder + 2 engineers). Building a collaborative coding assistant plugin for their web IDE. Wants low-friction hosted API to prototype features quickly.
+- Heavy focus on developer ergonomics: streaming responses, function calling to integrate with their AST tool, deterministic completions for code generation.
+- Expected initial traffic: ~50K tokens/day during prototype, spike to ~300K tokens/day if early beta expands. Cost-sensitive — wants to keep infra under $500/mo during trial.
+
+Technical preferences / asks:
+- Prefers small/opt models for fast local feel; open to Redwood model catalog recommendations.
+- Needs token / latency profile for typical code completion payload (avg prompt 150 tokens, reply 80-300 tokens). Target p95 latency < 400ms.
+- Wants streaming for incremental code edits.
+
+Security / compliance:
+- Mostly public cloud (no VPC right now). Founder asks about SSO later when hiring. Request: audit logs + API key rotation docs.
+
+Engagement timeline & activities:
+- 2026-02-25: self-serve signup, created trial workspace, used free credits. Auto-email sequence delivered onboarding.
+- 2026-03-02: Dev posted question in community Slack re: recommended model for TypeScript completions (response from community).
+- 2026-03-05: Short call scheduled (15m) with SE office hours — demoed quick function-calling example. Fireflies id ff_236b9a7c.
+- 2026-03-08: Team completed smoke test with streaming enabled; reported 2x faster developer iteration vs baseline. Provided token usage logs.
+
+Quotes / paraphrases:
+- "We just want something that feels snappy to devs — streaming + predictable latency matters more than absolute creativity." — Founder
+
+POC / success criteria:
+- Proof of concept: integrate hosted API into plugin and ship alpha to 50 internal users.
+- Success metrics: p95 latency < 400ms, average cost per 1k tokens < $0.80 for prototype, no major hallucination regressions on code tests.
+
+Next steps / sales actions (PLG):
+- Send targeted onboarding pack: quickstart for code-assistant, example function-calling patterns, cost-estimate calculator for 50K -> 300K tokens/day.
+- Ask for credit card to enable continuous testing (offer discounted committed tier info if they look like scaling).
+- Invite to upcoming community office hours on model selection.
+
+Open questions to validate:
+- Which exact TypeScript code paths will be most common (imports, full-file generation, refactors)?
+- Are there strict retention/data residency needs as plugin integrates with customer repos?
+
+Notes about AE touch: none yet — keep light-touch. If they hit >300K tokens/day or ask for SSO, escalate to AE Jordan Kim for dedicated capacity conversation.

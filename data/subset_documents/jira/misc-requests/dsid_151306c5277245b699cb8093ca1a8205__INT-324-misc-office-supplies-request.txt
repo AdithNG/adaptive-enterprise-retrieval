@@ -1,0 +1,31 @@
+One-off office supplies budget & chair reimbursement request for remote-first pilots
+
+Summary:
+A small set of requests from engineering and GTM teams for miscellaneous office supplies and one ergonomic chair reimbursement related to remote-first pilot employees. Request originates from distributed teams preparing for an on-site pilot week and a new hire onboarding bundle.
+
+Details:
+- 3x standing desk converters (temporary loaners) for on-site pilot
+- 5x assorted cables/adapters kit (USB-C, HDMI, ethernet) to restock the front desk drawer
+- 1x ergonomic office chair reimbursement (employee provided receipt) for new hire start-up ergonomics
+
+Impact:
+- Low direct platform impact; operational friction for pilot week if not fulfilled (delays to seat setup and onboarding).
+- Employee experience concern reported by hiring manager.
+
+Steps to reproduce / validate:
+1. Confirm budget owner approval (People Ops budget code).
+2. Procurement to confirm eligible vendor and price caps.
+3. Finance to process chair reimbursement once receipt is validated.
+
+Proposed next steps / owner suggestions:
+- People Ops (owner: Maya Ruiz) to approve budget allocation by 2026-03-24.
+- Office Ops to place small equipment order (expected 3 business days lead time).
+- Finance to provide reimbursement template and confirm payroll/expense flow.
+
+Notes:
+- Chair reimbursement capped at $350 per policy exception request for pilot hires (requesting formal approval).
+- Cross-referenced older office-ops ticket INT-301 for loaner inventory status.
+2026-03-20 10:12 Priya Nair: Filing this as a misc request — pinging Office Ops and Finance. See attached mock receipt (receipt-mock-2026-03-20.pdf).
+2026-03-20 14:05 Avery Chen: Assigned to me for coordination with Office Ops. I'll confirm vendors and lead times by EOD 2026-03-22.
+2026-03-21 09:30 Maya Ruiz: People Ops approves a one-time budget reallocation for pilot supplies; need formal cost estimate first.
+2026-03-22 11:05 Finance Bot: Please attach the employee reimbursement form and policy exception approval; payroll deadline 2026-03-28 for same-cycle processing.

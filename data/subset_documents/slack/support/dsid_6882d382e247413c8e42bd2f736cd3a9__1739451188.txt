@@ -1,0 +1,64 @@
+support
+
+Dev Patel: got a customer asking for “official rollback guidance” for Private (they’re on-prem-ish but not fully airgapped). they want something they can runbook + get signoff from security. do we have anything shareable yet or should we give the interim steps?
+
+Owen Phillips: +1, this came in as “if upgrade fails, what exact steps restore service + how long does it take” + whether rollback is supported for DB schema changes. they also asked if we can guarantee N-2 -> N with rollback. :grimacing:
+
+Markus Klein: this is Cascade Financial Group (regulated VPC) but they have a strict maintenance window + they mirror artifacts internally. they’re basically asking for what we commit to contractually.
+
+Rafael Mendes: do not promise N-2 -> N right now. current position is N-1 -> N supported path, rollback best-effort + depends on backups. we should point them to the draft runbook + emphasize prechecks/backup required.
+
+Connor O'Brien: yeah, please don’t imply “one command rollback” in current GA. we *do* have rollback command landing in installer (PR 4862) but not in their version yet. we can say “upcoming in next Private release train” and share the high-level semantics.
+
+Kira Thompson: runbook draft is here (internal): https://confluence.redwoodinference.com/display/ENG/Private+Upgrade+Runbook (WIP)
+There’s a section “Rollback (manual)” + “Rollback (installer-managed, upcoming)”. I can paste a sanitized excerpt for support if needed.
+
+Elliot Price: docs PR in flight too (internal/external-ish): https://github.com/redwood/redwood-docs/pull/905
+It includes “If you must rollback” guidance but we still have disclaimers around schema migrations.
+
+Dev Patel: what’s the safe interim guidance we can provide today? customer wants steps like: helm rollback? restore db? what about model cache?
+
+Rafael Mendes: interim guidance (today):
+1) Stop the upgrade if in progress (don’t keep retrying migrations).
+2) Roll back control-plane helm releases to previous chart version.
+3) Restore DB from snapshot taken immediately pre-upgrade (or logical dump).
+4) Verify CP health checks + auth.
+5) Data plane: restart pods, clear incompatible caches if needed.
+Key: this only works if you have a clean pre-upgrade backup; otherwise it’s “engagement required”.
+
+Connor O'Brien: and emphasize they must take backup *before* running `upgrade apply`. We’ve seen tickets where ppl assume helm rollback reverts DB. It doesn’t.
+
+Owen Phillips: can we give them exact commands? or do we keep it at “consult runbook / contact support”?
+
+Kira Thompson: I’d avoid putting exact `kubectl` / `helm` commands in an email until we confirm their deployment layout (namespace, release names, storage backend). but we can give a template:
+- `helm history <release>`
+- `helm rollback <release> <revision>`
+- restore procedure depends on postgres deployment (operator vs external)
+Also call out that rollback may require downtime.
+
+Elliot Price: agree. We can share a “high-level rollback sequence” as customer-facing text, then say support will provide environment-specific commands during the window.
+
+Markus Klein: they also asked about audit trail / evidence for “rollback invoked” for compliance.
+
+Connor O'Brien: audit log events are being added (PR 29187) but again: not in their current build. For now: we can provide installer logs + timestamps + the backup ID. If they need evidence for auditors, we can recommend collecting the support bundle.
+
+Supportbot: Reminder: please don’t share internal Confluence links with customers. Use approved snippets or the customer docs portal.
+
+Dev Patel: ok. can someone give me a customer-safe paragraph I can drop into the ticket + offer a call?
+
+Kira Thompson: draft text (customer-safe):
+“Redwood Private supports safe upgrades with preflight validation and a required pre-upgrade backup. If an upgrade fails and service must be restored quickly, rollback is performed by reverting the control-plane deployment to the prior version and restoring the pre-upgrade database snapshot/backup. Because database schema changes cannot always be reversed automatically, a valid pre-upgrade backup is required for deterministic rollback. We recommend scheduling a maintenance window and testing rollback in a non-production environment. Redwood Support can provide environment-specific commands and verification steps during the upgrade window.”
+
+Rafael Mendes: + add: supported upgrade path is N-1 -> N; larger jumps are evaluated case-by-case.
+
+Elliot Price: I’ll add a “Rollback guarantees / supported paths” callout to the public-facing doc draft so we’re consistent.
+
+Dev Patel: perfect. Owen + I will respond with that, and we’ll offer an assisted upgrade/rollback drill.
+
+Owen Phillips: thanks. I’ll also ask what storage backend they use (EBS vs CSI) since that changes snapshot guidance.
+
+Connor O'Brien: loop me in if they push for contractual guarantees; we should route to Vivek/PM. :thumbsup:
+
+Markus Klein: I’ll ping Vivek to make sure we align with what Sales is saying for Cascade. They’re sensitive on “rollback supported” language.
+
+Dev Patel: done. closing the loop here once customer replies.

@@ -1,0 +1,122 @@
+Next steps — swing demo (weekly rotation) and scheduling options for Novacorp
+
+From: Markus Klein <markus@redwood.com>
+To: Lucas Grant <l.grant@novacorp.com>, Emma Ross <emma.ross@novacorp.com>
+Cc: Jordan Blake <jordan@redwood.com>, Avery Johnson <avery@redwood.com>
+Date: Tue, 24 Jun 2025 15:12:00 -0700
+Subject: Next steps — swing demo (weekly rotation) and scheduling options for Novacorp
+
+Hi Lucas / Emma —
+
+Great to meet earlier today. Quick recap and proposed next steps so we keep momentum: 
+
+Recap (very high level):
+- Use case: Novacorp wants to embed low-latency summarization and private embeddings for search across internal docs.
+- Success criteria: sub-200ms 95th percentile generation for short responses, SOC2-compatible controls, deterministic rollouts for model versions.
+- Stakeholders: Lucas (Engineering lead), Emma (Procurement), Markus (Redwood AE), Jordan (Solutions), Avery (Technical SE).
+
+Readout & qualification notes:
+- Primary workload: search reranking + short assistant prompts; expected 30k tokens/day initially with seasonal peaks.
+- Data residency: EU for customer records; possibility of private deployment in Q4.
+- Procurement timeline: aiming for vendor selection by end of July.
+
+Ask / next step: 60-minute technical deep-dive (engineers + SRE) where Jordan and Avery will show a short hands-on demo and run through performance tuning (batching, KV caching, and routing).
+
+Scheduling constraints you mentioned on the call: prefer EU morning / US afternoon coverage and a schedule that rotates so your engineering teams in London and Boston share ownership of attending demos over the pilot weeks. To make this concrete I attached an availability grid and a compact discovery notes PDF.
+
+Proposed approach (simple weekly rotation):
+- Week A (US-friendly): 15:00–16:00 ET (11:00–12:00 PT) — good overlap for Boston/SF and late-morning EU
+- Week B (EU-friendly): 09:30–10:30 BST (04:30–05:30 ET) — good for London mornings and late APAC evenings
+- Week C (APAC-friendly): 21:00–22:00 IST / 23:30–00:30 AEST — targeted when APAC participants are available
+
+If that feels okay, can you: (a) confirm which week you'd prefer to start the rotation, and (b) pick up to two preferred slots from the attached grid? Jordan will then seed a calendar invite and we’ll include a calendar hold with a rotating weekly recurrence.
+
+Attachments: discovery-notes.pdf, availability-grid.xlsx (small, 1 sheet)
+
+Thanks — looking forward to the deep-dive.
+
+Best,
+Markus Klein
+Account Executive | Redwood Inference
+markus@redwood.com | +1 (415) 555-0182
+
+---
+Note: file attachments included as stubs in this thread.
+
+From: Lucas Grant <l.grant@novacorp.com>
+To: Markus Klein <markus@redwood.com>
+Cc: Emma Ross <emma.ross@novacorp.com>
+Date: Tue, 24 Jun 2025 20:40:12 +0100
+Subject: Re: Next steps — swing demo (weekly rotation) and scheduling options for Novacorp
+
+Thanks Markus —
+
+Appreciate the recap. We’re definitely interested in the 60-minute tech deep-dive. A couple quick notes from my side: 
+- Prefer the rotation idea — want to avoid always having London cover the early or late slots.
+- For the pilot, EU morning / US afternoon coverage is most important. APAC can join asynchronously or in the APAC-friendly week.
+- Procurement timeline looks right; Emma will lead on PO questions.
+
+Can you propose 2–3 concrete meeting windows (dates/times) for Weeks A and B so we can lock one in? If you can seed a recurring invite with a weekly rotation pattern that would be ideal.
+
+Lucas
+Lucas Grant
+Engineering Lead — Search & Data Platforms
+Novacorp
+l.grant@novacorp.com | +44 20 7946 0800
+
+On Tue, Jun 24, 2025 at 3:12 PM Markus Klein <markus@redwood.com> wrote:
+> [original message quoted above]
+
+From: Markus Klein <markus@redwood.com>
+To: Lucas Grant <l.grant@novacorp.com>, Emma Ross <emma.ross@novacorp.com>
+Cc: Jordan Blake <jordan@redwood.com>, Avery Johnson <avery@redwood.com>
+Date: Wed, 25 Jun 2025 08:22:00 -0700
+Subject: Re: Next steps — swing demo (weekly rotation) and scheduling options for Novacorp
+
+Thanks Lucas — happy to lock that down. Below are three concrete windows (all 60 minutes) that map to the Week A / Week B rotation concept. I also attached a one-sheet CSV that lays out a suggested 6-week rotation. Jordan will pick the calendaring lane once you confirm a start week.
+
+Proposed concrete slots (pick one for the first meeting):
+- Option 1 (US-first week): Thu, 3 Jul 2025 — 15:00 ET / 12:00 PT / 20:00 BST
+- Option 2 (EU-first week): Tue, 8 Jul 2025 — 09:30 BST / 05:30 ET
+- Option 3 (APAC-inclusive week): Wed, 9 Jul 2025 — 22:30 IST / 01:00 AEST (short notice but works for APAC attendees)
+
+Rotation cadence (summary):
+- Start on whichever week you pick. Each subsequent week rotates the friendly window (A -> B -> C). We’ll set a 6-week recurring hold and revise after the pilot.
+
+Next steps from our side once you pick a slot: 
+1) Jordan will send a calendar invite with a weekly recurrence and a note about expected attendees.
+2) Avery will prepare a short perf checklist to run during the demo (latency targets, batch sizes, model variant notes).
+3) We’ll include a short shared doc for questions that the Novacorp SREs can add to ahead of the call.
+
+Attachments: rotating-demo-rotas.csv (6-week matrix)
+
+If these windows look reasonable, say which option and which week to start.
+
+Thanks —
+Markus
+Account Executive | Redwood Inference
+
+> On Tue, Jun 24, 2025 at 8:40 PM +0100 Lucas Grant <l.grant@novacorp.com> wrote:
+> > [Lucas’ reply quoted above]
+
+From: Emma Ross <emma.ross@novacorp.com>
+To: Markus Klein <markus@redwood.com>, Lucas Grant <l.grant@novacorp.com>
+Cc: Jordan Blake <jordan@redwood.com>
+Date: Thu, 26 Jun 2025 09:05:00 +0200
+Subject: Re: Next steps — swing demo (weekly rotation) and scheduling options for Novacorp
+
+Hi all —
+
+Thanks — Option 1 on Thu, 3 Jul 2025 at 15:00 ET works best for our team to start the rotation. Please seed the calendar invite and include the Zoom link. We’ll invite our SRE (Tom Ellis) and a product manager.
+
+Also, Lucas and I will put a short procurement checklist into the HubSpot record (I added a stub link in case you need it): https://app.hubspot.com/contacts/12345/deal/nov-2025-091/procurement-checklist
+
+Jordan — once you’ve sent the invite, I’ll confirm attendees and send a PO timeline separately.
+
+Best,
+Emma Ross
+Head of Vendor Management | Novacorp
+emma.ross@novacorp.com | +44 20 7000 1999
+
+On Wed, 25 Jun 2025 at 08:22 AM -0700 Markus Klein <markus@redwood.com> wrote:
+> [Markus’ proposed slots and rotation plan quoted above]

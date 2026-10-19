@@ -1,0 +1,21 @@
+{
+  "run": {
+    "timestamp_utc": "2026-10-16T19:17:56+00:00",
+    "git_commit": "88cbf26484a8829cc02aa7e62ff0fc4a649ecde2",
+    "questions_path": "/Users/shusei/Documents/at_USC/2026_Fall/CSCI544/adaptive-enterprise-retrieval/data/processed/subset_questions.jsonl",
+    "questions_sha256": "7d947e61ca67c6f994727cbf4f3e045c9888d226a3aa59d918df3c7a01b55a6b",
+    "index": {
+      "schema_version": 1,
+      "model": "sentence-transformers/all-MiniLM-L6-v2",
+      "corpus_sha256": "e0e9ad110102f8f124ac51522c2f569e01eca64dd136d3321a8596c5993e9f2d",
+      "strategy": "paragraph",
+      "max_words": 120,
+      "overlap_words": 20,
+      "chunk_count": 3358
+    }
+  },
+  "questions": 100,
+  "scored": 90,
+  "hit@5": 0.8444444444444444,
+  "mrr": 0.670343487441681
+}

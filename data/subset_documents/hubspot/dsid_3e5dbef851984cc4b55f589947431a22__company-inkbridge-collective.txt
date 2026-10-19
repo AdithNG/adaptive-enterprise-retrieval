@@ -1,0 +1,52 @@
+Inkbridge Collective
+
+Lead origin: Vercel hackathon sign-up -> self-serve signup on hosted API (used free credits).
+
+Summary: Small developer tools startup building a searchable knowledge assistant + code helper embedded in customer portal. Wants to prototype quickly on Vercel (Next.js on Edge) using LangChain/LlamaIndex for retrieval and Redwood hosted embeddings + text-generation. Highly focused on fast dev experience: examples, small SDK snippets, and a Vercel-friendly quickstart.
+
+Primary asks (from call 2026-03-03):
+- "Do you have a LangChain adapter or LlamaIndex example?" (explicit quote)
+- Vercel Edge usage: how to call Redwood without exposing API keys in client bundles; serverless function/edge-worker patterns.
+- Streaming responses to the browser (chat UX) + reconnect/backpressure notes.
+- Examples for embeddings + vector store instructions (they currently experiment with Supabase vectors).
+- Token/cost estimate guidance for small pilot (~100k tokens/mo).
+
+Technical notes / constraints:
+- Frontend: Next.js (app router), deployed on Vercel. Prefer Edge runtime for lower latency.
+- Backend: none — want minimal server code. Might accept a tiny serverless function for secrets.
+- Vector store: exploring LlamaIndex w/ Supabase; open to using Redwood embeddings directly.
+- Latency target: p95 < 800ms for chat prefixes (small budget). Throughput: low (10-50 reqs/min).
+
+Engagement timeline:
+- 2026-02-20: Signed up for hosted API, created account, grabbed API key.
+- 2026-02-25: AE intro email; asked for quickstart. Gmail thread created.
+- 2026-03-03: Demo + discovery call (ff_20260303_inkbridge_initial-demo). Walked through API; demoed streaming.
+- 2026-03-05: Follow-up: sent sample curl + JS snippets; customer tried Next/Edge and hit CORS/401 when calling from client.
+- 2026-03-08: Customer requested LangChain & LlamaIndex minimal repo + Vercel example.
+- 2026-03-09: Scheduled pair-programming for 2026-03-12 (confirming).
+
+Quotes / verbatims:
+- "We just need something we can drop into a Vercel route — fast to iterate."
+- "If you have a LangChain starter that targets Edge, that's gold."
+
+Next steps (AE/SE):
+- Provide a small GitHub quickstart repo: Redwood + LangChain Chains (Edge-friendly), example LlamaIndex flow, and Vercel serverless secret pattern.
+- Prepare a short doc on streaming to browser + recommended backoff + sample EventSource/Fetch streaming client.
+- Pair-programming session to onboard them on integrating embeddings + reranker later (booked).
+
+Open questions for engineering:
+- Any recommended pattern for ephemeral keys or proxy for client streaming without compromising rate limits?
+- Is there an official LangChain adapter planned? If not, share community snippets.
+
+Internal notes: potential to upsell Dedicated if pilot grows (embedding volume). Low-touch deal: likely self-serve conversion after good DX.
+
+Send LangChain + LlamaIndex quickstart repo; schedule 60m pair-programming (Vercel Edge example)
+need Vercel Edge server-side example using Redwood hosted key rotation
+clarify streaming + CORS behavior for browser clients
+budget sign-off from CTO by end of month
+2026-02-20: account created (self-serve)
+2026-02-25: AE intro email sent
+2026-03-03: discovery/demo call (ff_20260303_inkbridge_initial-demo)
+2026-03-05: customer tried Next Edge; CORS/401 reported
+2026-03-08: asked for LangChain/LlamaIndex + Vercel examples
+2026-03-12: scheduled pair-programming (60m)

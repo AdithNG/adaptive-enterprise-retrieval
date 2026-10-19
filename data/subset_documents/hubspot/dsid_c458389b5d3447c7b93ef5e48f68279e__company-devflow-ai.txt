@@ -1,0 +1,66 @@
+Devflow AI
+
+HubSpot Company Record — Devflow AI (devflow.ai)
+
+Summary
+- Mid-market devtools team building an LLM-powered coding assistant inside their IDE + web app.
+- Came in via self-serve Hosted API; now in evaluation with potential Dedicated capacity request if p95 latency holds at launch traffic.
+- Strong sensitivity to onboarding friction (they’re modeling their own user onboarding after ours).
+
+Lifecycle touchpoints (sprint instrumentation)
+- Onboarding Email v2: received (Variant B; subject emphasized “fast first request”).
+  - Observed behavior: clicked CTA → quickstart page → returned to console within ~6 minutes.
+  - Feedback: “The email got us to the right page, but the snippet didn’t match our setup (we’re TS/Node + Vite).”
+- Console nudges:
+  - Nudge shown: Create API key (completed).
+  - Nudge shown: Make your first request (clicked; led to docs). Dismissal persisted correctly after completion (no repeat complaint).
+  - Nudge shown: Enable streaming (they asked what it changes for TTFT; wants best-practice defaults).
+
+Activation / product usage notes
+- Activation milestones (qualitative from call + event notes):
+  - First successful request: achieved after initial 401 error (likely copied wrong env var / key mismatch).
+  - Time-to-first-token: “Felt fine locally” but wants measured p95 under concurrency.
+  - First 100k tokens: not yet at time of call; they were still prototyping prompt formats.
+- SDK notes:
+  - Using TypeScript SDK.
+  - Early error handling: they hit “missing/invalid API key” path; asked for clearer guidance in-console on where the key is expected (env var name + example).
+
+Evaluation requirements (from 2026-01-22 call)
+- Workload
+  - Interactive chat/code completion; many short prompts, frequent streaming.
+  - Potential embeddings for repo/doc indexing (not immediate).
+- Performance targets
+  - Wants “snappy” streaming start; specifically asked to minimize perceived delay at response start.
+  - Interested in batching/caching guidance later (Optimize mentioned as follow-on).
+- Reliability / ops
+  - Wants predictable behavior during capacity contention; asked about fallback behavior and how errors present to the client.
+- Security/compliance
+  - SOC 2 requested.
+  - Asked about audit logs and retention controls (they sometimes pass code snippets from customers).
+  - SSO/SAML: “nice to have” now, may become required if they roll to larger enterprise accounts.
+
+Activation blockers / friction points
+- 401 on first request (copy/paste / env var mismatch). They described it as: “We weren’t sure if it was the key, the model name, or our network.”
+  - Suggested mitigation: tighten first-request snippet + highlight the exact env var name; in-console status check for ‘key seen’ would help.
+- Docs mismatch for their stack (TS/Node). They want a minimal snippet that matches the SDK they installed.
+- Confusion around streaming defaults:
+  - They asked whether they should always stream, and what settings are recommended to optimize TTFT vs throughput.
+- Email deliverability: no issue reported by Devflow AI directly, but note: their domain has strict filtering; keep an eye if future lifecycle sends bounce/complain.
+
+Stakeholder notes
+- Champion: Head of Product Engineering (name redacted in CRM export); very hands-on.
+- Technical evaluator: platform engineer who owns their inference layer; wants a short ‘load-test recipe’.
+
+Internal follow-ups / links
+- Fireflies transcript: fireflies/sales-calls/2026-01-22-onboarding-feedback-devflow-ai
+- Related lifecycle experiment context: lifecycle growth sprint launch brief (ben_carter/20260127-launch-brief-lifecycle-growth-experiments)
+- Messaging consistency thread used for copy alignment: soojin_lee/20260118-messaging-review-onboarding-sequence
+- Support reference (not necessarily this account, but relevant symptom pattern): SUP-24871 ‘not receiving onboarding emails’
+
+Next steps
+- Request a sample prompt distribution + expected concurrency to run a lightweight benchmark (include streaming on/off comparison).
+- Send SOC 2 + retention controls summary; confirm if they need SSO/SAML before launch.
+- If performance targets are strict, introduce Dedicated option with a small reserved pool for launch month.
+
+Latest AE/SE note (2026-02-07)
+- They’re leaning positive on Hosted API for pilot, but want a clear plan for scaling (Dedicated) and guardrails (fallbacks, quotas) before committing to a launch timeline.

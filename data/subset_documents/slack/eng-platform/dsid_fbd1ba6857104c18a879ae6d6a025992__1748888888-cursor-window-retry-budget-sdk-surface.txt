@@ -1,0 +1,36 @@
+eng-platform
+
+Mina: quick thread to align on cursor/window vs compact resume token for SDKs. we keep hearing pain: big tokens, weird URL escaping, and retry logic diverging between streaming and paged APIs.
+Otto: agreed. current system mixes full JSON state + metadata and ends up >1kb for some workloads. bad for query params and for clipboard.
+Sam: two orthogonal knobs: token format (opaque compact vs structured JSON) and server-side windowing (how much server keeps to allow resume). both affect retries and SDK ergonomics.
+Ravi: propose we define three modes:
+  - tiny-opaque: base64url packed bytes (version|session|offset|crc|opt-sig). cheap and short for URLs.
+  - debug-structured: JSON with fields, used only in dev builds or opt-in for customer-managed instances.
+  - hybrid: compact but includes a short type tag so servers can return a helpful human readable hint when resume fails.
+Mina: SDK surface idea: iterator exposes a non-blocking Pause() that returns a ResumeToken string. ResumeToken is always URL-safe base64 in hosted. languages: Python/TS -> str, Go -> type ResumeToken string.
+Otto: For paging we pass ?cursor=<token>. For streaming we include resume_token in the initial resume handshake header. Make both accept the same token format.
+Sam: windowing: servers keep a sliding window of recent events and a snapshot anchor. two policy knobs: window_size_bytes and snapshot_ttl. if token refers to an offset inside window, resume is cheap. if outside, server returns 410 with a small structured payload {code: "RESUME_EXPIRED", hint: "snapshot_needed", snapshot_id: "s-123"}. SDK should map that to ResumeExpired exception with the hint.
+Ravi: retry budget: when resuming across intermittent network, SDK should attempt a small exponential-backoff retry sequence (3 attempts by default) only for transient errors. If server returns RESUME_EXPIRED, stop retries and surface the explicit error. This avoids hammering the server chasing evicted cursors.
+Mina: dedupe/at-least-once semantics: server will tag each item with a stable sequence id. SDKs must dedupe on client-visible id to avoid double-processing when resume resumes from slightly earlier offset. Provide lightweight dedupe id in SDK iterator by default.
+Otto: languages:
+  - TS: async iterator with .pause() -> Promise<string> and client.list(..., {resume: token}) to restart. Show example:
+```ts
+const it = client.list({model: 'rwd-small', page_size: 50});
+for await (const x of it) { if (shouldPause()) { const token = await it.pause(); save(token); break } }
+// resume
+const it2 = client.list({model: 'rwd-small', resume: token});
+```
+  - Python: iterator with .pause() -> str; resume via list_responses(resume=token).
+  - Go: iterator with it.Pause() (returns ResumeToken) and NewListWithResume(ctx, opts, token).
+Sam: streaming transport nuance: with HTTP/2/gRPC we can attempt in-band reconnection using the token inside the TRAILER or a reconnect header. But for browser JS (fetch) we must rely on polling/paged endpoints or use a WS shim. SDKs should abstract the transport away from user.
+Ravi: metrics we should emit: resume_attempts, resume_success, resume_failure_reason (evicted|auth|parse_error), token_length_bytes, dedupe_count. These feed Optimize.
+Mina: security: avoid including secrets in tokens. if we support hmac, default is unsigned for Hosted so ops can inspect. Private installs can enable HMAC via admin.kms_signing=true. SDK debug.parse(token, allow_debug=true) only prints internals if token unsigned or allow_debug passed.
+Otto: backward compatibility: include a version byte/prefix in token format so servers can accept older formats. migration path: v1->v2 decoders on server.
+Sam: failure modes and SDK mapping: network timeout -> transient Retry; malformed token -> InvalidResumeTokenError; server-resume-evicted -> ResumeExpiredError with hint; auth failure -> ResumeAuthError. Avoid exposing raw HTTP 4xx to app code.
+Ravi: UX note: avoid having apps manually stitch pages. expose a single iterator interface for both paged and streaming APIs so app code doesn't need transport-specific error handling.
+Mina: ops: rollout plan: land a tiny spec and implement helper libs in TS/Python/Go. default to tiny-opaque v1. opt-in debug structured for dev. add feature flag for private KMS signing.
+ci-bot: ci: added infra/resume-token-spec check to pre-submit tests.
+Otto: next actions: Mina + Sam draft 1-page spec (binary layout + base64url rules + HTTP header names + error codes). Ravi to sketch SDK error types and dedupe helper. I'll prototype TS pause/resume by EOW.
+Mina: thanks all. aim to keep token <= 128 bytes in 99% of cases so it fits URLs and logs cleanly.
+Sam: one last thought: for large fanout consumers we might expose a server-side 'checkpoint' API returning a short token representing snapshot_id that clients can explicitly request and store for later resumes. that makes resume explicit and cheap.
+Mina: excellent. let's capture this in the RFC follow-up.

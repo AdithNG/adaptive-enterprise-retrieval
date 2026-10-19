@@ -1,0 +1,31 @@
+NorthPoint Signalworks
+
+Mid-market B2B SaaS product team evaluating Redwood for chat-first workflows plus semantic search. Started on hosted API; moving to Dedicated POC to validate latency, cost, and secure deployment (VPC + KMS). POC will exercise canary rollouts and fallback routing between model variants and regions, and must demonstrate automated rollback rules tied to eval/regression checks.
+2024-08-05 - inbound trial signup (hosted API). Product team ran smoke tests.
+2024-09-10 - hosted API demo with Maya. Primary ask: p95 latency <200ms for chat flows.
+2024-10-22 - cost/throughput workshop. Customer requested Dedicated options for predictable SLA.
+2024-11-12 - security review kickoff with SecOps; requested SOC2 evidence + KMS diagram (see Drive)
+2024-11-15 - SE Jamal performed throughput sim (concurrent chat workload). Proposed canary + fallback blueprint.
+2024-11-18 - verbal approval to run 4-week Dedicated POC. Signed NDA; awaiting SOW/pricing doc.
+POC objective: validate Dedicated pool for interactive chat + embeddings at mid-market scale (200-400 daily concurrent users).
+Latency targets: p95 <180ms for short chat (<=512 tokens); p50 <80ms. Product lead: "We can't accept >150ms 95p for primary flows" (sourced earlier).
+Throughput & cost: target token unit cost < $0.0009 during POC; acceptable burst behavior with autoscaling up to 2x baseline.
+Model strategy: baseline = Llama-2-70B quantized (fast kernels); canary variant = Llama-2-13B quantized; fallback to 13B under heavy load or degraded perf.
+Routing plan agreed for POC: primary region = us-east-1, secondary = eu-west-1. Failover preference = region failover (warm standby) over throttling.
+Canary rollout plan: 5% -> 25% -> 50% -> 100% over 4 days. Automatic rollback triggers: quality regression (eval suite), latency breach >200ms p95, or error rate >0.5%.
+Security constraints: customer requires SAML SSO, customer-managed KMS for key wrapping, audit logs with 12-month retention, and US-only residency for PII flows.
+Networking: must complete VPC peering + egress allowlist; team flagged requirement for stable static egress IPs for compliance.
+Open ask: provide example quantization profiles and recommended kernel settings for customer inference budget; sample config in Drive link.
+Quote from CTO on call: "We like the routing/fallback idea — want clear SLAs on rollback automation and model parity metrics."
+Decision criteria for purchase: meets latency SLAs in POC, passes security checklist, and forecasted TCO within estimated range.
+Internal stakeholders: Product (Emily R), Infra Lead (David H), SecOps (Rina S), Finance (Alex P).
+Sales notes: pricing sensitivity — prefer annual committed capacity if 10–20% discount off list, will consider Dedicated reserved pool if SLOs match.
+4-week Dedicated POC: reserved pool (4x A100 equiv), canary plan (5/25/50/100), primary us-east, secondary eu-west, model variants: 70B-quant and 13B-quant, success metrics: p95 latency <180ms, token cost < $0.0009, error rate <0.5%.
+11/12 SecOps: asked for SOC2 in-scope list + KMS architecture
+11/15 Perf review: Jamal suggested dynamic prefix caching for common prompts
+11/18 Exec: greenlight for POC provided, budget contingent on SOW
+Finalize Dedicated POC SOW & pricing; infra kickoff w/ SecOps; provide model variant list and canary config
+internal budget sign-off (Finance)
+VPC peering & egress IP allowlist pending
+SAML integration details from IdP team
+Pricing deck shared; awaiting Finance approval. Legal asked for data residency addendum. Expect SOW signature in 6-8 weeks after POC if successful.
