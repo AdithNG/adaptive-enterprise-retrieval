@@ -17,3 +17,7 @@ data/processed/*
 outputs/*
 !outputs/.gitkeep
 all_documents.zip
+
+# Local reports, model downloads and Finder metadata
+output/
+.DS_Store
