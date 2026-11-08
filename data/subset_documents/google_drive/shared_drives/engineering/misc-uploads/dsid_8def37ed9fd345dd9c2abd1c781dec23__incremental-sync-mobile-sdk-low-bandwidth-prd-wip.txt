@@ -1,0 +1,133 @@
+incremental-sync-mobile-sdk-low-bandwidth-prd-wip
+
+Purpose
+
+This PRD sketch proposes an "incremental sync" mode and corresponding SDK ergonomics targeted at mobile and constrained-network clients using the Hosted API. The goal is to enable low-bandwidth, resumable streaming with first-class tool-calling semantics and structured output while minimizing token and transport cost.
+
+Problem statement
+
+Mobile apps, edge devices, and intermittent networks are a common production use-case for our Hosted API customers. Current streaming flows assume a persistent, low-latency connection (websocket / http2) and continuous token streams. For constrained clients we see three recurring issues:
+- High data cost and battery impact from continuous streams
+- Fragile behavior on intermittent connectivity (reconnects cause duplicate tool calls, partial outputs lost)
+- Poor developer ergonomics for integrating tool calls and structured responses into native SDKs (iOS/Android)
+
+Design goals
+
+1) Minimize upstream/downstream bytes for mobile clients: compact framing, delta-only checkpoints, optional compressed/encoded frames.
+2) Strong resumability: resume from last acknowledged checkpoint without re-running tool calls or re-synthesizing long prefixes.
+3) Tool-call atomicity & idempotency: ensure external side-effects invoked by tool calls are executed exactly-once (or clearly flagged as at-least-once with developer options).
+4) Typed structured output: prefer JSON-schema validated chunks so client code can incrementally apply partial structured results.
+5) Simple, idiomatic SDK ergonomics: async iterators/promises for JS, Combine/Flow-friendly streams for mobile, small runtime overhead, clear cancellation/backpressure semantics.
+
+Key concepts / protocol primitives
+
+- Microframes: small, line-oriented frames for incremental patches. Each frame includes: sequence id, checkpoint id (optional), type (delta|checkpoint|tool-call|tool-result|error|meta), and an optional compact payload.
+- Delta checkpoints: compact, signed checkpoints representing the model's internal KV/prefix position and a short output delta. Checkpoints are small (<= 2KB) and are the resumability anchor.
+- Deterministic tool-call tokens: SDK attaches a developer-provided idempotency token to each tool call frame. Server tracks these tokens per session and guarantees tie-breaking semantics for duplicate frames.
+- Event-sourced replay: A session timeline of microframes can be replayed server-side to rehydrate state without re-executing side-effects. Tool-call frames mark whether they contributed side-effects that are already persisted.
+- Typed partials: Structured output is emitted as typed partials (schema-path + partial value + completion marker). Clients can incrementally validate/apply partials.
+- Transport abstraction: support fetch/stream (service worker friendly), SSE/http2, websocket; the microframe protocol is transport-agnostic.
+
+SDK surface (draft)
+
+JS (browser/node) idea:
+const stream = await Redwood.hosted.incremental.start({ model: 'rwd-small', sessionId: 'user-123', mode: 'low-bandwidth' });
+for await (const frame of stream) {
+  if (frame.type === 'checkpoint') localDB.put(frame.checkpointId, frame.checkpointBlob);
+  if (frame.type === 'tool-call') showToolUi(frame.payload);
+}
+await stream.close();
+
+Native (iOS Kotlin pseudocode):
+val client = IncrementalClient(config)
+client.onFrame { frame ->
+  when(frame.type) {
+    FrameType.DELTA -> applyDelta(frame.payload)
+    FrameType.TOOL_CALL -> routeToTool(frame.payload)
+    FrameType.CHECKPOINT -> storage.saveCheckpoint(frame.id, frame.payload)
+  }
+}
+client.start()
+
+Ergonomic patterns emphasized:
+- Explicit acks: client must ack checkpoints it has persisted. Server uses ack history to know safe resume points.
+- Preview tokens: cheap, partial-synthesis tokens for previews before committing to expensive tool calls. Useful for autosuggest flows on mobile.
+- Optional inline compression and base64-lite encoding for image/attachment fragments.
+- Light client validation: expose schema validators so apps can show partial structured output without waiting for full JSON.
+
+Tool calling semantics
+
+- Preflight negotiation: when a tool-call frame is emitted, the server includes a small tool contract (name, args-schema, cost-estimate). The client confirms or rejects.
+- Two-phase tool ops: (1) intent frame emitted as part of stream; (2) tool execution confirmed with a tool-result frame. Both frames carry idempotency tokens.
+- Side-effect policy flags: tool-call frames include a policy: "at_most_once", "at_least_once", or "best_effort". Default is at_most_once when idempotency token present and tool supports reconciliation.
+- Compensation hooks: if a reconnect would trigger a duplicate, server can emit a "compensate" meta-frame to instruct client to run local compensation logic.
+
+Structured output and partial JSON
+
+- Partial JSON chunks are expressed as path-annotated patches (RFC-like). Example: { "path": "/items/3/name", "op": "replace", "value": "Short summary" }.
+- Each patch attaches a schemaId that clients can fetch (small cacheable JSON-schema snippets).
+- Validation errors are emitted as meta-frames so SDKs can decide whether to surface to UI or buffer until corrected by later frames.
+
+Resumption and replay flow
+
+1) Client reconnects and provides last known checkpoint id and recent ack window.
+2) Server validates checkpoint provenance and returns a minimal set of microframes to re-synchronize state.
+3) If a tool-call outcome is uncertain, server indicates decision: already-executed, cancelled, pending.
+4) If server must re-run a deterministic model prefix to re-derive a non-side-effecting delta, it does so and emits a synthetic checkpoint.
+
+Bandwidth saving tactics (mobile-focused)
+
+- Delta-only frames for text (diffs relative to last acknowledged slice).
+- Boundary compression: compress repeated small frames into a single compressed checkpoint when client is idle.
+- Skip-heavy tooling: server may emit lightweight summaries based on quality threshold before committing to heavy tool calls; client can request full expansion.
+- Local cache of schema and tool contracts to avoid RTT for validation.
+
+Observability and SLOs
+
+- Telemetry: token/byte counts per session, median reconnect time, checkpoint frequency, tool-call latency, tool-call dedupe rate.
+- SLOs: 99p reconnect recovery under 3s (hosted internal networks), 95p under 10s for public mobile networks.
+- Error classes surfaced to SDK: transient, permanent, policy (quota), model-regression. SDK exposes consistent error enums.
+
+Developer experience considerations
+
+- Quickstart: 10-line example showing start/resume/ack.
+- Debugging CLI: redwood-infer replay --session id --from-checkpoint X -> prints timeline and resolves tool-call history.
+- Simulator: local node module to simulate flaky networks and test idempotency.
+- Migration guide: mapping from existing streaming flows to incremental-sync, including recommended mode fallbacks.
+
+Security and compliance notes
+
+- Checkpoints may contain minimal context; avoid embedding PII. For Private deployments, checkpoints are encrypted with tenant KMS key.
+- Tool-call idempotency tokens are scoped to tenant and session; treat as privileged.
+
+Rollout plan (rough)
+
+- Alpha (internal + partners): 2025-04-01 — implement server microframe backend, JS SDK prototype, CLI replay tool.
+- Dogfood/Beta: 2025-06-01 — iOS/Android bindings, SRE/telemetry dashboards, two pilot apps (customer success + internal product).
+- Public Beta: 2025-09-01 — public docs, SDK releases, sample apps.
+- GA: 2026-01-15 — metrics gated: <2% tool-call duplication, median resume time < 5s on cellular, adoption by 3 pilot customers.
+
+Open questions / risks
+
+- Checkpoint size vs fidelity: how much internal state do we allow in checkpoints before increasing attack surface and KMS cost?
+- Tool-call side-effect guarantees across Dedicated/Private deployments with different persistence capabilities.
+- UX tradeoff: preview tokens reduce cost but create an extra round-trip — acceptable for low-latency mobile flows?
+- SDK surface parity: how do we present the same guarantees in idiomatic Swift/Kotlin/JVM/JS without leaking complexity?
+
+Next steps (short-term)
+- Prototype microframe encoder/decoder and delta-checkpoint format (eng: Samir)
+- Small JS SDK PoC implementing async iterator + ack API (dx: Jordan)
+- Draft API spec for tool-call idempotency tokens and side-effect flags (product: Ava)
+- Add JIRA tasks for telemetry and SRE dashboards (ops)
+
+Notes to reviewers
+
+This doc is intentionally exploratory: focuses on the intersection of streaming, tool-calls, structured output, and mobile ergonomics. Feedback requested on:
+- Acceptable checkpoint size/format constraints for mobile storage and KMS encryption.
+- Which tool-call policies map to our current backend guarantees and which require infra work.
+- SDK ergonomics tradeoffs (explicit ack vs automatic background checkpoint persistence).
+
+References and inspiration
+- Internal: CONFLUENCE-123-hosted-sdk-arch (protocol history), JIRA-API-7891 (mobile-client-complaints), github.com/redwood-inference/sdk/pull/512 (streaming-iterators-poC)
+
+End of draft.

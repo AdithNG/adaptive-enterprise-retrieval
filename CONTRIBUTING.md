@@ -4,7 +4,7 @@
 2. Pull the latest `main` and create a focused branch, such as
    `git switch -c feat/keyword-retrieval`.
 3. Agree ownership using `docs/PLAN.md`; coordinate changes to shared contracts.
-4. Run `python -m unittest discover -s tests -v` and the offline demo.
+4. Run `python -m unittest discover -s src/tests -v` and `python src/runner.py demo`.
 5. Make small commits, push your branch, and open a pull request describing
    the change and validation. Ask another teammate to review before merging.
 

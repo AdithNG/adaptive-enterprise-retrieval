@@ -1,0 +1,36 @@
+finance
+
+Lena: Morning — flagged by weekly budget report: ~520 GPU-hours posted to project 'demo-sandpit' over the weekend with no cost_center or team label. running short on runway if this repeats. anyone own this? :wave:
+Marco: Oof. Any quick samples from the export?
+Lena: pasted CSV snippet: 
+Lena: resource: compute.googleapis.com/instances
+Lena: project: demo-sandpit
+Lena: sku: NVIDIA_T4
+Lena: usage_hours: 12.5
+Lena: cost_usd: 975.00
+Lena: labels: {}
+Aisha: demo-sandpit is used by sales demos + engineering experiments. We have a policy that sales demos must use 'partner-demo-*' projects but last-minute provisioning sometimes goes into demo-sandpit.
+BillingBot: Automated alert: monthly_untagged_gpu_hours > 200 for project demo-sandpit. Created ticket FIN-1024: https://billing.redwood.internal/tickets/FIN-1024
+Marco: Can we map instance create events to identities? If external partner spun this up we should chargeback, otherwise internal teams need to be accountable.
+PlatformBot: Audit query results attached. Launch events between 2025-09-13T00:00Z and 2025-09-14T08:00Z show three creators: alice.sales, ci-demo-runner, and partner_onboard@globex.com. Largest instance IDs: i-0a1b2c3d (partner_onboard), i-0d4e5f6a (alice.sales).
+Lena: partner_onboard@globex.com rings a bell — Partnerships ran a demo last week. Marco — did Partnerships request demo infra be in demo-sandpit or partner namespace?
+Marco: They asked for partner-namespace, but the onboarding terraform var defaulted to demo-sandpit. My bad — missed an override in the deployment script.
+Aisha: Finance: will you accept a retrospective tag + ledger reassign, or do you need an invoice amendment for Globex? If partner contract covers usage we can backcharge; otherwise we should absorb as marketing/demo budget.
+FinanceLead: For charges > $2k we require Controller sign-off + Partnerships approval for any external chargeback. This looks like three lines totaling ~$2.9k. Please attach the partnership approval and contract ID to FIN-1024 before Finance will touch the ledger.
+Lena: noted. Marco — can you get Partnerships approval and attach contract acme-contract-778 (or Globex equivalent) to FIN-1024?
+Marco: On it. I'll ping Partnerships and ask them to confirm billing to globex-contract-441.
+PlatformBot: Prepared backfill plan: (1) add label cost_center=globex_trial to instances i-0a1b2c3d and cluster nodes, (2) create ledger entry with reference FIN-1024 and GL code GL-BILL-PARTNER, (3) emit audit event for the change. Script requires Finance approval token to run.
+Aisha: Also request: update monthly forecast sheet and pull forward a corrected spend line so our committed capacity projections don't spike unexpectedly. Who owns the forecast update?
+FinanceLead: I'll update the forecast after ledger adjustment is posted. Please include expected net impact and whether credits or invoice will be issued.
+Marco: Partnerships responded: confirm globex-contract-441 should be charged. Attached partnership approval email to FIN-1024.
+FinanceLead: Received. Controller approval required — I'm escalating to Controller. Keeping FIN-1024 status: awaiting_controller_signoff.
+BillingBot: FIN-1024 now has attachments: partnership_email.eml, audit_launch.csv. Current status: pending_controller_approval.
+Lena: For ops: can we add a preventive guardrail? Suggest: org policy to require label 'cost_center' on instance creation + pre-provisioning check in demo onboarding pipeline. Also add nightly reconcile that flags mismatches and auto-creates FIN tickets.
+PlatformBot: Noted. Proposed enforcement: terraform module addition + GCP org policy that rejects instances missing label cost_center. Also adding CI gating in onboarding repo. Opening infra PR and will link to FIN-1024 for tracking.
+Aisha: Finance asks that any backfilled tags include a note with the original charge timestamp and instance id so audits are clear. Also keep raw cost export unchanged; ledger entry should be the source of truth for reassignments.
+Marco: Will include audit notes and retain raw exports. Running backfill will be blocked until Controller signoff — PlatformBot, please queue the script to run once Finance posts approval token.
+Controller: Controller here — reviewed attachments and approve ledger reassign to globex-contract-441. Please proceed with backfill and create GL journal referencing FIN-1024 and GL-BILL-PARTNER.
+FinanceLead: Controller approved. Marking FIN-1024 approved_by_controller. Finance will post ledger adjustment after PlatformBot emits audit events.
+PlatformBot: Backfill executed: tagged i-0a1b2c3d with cost_center=globex_trial, tagged cluster nodes, and emitted audit log entries. Ledger adjustment created: journal_id JNL-5563, amount $2,925.00, GL code GL-BILL-PARTNER, ref FIN-1024.
+BillingBot: FIN-1024 status: resolved. Audit docs: https://billing.redwood.internal/audits/JNL-5563
+Lena: Thanks everyone. Follow-ups: (1) Marco to merge infra PR enforcing labels, (2) Platform to add nightly reconcile alert to BillingBot, (3) Finance to update forecast and confirm customer invoice adjustment. Will close FIN-1024 after confirmation from Partnerships that Globex was invoiced. :white_check_mark:

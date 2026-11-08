@@ -1,0 +1,26 @@
+Adaptive eval dispatch for model-version locks with tenant-aware prioritization
+
+Background: When a model version is locked/pinned in the catalog or by a tenant we need an automated, cost-aware evaluation run to detect regressions before traffic is routed. Current ad-hoc workflows produce uneven coverage and delayed detection for lower-traffic tenants. Goal: Implement an adaptive eval dispatching service that consumes pin/upgrade events, prioritizes targets by tenant impact and traffic, deduplicates simultaneous events, and schedules a staged evaluation (smoke -> sampled synthetic -> full-fidelity) with quota controls and audit logging.
+Introduce an eval-dispatch microservice in the control plane. Workflow: 1) Pin/upgrade event emitted from catalog/tenant API -> 2) dispatch service normalizes event and calculates priority score (traffic-weight, SLA tier, catalog-critical flag) -> 3) select eval profile (smoke, sampled, full) using tenant policy and historical variance -> 4) schedule runs to eval-runner fleet with rate limits and cost budget -> 5) aggregate results and write to catalog/tenant change log; trigger rollback/alert webhooks if thresholds exceeded. Key features: idempotent event handling, per-tenant budget tokens, adaptive sampling that favors low-traffic tenants with synthetic trace replay, and backpressure to avoid overload during large catalog changes.
+Pin/upgrade events for both catalog and tenant-locked models reliably create dispatch records (>=99.5% success)
+Dispatch service deduplicates repeated pin events within 10 minutes for same version/tenant
+Smoke eval completes within SLO (90th percentile < 30s) and returns pass/fail
+Adaptive sampling picks representative prompt sets for low-traffic tenants and completes within configured budget
+Triggering path produces audit log entries with event id, priority, and eval outcome visible in console change history
+When regression threshold is breached, an automated alert and tenant-scoped rollback recommendation are produced
+Spec: finalize priority scoring formula and tenant policy matrix (PM + Evals)
+Infra: create eval-dispatch service skeleton, event consumer, and idempotency store
+Evals: implement three eval profiles and sampling strategy for low-traffic tenants
+Quota: integrate per-tenant budget tokens and global cost throttle
+Observability: add traces, metrics and Grafana dashboard panels for dispatch latency, queue depth, cost burn
+Safety: wire regression thresholds and webhook alerts to rollback workflows
+QA: synthetic regression tests that inject known regressions and verify detection and alerts
+2025-02-12: Kickoff meeting with PM (Riley Chen) and Evals (Priya Shah). Agreed to prioritize tenant-aware sampling and idempotency.
+2025-02-18: Prototype priority scoring formula: score = 0.6*normalized_traffic + 0.3*SLA_weight + 0.1*catalog_critical_flag. Shared doc: https://confluence.redwood.ai/display/EVALS/priority-formula-draft
+2025-02-24: Infra spike complete - basic dispatch service consumes events from catalog and writes normalized records to eval-dispatch queue (branch: github.com/redwood-inference/eval-dispatch/tree/ENG-30217-prototype, PR pending)
+2025-03-01: Evals implemented smoke profile and a sampled synthetic runner for tenant replays. Early integration tests show smoke SLOs met on staging. Open trade-off: sampling fidelity vs cost for extremely low-traffic tenants.
+2025-03-05: PM review (Riley) suggested adding a manual "force full eval" flag accessible from Console for enterprise tenants. Design task added.
+We can either run full-fidelity evals for all pinned upgrades (high cost, best sensitivity) or use adaptive sampling (lower cost, risk of missing rare regressions). Chosen approach: staged evaluations with option to force full runs for high-SLA tenants. This balances cost and coverage. Another trade-off: complexity of tenant budgeting vs. simple global throttle; we prefer per-tenant tokens to avoid noisy tenants consuming budget.
+Start with conservative default thresholds for alerting to reduce false positives
+Expose force-eval and skip-eval controls to enterprise admins with audit logging
+Rate-limit dispatch during large catalog rollouts and surface backpressure to release owners

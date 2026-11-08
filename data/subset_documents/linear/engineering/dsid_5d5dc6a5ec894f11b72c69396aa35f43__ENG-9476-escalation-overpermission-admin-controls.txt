@@ -1,0 +1,64 @@
+Customer escalation: SSO group sync led to permission-denied and over-permission edge cases
+
+Summary:
+A high-severity customer escalation with AcmePayments surfaced two distinct RBAC v2 failures after a recent SSO/SAML group sync: 1) users who should have inherited admin-level grants were evaluated as permission-denied (permission denied regression), and 2) in a different sync scenario group memberships were temporarily evaluated as effective-admin for several minutes (over-permission window).
+
+Context and impact:
+- Customer: AcmePayments (enterprise Dedicated tenant).
+- Timeline: first reported 2026-03-01; reproducible across orgs with certain SAML group claim structures and group-dep mapping.
+- User-visible issues: inability to access admin console pages, and in one reported case audit logs showed elevated operations executed by non-admin principals during a sync window.
+- Business impact: blocked customer workflows, one escalated incident to account execs, potential compliance risk due to transient over-permission.
+
+Root cause analysis (summary):
+1) Permission evaluation race: RBAC v2 permission evaluator runs a two-stage evaluation (group-mapping -> effective-role resolution -> cache write). Under heavy SAML sync load, a batched sync path applied group mapping changes but the effective-role cache eviction and recomputation were asynchronous; some requests hit the pre-update cache and were denied.
+2) Over-permission gap: an optimization in the SSO/SAML sync merges membership diffs and applied a short-lived additive grant path before the authoritative replace path finished; combined with an optimistic cache update this allowed a transient state where inherited admin privileges were visible to request paths that check different caches (session vs. real-time).
+3) Audit logging omission: batched audit flush optimization suppressed granular grant/deny records when both events happened within the same batch window, causing gaps in the chronological trail for forensic purposes.
+4) Mapping precedence bug: a misordered precedence rule in SAML group claim mapping caused groups from multiple IdP mappings to be merged in the wrong priority order, enabling two different grant rules to apply in conflict scenarios.
+
+Scope of work (proposed fixes):
+- Fix A: Make SAML group claim mapping deterministic and stable across syncs by enforcing explicit precedence and adding a stable sort on group identifiers before apply. (ENG)
+- Fix B: Change permission evaluation to compute effective-role in-place under the sync lock or use a short-lived strong-consistency window: any request during an active sync will either use pre-sync snapshot or block briefly until recompute finishes. This removes the race that caused permission-denied and over-permission windows. (ENG + infra)
+- Fix C: Audit logging: stop merging grant/deny audit events within the same batch; instead emit a compressed but ordered event bundle that preserves chronology and actor. Add telemetry to detect missing audit sequences. (ENG + Security)
+- Fix D: Migration script: detect and repair inconsistent effective-role cache entries in Dedicated tenants that were exposed by the bug. Run with customer opt-in and provide rollback. (ENG + SRE)
+- Fix E: UI/Console change: add an "Effective permissions" inspector for admin pages and a visible warning banner when a tenant is undergoing a SAML sync that may temporarily affect permissions. (Product/Design)
+
+Testing and verification:
+- Unit tests for precedence ordering in SAML mapping and for the evaluator lock behavior.
+- Integration tests: simulated SAML sync with interleaved reads/writes to reproduce race; verify no transient over-permission and no false denies.
+- Load test: simulate 200 org-wide syncs/minute in staging and observe cache consistency and audit emission.
+- Canary rollout: staged rollout to 10% of Dedicated hosts, monitor errors/latency, audit gaps, and customer edge cases.
+
+Rollout plan and timeline:
+- Patch PRs open now: r/PR-3152 (mapping deterministic), r/PR-3153 (evaluator lock), r/PR-3154 (audit change). Target ship: console-2026.03 (2026-03-20 mainship), backport to runtime-1.19 for active Dedicated clusters if verified.
+- Migration window: schedule per-customer migration scripts; communicate via SRE runbook and account teams.
+
+Mitigation for customers while fix is in progress:
+- Temporary mitigation for affected tenants: toggle to "sync in replace mode" instead of diff-apply in IdP connector (low-risk but increases sync CPU).
+- Support mitigation: advise customers to suspend large group mass-updates during our patch window.
+
+Open questions / trade-offs:
+- Strong consistency vs. throughput: holding a short sync lock adds latency for requests during sync — acceptable for Dedicated/Private but should be configurable for Hosted tenants.
+- Audit verbosity vs. S3/log retention costs: ordered bundles increase event count slightly; need cost approval from Finance for higher ingestion.
+- Whether to auto-run migration across Dedicated tenants or require explicit opt-in.
+
+Next steps (immediate):
+1) Merge deterministic mapping PR and cut canary for mapping only (ETA 2026-03-10).
+2) Complete evaluator-lock PR and coordinate with infra to allocate canary hosts (ETA 2026-03-14).
+3) Run migration job on a single affected tenant in staging and verify.
+4) Prepare customer comms and SRE runbook.
+
+Links and artifacts:
+- Repro doc (Confluence): https://confluence.redwood.ai/rbac-v2/saml-sync-repro-2026
+- Support ticket: SPT-1894 (AcmePayments escalation)
+- GitHub PRs: https://github.com/redwood-inference/platform/pull/3152, /pull/3153, /pull/3154
+- Staging dashboard: https://grafana.redwood.ai/d/abcd/saml-sync-loads
+- Forensics dump (redacted): s3://redwood-internal/acme-escalation-20260301
+
+2026-03-03 — Aisha Banerjee: Created ticket after SPT-1894. Initial triage concluded both deny and over-permission symptoms. Assigned to Marcus Li.
+2026-03-04 — Marcus Li: Reproduced on staging with synthetic SAML group claim sequences (two IdP mappings + nested group). Attached repro steps to Confluence doc. Linked PR-3152 for mapping fix.
+2026-03-06 — Security (Priya Kumar): Reviewed audit implications. Agreed we must preserve chronological grant/deny events; will partner on telemetry.
+2026-03-08 — Marcus Li: PR-3153 (evaluator lock) passed unit tests; integration failing on a rare timing case. Added additional invariant checks and deterministic sleeps for flakiness triage.
+2026-03-10 — SRE (Luis Ortega): Prepared canary fleet for evaluator-lock test. Requesting maintenance window 2026-03-12 0200-0500 UTC for canary rollout.
+2026-03-12 — Customer Success (Nora Patel): Notified AcmePayments of planned maintenance and mitigation steps. They requested migration be opt-in; we will honor that.
+2026-03-13 — Marcus Li: Audit bundle format patch (PR-3154) implemented. Telemetry added: audit-seq-missing counter and a Grafana alert (threshold > 1 per hour).
+2026-03-14 — Marcus Li: Merged mapping fix and audit bundle in staging. Starting evaluator-lock canary now. Observability: no over-permission events in first 12h, two minor 403 regressions under sustained load (investigating).

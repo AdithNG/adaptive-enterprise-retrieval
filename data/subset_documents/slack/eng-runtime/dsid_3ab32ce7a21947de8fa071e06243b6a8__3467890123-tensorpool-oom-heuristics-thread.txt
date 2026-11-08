@@ -1,0 +1,43 @@
+eng-runtime
+
+mina: Heads-up — after the kernel-selector change on canary we saw two customer sessions hit OOMs during 1k-token generations. Not a full crash but the serving process started thrashing GPU memory and eventually hit OOMs.
+raj: Any profiler traces yet? Seems like the usual suspects: excessive scratchpad peaks or KV cache resize churn.
+mina: I ran a quick nvprof trace and our max allocated workspace spikes right before the OOM. The allocation stack points at `prepare_logits_scratch()` and `kv_ingest_batch()`.
+olga: Can you paste the minimal logs? Also which quantization path (fp16/q4)?
+mina: q4_k_m. Log snippet:
+```
+INFO 12:03:08 prepare_logits_scratch size=15728640
+INFO 12:03:08 kv_ingest_batch alloc=9830400
+INFO 12:03:09 scratch_coalesce failed->fallback_alloc
+OOM at allocate_workspace
+```
+jules: Interesting — `scratch_coalesce failed->fallback_alloc` suggests freelist fragmentation. After the kernel selector change we started preferring kernels that require contiguous scratch layout instead of scattered small buffers.
+raj: Two quick hypotheses: (1) freelist bucket sizing is wrong for the new kernel footprints; (2) our delayed-free grace window is too long and prevents reuse under bursty allocation patterns.
+mina: Agree. I'm thinking of two short experiments: reduce freelist bucket granularity (merge small buckets) and shorten delayed-free window from 200ms -> 50ms to encourage reuse.
+olga: Also consider a conservative eager-evict of cold logits slab when KV grows beyond threshold. That avoids simultaneous large scratch + large logits.
+raj: Proposed config to run in canary — small JSON tweak we can hot-reload:
+```
+{"allocator":{
+  "bucket_merge_threshold_bytes": 1_048_576,
+  "delayed_free_ms": 50,
+  "max_eager_zero_bytes": 2_097_152
+},
+"kv":{
+  "evict_on_ingest_pct": 0.65,
+  "evict_batch_size": 4
+}}
+```
+mina: I'll hot-reload that on canary in 10m and run the failing prompt loop.
+deployer-bot: canary-deploy: rolling config update started for runtime-canary-7
+jules: For observability, can we add a short histogram for "scratch_coalesce_attempts" vs "fallback_allocs" and emit the freelist bucket occupancy every 5s? Will help validate the fragmentation hypothesis.
+mina: Good idea — I'll add a lightweight metric and a short debug trace to the canary so we don't overflow metrics ingestion.
+olga: If the short delayed-free fixes it, we should also run a 24h soak to ensure we don't regress throughput due to more frequent allocations.
+raj: Another edge case — KV cache resizing during high-concurrency ingestion can cause short-lived double allocations: first to copy into new KV pages, then to instantiate per-request scratch. If both happen concurrently we spike. We might throttle resize concurrency.
+mina: Noted. I'll try the freelist + delayed-free change first, then add a resize-concurrency cap if we still see spike.
+jules: If you need a quick reproducer, run the `loadtest/generation_burst.py` with `--batch-schedule=burst:100:20` and `--kv-ingest=enabled` — that's what triggered it in staging.
+mina: Running now. Will post logs in this thread. Thanks all :thumbsup:
+(10m later)
+mina: Update — after the config tweak the canary handled three 1k generation bursts with no OOMs. Metrics: fallback_allocs dropped from 18->2 per minute; scratch_coalesce_attempts steady. Still seeing slightly higher p99 latency (~4%).
+raj: Expected — slightly shorter delayed-free can increase small allocations, tradeoff latency vs memory safety. We can tweak bucket_merge_threshold to recover p99.
+olga: Let's keep the canary running for 12h and then promote if stable. Also add a rollout guard to revert config automatically if OOMs > 1 in 10m.
+mina: Will do the 12h soak and add the OOM guard. Thanks everyone.

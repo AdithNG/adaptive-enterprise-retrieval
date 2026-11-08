@@ -1,0 +1,132 @@
+Telemetry opt-out, prompt/response ownership and telemetry routing (Medicore)
+
+From: Alex Rivera <alex@medicore.com>
+To: vivek_kulkarni <vivek@redwood.ai>
+Cc: procurement@medicore.com
+Date: Tue, 10 Nov 2026 09:15:00 -0800
+Subject: Questions on data use: telemetry, ownership and KMS residency
+
+Vivek —
+
+Thanks for the demo last week. Before we proceed to procurement we need confirmation on a few items for our security & legal teams so they can sign off: 
+
+1) Do you commit that Medicore prompts and responses will not be used to improve model weights (no-training) unless we explicitly opt in?
+2) Can you provide a telemetry opt-out (no-telemetry) so that operational telemetry tied to our tenant is excluded from metric capture and experimentation?
+3) We require onshore KMS for key management and evidence that any subprocessor with access to plaintext is located in the US or EU (list and residency).
+4) What proof can you provide for deletion requests and audit logs (pattern we expect: timestamped deletion, confirmation, and exportable audit bundle)?
+
+I've attached Medicore_DPA_questions.pdf with redline requests. Can you route to the right people and let me know an estimated timeline?
+
+Appreciate it —
+Alex Rivera
+Director, Procurement
+Medicore Health
+
+(attachment: Medicore_DPA_questions.pdf)
+From: vivek_kulkarni <vivek@redwood.ai>
+To: Alex Rivera <alex@medicore.com>
+Cc: david_kim <david@redwood.ai>, karthik_iyer <karthik@redwood.ai>, naomi_feldman <naomi@redwood.ai>
+Date: Tue, 10 Nov 2026 12:02:00 -08:00
+Subject: Re: Questions on data use: telemetry, ownership and KMS residency
+
+Alex —
+
+Thanks for the clear list. We're aligned with Medicore's security posture and have options to meet each ask; below is a short operational summary. I'll loop in David (ops) and Karthik (policy/legal) for detail and timing.
+
+High-level answers: 
+- No-training: Yes — we offer an explicit contract clause and a tenant-level runtime flag that prevents requests from being routed into any model-improvement pipelines. This is available for Hosted and Dedicated modes.
+- Telemetry opt-out: We can suppress tenant-identifying telemetry and provide an opt-out mode that still allows anonymized system health signals. Telemetry for billing (token counts) can be provided in aggregate only.
+- KMS residency: We support onshore KMS integrations (customer-managed) for Dedicated and Private deployments; Hosted customers can use onshore KMS via dedicated capacity or private deployment options.
+- Proof of deletion & audit: We can export an audit bundle (timestamped events, deletion confirmations, subprocessor access logs) and provide a signed attestation.
+
+Action items from our side:
+1) David to propose an ops runbook (how opt-out is enforced at runtime + latency/throughput implications).
+2) Karthik to propose contract language and a short redline that covers audit granularity and export.
+3) Naomi to provide the current subprocessor inventory and residency matrix.
+
+Would Medicore be ok with a 5-business-day turnaround for the runbook and 7–10 business days for the redline & evidence pack?
+
+Best,
+Vivek Kulkarni
+VP, Solutions
+Redwood Inference
+
+
+From: david_kim <david@redwood.ai>
+To: vivek_kulkarni <vivek@redwood.ai>, Alex Rivera <alex@medicore.com>
+Cc: karthik_iyer <karthik@redwood.ai>, naomi_feldman <naomi@redwood.ai>
+Date: Wed, 11 Nov 2026 08:34:00 -08:00
+Subject: Re: Questions on data use: telemetry, ownership and KMS residency
+
+Alex / team —
+
+Below is an operational summary to make the commitments concrete. Attaching the current subprocessor inventory for your review.
+
+Runtime enforcement (no-training + telemetry opt-out):
+- Tenant flag: We have a per-tenant runtime flag "no_model_learning" instantiated at request ingress. When set, the request path bypasses any learning/experimentation endpoints and writes only into ephemeral caches with a TTL of 1 hour (configurable by agreement).
+- KV cache & prefix caching: For latency-sensitive workloads we still use ephemeral KV caches; these are not persisted to training pipelines.
+- Telemetry: We separate telemetry into billing metrics (aggregated token counts) and telemetry-flags for health/debug. Opt-out removes tenant-id from all non-billing telemetry streams and writes anonymized buckets to a separate retention pipeline.
+- Audit & deletion flow: Deletion request triggers: (1) mark items as deleted (index), (2) purge ephemeral caches and permanent logs within 24 hours, (3) generate exportable audit bundle (jsonL events) including request ids and timestamps. We retain a signed attestation for 12 months by default.
+
+Subprocessors & residency: See attached subprocessor_inventory.csv — columns: name, role, region, access_level. We are able to provide onshore-only routing for traffic (us-east, us-west) and to constrain data plane so only onshore subprocessors handle plaintext when requested.
+
+Latency/throughput considerations: Enforcing no-learning and telemetry opt-out has negligible steady-state latency (<5 ms p50 impact) but may affect our ability to use low-cost experimental batching for some multi-tenant pools. For guaranteed throughput & subprocessor isolation we recommend Dedicated capacity (reserved GPU pools) for Medicore's production traffic.
+
+Next steps I propose:
+- Internal runbook (this week): PRD that details the runtime flag, expected SLO impact, and rollback plan.
+- Evidence package (7 business days): subprocessor manifests, audit bundle sample, and SOC 2 link.
+
+Attachment: subprocessor_inventory.csv
+
+Thanks,
+David Kim
+Director, Product Operations
+Redwood Inference
+
+(attachment: subprocessor_inventory.csv)
+From: karthik_iyer <karthik@redwood.ai>
+To: vivek_kulkarni <vivek@redwood.ai>, david_kim <david@redwood.ai>, Alex Rivera <alex@medicore.com>
+Cc: naomi_feldman <naomi@redwood.ai>
+Date: Thu, 12 Nov 2026 10:21:00 -08:00
+Subject: Re: Questions on data use: telemetry, ownership and KMS residency
+
+Alex / Vivek —
+
+Legal & compliance notes and suggested contract language: 
+
+1) No-training clause (suggested): "Provider shall not use Customer Data (prompts, completions, or derivatives) to train, fine-tune, or improve Provider models or model weights, except with Customer's prior written consent." 
+
+2) Telemetry opt-out (suggested): "Provider shall not collect or retain telemetry that can be used to re-identify Customer tenants or end users. Provider may collect anonymized operational metrics for platform health, provided such metrics are aggregated and cannot be reversed to identify Customer data."
+
+3) Audit & deletion: Include an SLA for audit bundle delivery (e.g., 7 business days) and confirm the export format (we'll provide JSONL + signed hash). Also include attestations for proof-of-deletion.
+
+4) Subprocessor residency & restrictions: Add an exhibit listing subprocessors with region and data-access level; include mechanism for onshore-only routing and periodic attestations (quarterly).
+
+I'll prepare a short redline to your PDF and propose the above language; will aim to send the redline within 3 business days. If Medicore requires DocuSign-ready language we can provide a negotiated addendum (Deal ID MED-2319).
+
+Karthik Iyer
+Head of Legal (Contracts)
+Redwood Inference
+
+
+From: Alex Rivera <alex@medicore.com>
+To: karthik_iyer <karthik@redwood.ai>, vivek_kulkarni <vivek@redwood.ai>
+Cc: procurement@medicore.com
+Date: Mon, 16 Nov 2026 16:42:00 -08:00
+Subject: Re: Questions on data use: telemetry, ownership and KMS residency
+
+Thanks, everyone — this is helpful and addresses most concerns. A couple quick asks before we lock timelines with Procurement: 
+
+- Can you produce the runbook and the redline by end of day Friday (19 Nov)? Medicore legal wants the suggested clauses in DocuSign-ready form.
+- Please include the SOC 2 report or a link to your SOC 2 evidence bundle in the evidence package.
+- We'll need a mutual action plan with milestones, owners and dates so procurement can show timeline to our board.
+
+If you can target the 19 Nov turnaround that would be excellent — otherwise let me know what you can commit to.
+
+Appreciate the quick coordination.
+Alex
+Director, Procurement
+Medicore Health
+
+P.S. Happy to hop on a 30-min call if needed — procurement@medicore.com
+

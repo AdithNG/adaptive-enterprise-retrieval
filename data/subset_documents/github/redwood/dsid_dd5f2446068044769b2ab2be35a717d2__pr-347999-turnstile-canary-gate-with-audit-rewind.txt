@@ -1,0 +1,36 @@
+Turnstile canary gating with audit-rewind and session-fence support
+
+Motivation: We need a safer canary primitive that enforces session-coherent promotion and provides a forensic-backed automated rollback that can optionally rewind recent traffic for replay testing. The Turnstile gate implements a session-fence: during promotion the controller guarantees that sessions routed to the candidate model are isolated and can be rewound (replayed) against the golden variant for postmortem verification. The audit-rewind helper materializes compact, indexed per-cohort artifacts that let SREs and devs replay a timebox of requests deterministically.
+
+What this PR does: implements a new rollout gate (turnstile), a compact on-disk audit store format, controller logic to fence sessions during canaries, a replay CLI for investigators, and operator docs/playbooks. Key behaviors: session affinity maintained while candidate is in the fenced lane; if the gate trips (latency/regression thresholds) the controller can trigger an automated rollback and optionally kick off an audit-rewind job to capture and replay affected sessions for debugging. The rewind job supports partial replays (sampling by cohort, developer tags, or explicit request IDs).
+
+Checklist: 
+- [x] Core controller implementation (turnstile_controller.go) 
+- [x] Audit store writer + compact index (telemetry/audit_store.go) 
+- [x] Replay CLI (tools/replay_cli.py) 
+- [x] Unit tests for fencing and gated promotion logic (tests/turnstile_unit_test.py) 
+- [x] Integration test that runs a small live canary, induces a latency spike, verifies rollback + rewind (tests/turnstile_integration_test.py) 
+- [x] Runbook and operator docs (docs/runbooks/turnstile.md) 
+- [x] Telemetry dashboards: added telemetry/turnstile_dashboard.json (skeleton) 
+
+Testing notes: initial CI run flagged a flaky test in the sampling path (tests/turnstile_integration_test.py) due to timing assumptions; increased test harness timeouts and introduced deterministic pseudorandom seeds for sampling. Local integration: ran a 1k qps synthetic canary against the staging cluster with session stickiness and verified that scoreboard metrics (turnstile.active_sessions, turnstile.replay_candidates, turnstile.rollback_triggers) are emitted. Replayed a 5-minute window with replay_cli and confirmed parity for 98% of traced response hashes.
+
+Backward compatibility and safety: the Turnstile gate plugs in as an optional gate in existing rollout policy YAMLs; if not referenced, there is zero behavioral change. The audit store expires by default after 72 hours and is configurable per-tenant to avoid storage blowup. The rewind path is read-only with a configurable dry-run mode so it can be used without automatically shadowing production traffic.
+
+Operational concerns: 
+- Storage: audit artifacts are compact (indexed delta blobs) but operators should monitor telemetry.audit_store_bytes; default retention is conservative. 
+- Privacy: audit artifacts contain request metadata and user-cohort tags (no PII allowed). We added sanitization hooks in telemetry/audit_store.go and a KMS flag for encrypting on write. 
+
+Related work: builds on ENG-1072 (session-anchored shadow bridge) and complements ENG-1624 (telemetry replay framework). This PR also references SUP-783 for a customer incident that motivated faster forensic replays.
+
+How to review: focus on the controller invariants in turnstile_controller.go and tests/turnstile_unit_test.py. Replay CLI is small and intentionally opinionated — review for safety knobs. docs/runbooks/turnstile.md contains operator playbook and run examples.
+
+Notes for release: enable behind feature flag rollout.turnstile_enabled=false by default for 2 weeks, then roll to opt-in tenants.
+
+Introduces the Turnstile canary gate (session-fenced canary lane) and an audit-rewind helper for safer automated rollbacks. Backwards compatible with existing rollout policies. See docs/runbooks/turnstile.md for operator playbook.
+Diego Martinez: overall this looks good — can we tighten the default retention from 72h to 48h for sandbox tenants?
+Aisha Patel: replied: made retention configurable per-tenant and left default at 72h to match legal retention guidance; added config comment
+Chen Li: nit: split large audit blobs into 64KB chunks for easier streaming — implemented in second commit
+Marta Novak: request: add an SLO guard that prevents auto-rollback if less than X samples collected — added a gating check and test
+Diego Martinez: approved after small comments; reran CI on last push
+CI: initial run failed on tests/turnstile_integration_test.py (flaky sampling). Reran: all checks passed.

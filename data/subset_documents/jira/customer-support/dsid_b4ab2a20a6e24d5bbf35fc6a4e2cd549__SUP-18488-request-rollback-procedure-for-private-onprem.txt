@@ -1,0 +1,76 @@
+Request: documented rollback procedure for Redwood Private (on-prem / air-gapped) upgrades
+
+Customer (Northstar Health Systems) is planning an on-prem / air-gapped upgrade of Redwood Private and is requesting a clear, operator-friendly rollback procedure that can be shared internally for change control.
+
+Request details (from customer):
+- They need step-by-step rollback instructions suitable for an IT ops runbook, including what is and is not supported (e.g., Helm rollback vs restore-from-backup).
+- They require clarity on expected downtime/RTO and what artifacts must be preserved (offline bundle, chart versions, container images, DB backups, PV snapshots).
+- They have strict constraints:
+  - Air-gapped environment (offline bundle only, no outbound registry/chart repo access).
+  - Change windows are short (2 hours max) with a hard stop where they must revert.
+  - Audit/compliance requires evidence of backups taken and a deterministic rollback path.
+
+What they are upgrading:
+- Redwood Private control plane + data plane via Helm in their own Kubernetes cluster.
+- Current version: customer reports they are pinned to an N-1 release (exact patch TBD; they mentioned 2.9.x in email).
+
+Customer questions to answer:
+1) If the upgrade fails mid-way (e.g., DB migration or control plane rollout), what are the exact steps to revert?
+2) Is a Helm rollback supported? If not, what is the supported rollback mechanism?
+3) What preconditions must be met to roll back safely (snapshots, dumps, stopping components, etc.)?
+4) What data can be lost (if any) and how to verify system health post-rollback?
+
+Support goal:
+- Provide an accurate rollback procedure based on current GA capabilities (not aspirational), while aligning with the upcoming upgrade/rollback work so the customer does not build an incorrect internal process.
+2025-05-29 09:14 PT — Dev Patel (Support) — Ticket created after customer asked for rollback guarantees and a written procedure for on-prem upgrades. Customer explicitly asked for something they can attach to their CAB/change request.
+2025-05-29 10:02 PT — Owen Phillips (Support Escalation SME) — Acknowledged. Key point to set expectations: today, rollback is supported via restore-from-backup taken immediately before upgrade (DB + config + PV snapshots), not via Helm rollback. Will draft customer-facing steps and validate with SRE/Release Eng.
+2025-05-29 12:21 PT — Rafael Mendes (SRE) — Confirming: Helm rollback is not considered safe once DB migrations run. If any migration step has executed, the only supported rollback is full restore (DB restore + PV snapshot restore as applicable) to the pre-upgrade point-in-time. Also recommend pausing data plane rollouts first to reduce blast radius.
+2025-05-30 08:37 PT — Connor O'Brien (Release Eng) — For air-gapped: ensure they retain the full pre-upgrade offline bundle (charts + images + manifests) and checksums. If they overwrite their mirror with new tags, rollback becomes hard. Recommend immutable, versioned directories in their artifact mirror (e.g., /redwood-private/2.9.3 and /redwood-private/2.10.0).
+2025-05-30 11:05 PT — Michael Nguyen (Migrations) — Add guidance: if upgrade fails during migration, do not attempt a "downgrade" by running older pods against a migrated DB. Restore the DB from the pre-upgrade backup. For Postgres, prefer pg_dump/pg_restore for logical backup (or a storage snapshot if their storage backend supports consistent snapshots).
+2025-06-02 09:18 PT — Owen Phillips (Support) — Sent customer a draft rollback procedure (below) and asked them to confirm their current versions (installer + chart + platform) and storage backend.
+
+Draft rollback procedure (customer-facing, current GA):
+A. Before upgrade (required to have a rollback path)
+1) Ensure you have the full pre-upgrade artifact set stored offline:
+   - The offline bundle for the currently running version (charts + images + manifests).
+   - Checksums/signature file if provided.
+2) Take backups immediately before running the upgrade:
+   - Control plane database backup (Postgres logical dump) and verify you can restore it.
+   - Snapshot persistent volumes for stateful services (where supported) or capture storage-level snapshots.
+   - Export cluster config relevant to Redwood (Helm values, secrets references, cert material references).
+3) Record current versions:
+   - Chart version(s), Redwood Private version, and installer version.
+
+B. When to rollback
+- Rollback is recommended if:
+  - Control plane does not become Ready after upgrade within your maintenance window.
+  - DB migrations error or exceed your change window.
+  - Auth/OIDC integration breaks and cannot be remediated quickly.
+
+C. Rollback steps (supported)
+1) Stop further change:
+   - Halt any automation applying charts.
+   - If data plane rollout is in progress, pause/stop it first.
+2) Restore to pre-upgrade backups:
+   - Restore the control plane DB from the backup taken immediately before upgrade.
+   - Restore PV snapshots (or storage snapshots) for stateful components if they were mutated during upgrade.
+3) Re-deploy the previous version artifacts:
+   - Re-apply the previous chart(s) and manifests from the pre-upgrade offline bundle.
+   - Ensure your image registry points to the pre-upgrade image set.
+4) Post-rollback verification:
+   - Confirm control plane health checks.
+   - Confirm data plane routing works.
+   - Confirm audit logs and auth integrations.
+
+D. Explicitly not supported / cautions
+- Helm rollback is not supported once DB migrations have applied.
+- Do not run older control plane pods against a DB that has been migrated forward.
+
+Also offered a 30-min call to tailor this to their storage backend and their change window.
+2025-06-03 14:44 PT — Dev Patel (Support) — Customer replied: they use CSI-backed storage with snapshot support, and want a single PDF-like doc. They also asked: "Is there a way to do a rollback without restoring PVs, just DB?"
+2025-06-04 09:27 PT — Irene Choi (Infra) — Answer: depends on which PVs are used and whether any stateful components store upgrade-time state outside DB. Conservative guidance: assume PV restore is required unless we can confirm components are stateless or only cache. For model cache PVs: usually can be cleared/rebuilt, but we should not present that as universal without confirming their deployment topology.
+2025-06-05 10:11 PT — Owen Phillips (Support) — Responded to customer: DB-only rollback may be possible if PVs contain only rebuildable caches, but safest supported rollback remains DB restore + PV restore for stateful services. Asked them to provide which PVCs they have and what components are stateful in their install (control-plane DB PVC, object store, model cache).
+2025-06-06 16:03 PT — Kenji Nakamura (UX) — FYI: upcoming installer work will include a first-class rollback command that consumes stored upgrade state and runs deterministic hooks. Not GA yet; do not promise timelines to customer. Point them to the current runbook excerpt and we can update once GA.
+2025-06-07 09:41 PT — Owen Phillips (Support) — Final: Provided a cleaned-up rollback procedure (same content as draft, reworded as a runbook) and linked the relevant Redwood internal/external-aligned docs section for upgrades + troubleshooting. Marking as Resolved; follow-up task: convert to customer-facing doc snippet once docs PR lands.
+Provided customer with a supported rollback procedure for current GA behavior: restore-from-pre-upgrade backups (DB + PV snapshots as applicable) and re-deploy prior version artifacts from the pre-upgrade offline bundle. Set expectations that Helm rollback is not supported once DB migrations have applied. Offered a tailoring call and requested storage/PVC details to refine DB-only vs DB+PV guidance for their topology.
+Do not oversell the upcoming rollback command. Customer-facing language must remain: supported rollback is restore-from-backup. If customer presses for guarantees, route to Solutions (Markus Klein) + PM (Vivek Kulkarni) for contract/SLA language. Consider adding a short, sanitized "Rollback (On-Prem)" section to external docs once aligned with: rollback semantics page + private upgrade runbook + backup/restore strategy. Ensure we align with auditability requirements (backup evidence + timestamps) and offline bundle immutability guidance.

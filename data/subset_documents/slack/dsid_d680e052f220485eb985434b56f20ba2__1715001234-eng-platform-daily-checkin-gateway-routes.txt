@@ -1,0 +1,50 @@
+eng-platform
+
+Maria Chen: Morning — quick async standup for eng-platform. What I did: merged the small change to auth middleware that preserves x-forwarded-user, verified with unit tests. Blockers: noticed some 401 spikes against the API gateway in the staging trace; digging into routing fallback behavior. Today: finish a canary rollout for the routing policy changes and follow up on the spike.
+Ajay Patel: /what I did: added per-route rate-limit config to the yaml schema, and stubbed the planner to read it. Blockers: need an integration test harness that simulates bursty traffic for the quota refactor. Today: wire the simulator and push a test run to CI.
+Liam O'Connor: Did code review on Maria's auth change — left one comment about header normalization. Also pushed a small perf patch to continuous-batching. No blockers. Today: will help Ajay with the simulator and run a couple of load scenarios.
+Sophia Rivera: I ran the staging traffic replay overnight (route: /v1/generate) — saw the same 401 spikes around 03:12 UTC. Trace looks like requests hitting fallthrough-route which has auth disabled. Not sure why the policy match didn't pick the primary route. Blocker: need a dump of the policy table at the time of the replay. @Maria can you dump the policy state from staging?
+
+Maria Chen: Yup, grabbing it now — running `./admin dump-policy --env=staging --since=1714998000` (will paste output).
+
+deploy-bot: Deployment started: gateway-service v2.18 -> v2.19 (canary=10%) by @maria
+Maria Chen: Pasting relevant excerpt from dump (sanitized):
+```
+routes:
+  - id: generate-primary
+    match: path_prefix: /v1/generate
+    auth_required: true
+    predicates:
+      - header: x-client-type == "web"
+  - id: generate-fallback
+    match: path_prefix: /v1/generate
+    auth_required: false
+    predicates:
+      - header: x-client-type == "internal"
+```
+Maria Chen: Hmm — staging replay requests have x-client-type: "web-prod" which doesn't match either predicate. That's why fallthrough is triggered. I'll add a predicate that handles wildcard prefixes.
+
+Ajay Patel: Good catch. For routing policy language, would `header_prefix: x-client-type starts_with "web"` be ok? We should avoid too many predicate types.
+
+Liam O'Connor: Agree — prefer `starts_with` vs regex for perf. If we add a small normalizer that maps "web-prod" -> "web" at ingress, that also fixes auth mapping. But might hide client-versioning.
+
+Sophia Rivera: For next steps — Maria, can you: 1) add starts_with predicate to the policy and canary to 20%? 2) attach the staging policy dump as a gist or paste here? 3) Ajay/Liam can help with simulator runs after change.
+
+Maria Chen: Plan: will open a tiny PR for policy change + tests, increment canary to 20% after deploy passes smoke, and paste the policy dump link. ETA ~2h. @Ajay @Liam please stand by for pairing on simulator.
+
+Ajay Patel: I'll queue the simulator job once PR is merged. Also leaving a note to add a unit test for rate-limit fallback when a route match fails (we had no test for that edge case).
+
+Liam O'Connor: Ping me when you merge, I'll run the replay with 10k qps burst and forward the metrics. Also watching for latency tail increase due to auth normalization. :eyes:
+deploy-bot: Deployment succeeded: gateway-service v2.19 (canary=20%) — rolling.
+
+Maria Chen: Thanks. No other blockers from me, except coordinating the simulator. Will post PR link when ready. :thumbsup:
+
+Sophia Rivera: Great — I'll monitor the staging dashboard and alert if 401s reappear. If anything else, post here.
+
+Ajay Patel: Quick follow-up: which config key did we pick for per-route rate limits? I used `limits.per_minute` in the schema; confirm and I'll add CI validation.
+
+Maria Chen: `rate_limit.per_minute` is what the runtime expects (we documented this in the schema notes). Ajay, please keep `limits.` as an alias for backward compatibility and add a deprecation warning in the validator.
+
+Liam O'Connor: all good. small note: if rate-limit config is missing, runtime should fall back to global default (10k/min) — we should add a test asserting that.
+
+Maria Chen: Noted. I'll include tests for fallback and predicate matching. Closing my standup — will update with PR link.

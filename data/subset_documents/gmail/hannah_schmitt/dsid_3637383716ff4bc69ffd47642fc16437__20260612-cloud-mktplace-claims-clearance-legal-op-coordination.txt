@@ -1,0 +1,106 @@
+AWS/Azure co-sell listing — claims clearance & support SLA language
+
+From: Priya Suresh <priya.suresh@acmeanalytics.com>
+To: Hannah Schmitt <hannah.schmitt@redwood.com>, Marissa Cole <marissa.cole@redwood.com>
+Cc: aws-mp-approvals@amazon.com
+Date: 2026-06-12T09:15:00-07:00
+Subject: Draft listing copy + support SLA for AWS co-sell
+
+Hi Hannah & Marissa,
+
+Attached are the latest assets for the AWS/Azure marketplace listings and the proposed support SLA language. We want to ensure the copy is aligned with both AWS co-sell requirements and Azure Marketplace policy on claims and branding.
+
+Key concerns from our legal team:
+- Avoid unqualified superlatives ("best/industry-leading").
+- Be specific on SLAs: the support SLA currently reads "99.9% uptime" for Standard tier; legal asked whether we can claim "99.95%" for Enterprise plan.
+- Support scope: need clarity on incident response times and what "phone support" entails.
+
+Attachments:
+- acme_brand_guidelines.pdf (brand logos and permitted lockups)
+- support_sla_proposal_v2.docx (current draft)
+
+Can Redwood confirm if the suggested SLA phrasing is supportable, and propose alternative phrasing that meets marketplace policy (AWS/Azure) for co-sell eligibility?
+
+We'd like to go live in the AWS marketplace by July 5. Do you see any blockers?
+
+Best,
+Priya
+Director, Partnerships
+Acme Analytics
+
+From: Hannah Schmitt <hannah.schmitt@redwood.com>
+To: Priya Suresh <priya.suresh@acmeanalytics.com>
+Cc: Marissa Cole <marissa.cole@redwood.com>
+Date: 2026-06-12T11:02:00-07:00
+Subject: Re: Draft listing copy + support SLA for AWS co-sell
+
+Thanks Priya — quick read-through.
+
+High level: we can support 99.95% for Enterprise if they're willing to pay for reserved Dedicated capacity and a higher support tier. We can't offer that SLA on a shared hosted plan. Suggested wording:
+- "Enterprise tier: 99.95% availability backed by reserved capacity and prioritized incident response" (we should avoid "uptime" in listing copy).
+- "Standard tier: 99.9% availability on our hosted plan."
+
+Marissa — can you confirm marketplace policy flags for the phrase "backed by reserved capacity" on AWS and Azure? I want to avoid language that suggests contractual guarantees in the public listing if we don't have contractual artifacts.
+
+Priya — also helpful if you can surface whether Acme expects Redwood to be listed as a co-sell partner (logo/claim) or if they'd only like Acme as the vendor. That changes branding placement.
+
+I'll loop in Karthik for any technical claims about runtime/quantization support that might appear in marketing copy.
+
+Thanks,
+Hannah
+Head of Partnerships
+Redwood Inference
+
+From: Marissa Cole <marissa.cole@redwood.com>
+To: Hannah Schmitt <hannah.schmitt@redwood.com>, Priya Suresh <priya.suresh@acmeanalytics.com>
+Cc: karthik.iyer@redwood.com
+Date: 2026-06-12T14:35:00-07:00
+Subject: Re: Draft listing copy + support SLA for AWS co-sell
+
+Adding marketplace ops notes inline:
+- AWS marketplace: public listing copy must not contain contractual SLA terms unless supported by Marketplace Private Offer/contract. Public copy should say "Service availability targets up to 99.95% depending on plan" and link to support page/contract.
+- Azure marketplace: similar, but they allow explicit "99.95%" if a validated Azure co-sell offer with VM SKUs or reserved capacity is registered.
+
+Suggested public copy (short):
+"Enterprise: service availability targets up to 99.95% with reserved capacity and premium support. Standard: 99.9% availability on shared hosted plans."
+
+Attachments:
+- aws_co-sell_checklist.xlsx (marketplace-specific compliance checklist)
+- support_sla_proposal_v2.docx (attached comments)
+
+Next steps:
+1) Priya to confirm whether Acme wants Redwood co-branded listing or vendor-only.
+2) Acme to confirm whether they'll commit to reserved capacity for Enterprise customers.
+3) Legal check: Hannah to review the revised phrasing for promotional materials.
+
+If all agree, I'll prepare the AWS listing text and open a support ticket with AWS approvals to request co-sell designation.
+
+—Marissa
+Marketplace Ops
+Redwood Inference
+
+From: Karthik Iyer <karthik.iyer@redwood.com>
+To: Hannah Schmitt <hannah.schmitt@redwood.com>, Marissa Cole <marissa.cole@redwood.com>, Priya Suresh <priya.suresh@acmeanalytics.com>
+Date: 2026-06-13T16:40:00-07:00
+Subject: Re: Draft listing copy + support SLA for AWS co-sell
+
+Forwarding with technical sign-off.
+
+On 2026-06-12 14:35, Marissa Cole wrote:
+> Adding marketplace ops notes inline: ...
+
+Engineering confirmation:
+- We can support the "up to 99.95% availability" claim for Enterprise customers if the customer purchases Reserved/Dedicated capacity and a commercial support plan that includes a 1-hour P1 response time. That requires a minimum committed throughput (we can document thresholds).
+- Do not claim network-level SLAs (we cannot guarantee customer's infra). Keep phrasing to "service availability" and tie to plan/contract.
+
+Approved copy for internal legal review & marketplace ops:
+"Enterprise: service availability targets up to 99.95% with reserved capacity and premium support. Standard: 99.9% availability on shared hosted plans."
+
+I attached a short operational note (support_sla_ops_note.txt) summarizing thresholds and escalation matrix.
+
+Karthik
+VP, Serving Runtime
+Redwood Inference
+
+Attachments:
+- support_sla_ops_note.txt

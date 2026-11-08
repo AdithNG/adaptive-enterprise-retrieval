@@ -1,0 +1,124 @@
+SlatePoint renewal: usage true-up and burst-to-reserve conversion
+
+From: procurement@slatepoint.ai
+To: neha_kapoor@redwood.ai
+Date: 2026-08-02T10:15:00Z
+Subject: Renewal intake: usage reconciliation + burst conversion request
+
+Hi Neha,
+
+We're starting the renewal process for SlatePoint (DEAL-8741). Before procurement can sign, Finance needs a reconciliation of the past 12 months of Dedicated usage and a clear proposal to convert the ad-hoc burst credits we've been using into a predictable reserved tranche.
+
+What's important to us: a) a clean true-up so we only pay for what we actually used, b) a proposal to move critical inference traffic to reserved GPUs to reduce tail latency and cost variance, and c) what the operational migration will look like (downtime, model warmup, cache prewarm).
+
+I've attached the usage_report_Jul2026.csv from our side — it shows a lot of daily spikes around our nightly batch scoring windows and some sustained daytime inference for the last 6 weeks. Can Redwood provide a phased recommendation and delta pricing? Procurement timeline: need a signed amendment by 2026-08-28 to keep current pricing cadence.
+
+Thanks,
+Asha Menon
+Head of Infrastructure
+SlatePoint
+
+---
+Attachment: usage_report_Jul2026.csv (CSV summary, 45KB)
+From: neha_kapoor@redwood.ai
+To: Asha Menon <asha@slatepoint.ai>
+Cc: karthik_iyer@redwood.ai, ben_carter@redwood.ai
+Date: 2026-08-03T14:02:00Z
+Subject: Re: Renewal intake: usage reconciliation + burst conversion request
+
+Hi Asha — thanks for the report and the timeline. We're happy to run the true-up and propose a staged conversion path that minimizes risk. High-level plan (proposal draft attached):
+
+1) Immediate: 30-day bridge — convert current burst credits into a temporary burst-bridge pool (no infra churn) so you retain capacity through the procurement window.
+
+2) 30-day utilization review: Redwood will run a daily heatmap + tail-latency analysis and provide a recommended committed tranche size based on P90 sustained utilization and 90th percentile peak smoothing.
+
+3) Phased reservation (if agreed): Gradual conversion of the bridge pool to reserved GPUs over two weeks. We recommend a heterogenous mix (8x A10G for steady inference + 4x A100s for heavy batch scoring). We will prewarm KV caches and coordinate cutovers to avoid cold-start latency.
+
+Operational notes: autoscale policy will be configured with a soft floor and graceful eviction of burst instances; we'll enable prefix caching for your high-frequency prompts. No customer-visible downtime expected; model warmup handled in background.
+
+Attached: slatepoint-proposal-draft.pdf (pricing worksheet + MOP).
+
+If that sounds ok, I'll loop in legal for an amendment and send a DocuSign-ready SOW.
+
+Best,
+Neha Kapoor
+Account Lead, Strategic Sales
+Redwood Inference
+
+---
+Attachment: slatepoint-proposal-draft.pdf (proposal, 120KB)
+From: karthik_iyer@redwood.ai
+To: neha_kapoor@redwood.ai, ben_carter@redwood.ai, laura_bennett@redwood.ai
+Date: 2026-08-04T09:30:00Z
+Subject: Re: SlatePoint renewal: sizing suggestion + scheduling
+
+Neha / Ben / Laura — quick internal note after reviewing Asha's CSV and Neha's draft:
+
+- Observed pattern: baseline steady inference at ~220 tokens/sec (sustained) with nightly batch windows peaking at ~9x baseline for 2–3 hours. Their 30-day P90 sustained per-GPU utilization suggests a committed floor of ~60% if we provision 12 GPUs.
+
+- Hardware mix: I agree with the 8+4 split. Rationale: A10G gives best cost/perf for low-latency, and A100s let us absorb high-throughput batch loads and shorter completion times for heavy experiments.
+
+- Autoscale + routing: Configure two pools (reserved and burst-bridge). Set routing policy to prefer reserved for traffic tagged as "prod" (we can add tag headers). For batch jobs, we prefer A100 pool with higher token throughput and allow background preemption on the bridge pool.
+
+- Cost modeling: If they commit to 12 GPUs for 12 months we should offer a 12% commit discount vs hosted burst pricing. For an interim true-up: reconcile usage over last 90 days and credit excess burst spend against first invoice of the reservation.
+
+- Risk: If utilization drops <40% for 60 days, include a one-time protected reprofile (we can propose an amendment later).
+
+I'll sketch the amendment language and send to Legal. Ben, can you sanity-check the price delta? Laura, can you coordinate SRE for prewarm playbook?
+
+-Karthik
+Head of Dedicated Capacity, Redwood Inference
+From: Asha Menon <asha@slatepoint.ai>
+To: neha_kapoor@redwood.ai
+Cc: procurement@slatepoint.ai
+Date: 2026-08-10T11:19:00Z
+Subject: Re: SlatePoint renewal: usage reconciliation + burst-to-reserve conversion request
+
+Neha — thanks for the quick turnaround and the proposed approach. The phased plan looks reasonable and aligns with our internal priorities. A few clarifying items from Procurement: 
+
+1) We need the delta in monthly committed spend (USD) vs current burst-run for sign-off. Please include the exact monthly invoice amounts with and without the 12% commit discount.
+2) Can Redwood accept a 30-day true-up window where we reconcile last-quarter usage and have a credit applied to the reservation invoice?
+3) Timeline: Procurement requires a fully executed amendment by 2026-08-28. If we hit that, SlatePoint agrees to start step 1 (bridge pool) immediately after signing.
+
+If you can send the amendment and final MOP by EOD 2026-08-12 we can loop Legal and Procurement in time.
+
+Thanks — looping procurement for scheduling.
+
+Regards,
+Asha
+Head of Infrastructure
+SlatePoint
+
+---
+Procurement: procurement@slatepoint.ai
+From: neha_kapoor@redwood.ai
+To: Asha Menon <asha@slatepoint.ai>
+Cc: karthik_iyer@redwood.ai, ben_carter@redwood.ai, laura_bennett@redwood.ai, procurement@slatepoint.ai
+Date: 2026-08-21T16:42:00Z
+Subject: SlatePoint amendment & MAP (next steps + links)
+
+Asha / team — attaching the action items and links for signature. Summary below and next steps: 
+
+Summary: We reconciled SlatePoint's last-90-day usage and propose converting burst credits into a 12-GPU reserved tranche (8 A10G, 4 A100) over a 14-day phased cutover. Pricing: committed monthly spend = $52,400; estimated current monthly burst run = $68,700; with 12% commit discount applied to the reserved tranche the net monthly delta is a $8,556 savings compared to burst-only pricing. The first reservation invoice will include a credit for reconciled burst spend ($14,200) applied to month 1.
+
+Milestones / MAP:
+- 2026-08-21: SOW and amendment sent for signature (DocuSign link: https://docusign.com/transactions/abcdef123456)
+- 2026-08-22 to 2026-08-24: Legal/Procurement review window
+- 2026-08-25: Execute amendment (target)
+- 2026-08-26 to 2026-09-09: Bridge pool active + 30-day utilization monitoring begins.
+- 2026-09-10 to 2026-09-24: Phased reservation cutover; prewarm and verification; post-cutover latency baseline report delivered within 48 hours.
+
+Operational notes: SRE (Laura) will run the prewarm playbook and coordinate model pinning. Karthik will own the autoscale thresholds and fallback routing. Ben will own billing reconciliation.
+
+Attachments: SOW_amendment_v1.docx, slatepoint-proposal-draft.pdf
+Drive: https://redwood.app/drive/slatepoint/DEAL-8741-proposal
+
+Please confirm and sign. If procurement needs alternative invoice timing, let us know and we can accommodate a one-time adjustment.
+
+Thanks,
+Neha Kapoor
+Account Lead, Strategic Sales
+Redwood Inference
+
+---
+Attachments: SOW_amendment_v1.docx (SOW amendment, 35KB); slatepoint-proposal-draft.pdf (pricing worksheet)

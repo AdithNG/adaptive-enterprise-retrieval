@@ -1,0 +1,125 @@
+Contract renewal & capacity uplift — EmberTech
+
+From: Laura Singh <laura.singh@embertech.com>
+To: ben_carter@redwood.com
+Cc: procurement@embertech.com
+Date: Thu, 15 Mar 2028 10:05:00 -0700
+Subject: Redwood renewal & capacity uplift questions
+
+Ben —
+
+We're coming up on our renewal (June 1) and EmberTech's usage has grown faster than we forecasted. We're evaluating two things in parallel: (1) a potential term-extension with a predictable committed capacity increase for Q3/Q4, and (2) a short bake test against a competitor that's submitted an alternative pricing/throughput pitch.
+
+Before we get too deep into RFP logistics, can you send a simple statement of: current throughput guarantees for our plan (p95 tail latency, tokens/sec at typical seq=512), options for a 3x committed capacity uplift (pricing and lead time), and whether you can run an isolated 48-hour throughput benchmark on dedicated capacity? Procurement needs this for our sourcing committee next week.
+
+Also flag any new terms you intend to add for burst capacity or overage handling — our security/compliance team will want to know about audit logging and KV cache handling if we move to a dedicated pool.
+
+If easier, happy to jump on a 30-minute call next week.
+
+Thanks —
+Laura Singh
+Head of Platform Engineering
+EmberTech
+laura.singh@embertech.com
+Office: +1 415-555-0198
+
+[Attachment: embertech_rfp_2028-03.pdf (pdf, 220KB)]
+From: ben_carter@redwood.com
+To: monica_patel@redwood.com, marissa_cole@redwood.com, rishi_malhotra@redwood.com
+Date: Fri, 16 Mar 2028 08:32:00 -0700
+Subject: Fwd: Redwood renewal & capacity uplift questions
+
+Team — forwarding EmberTech's ask. Key asks: p95 latency numbers at seq=512, pricing for 3x committed uplift, and an isolated 48-hour benchmark. They called out audit logs/KV cache for a dedicated pool.
+
+Proposed save/expansion approach: offer a 6-month bridge renewal with a committed uplift at ~15% discount to hosted list, plus a 48-hour dedicated benchmark we run from Solutions Eng. If benchmark meets throughput targets we convert to a reserved Dedicated plan with a 12-month commitment (pricing TBC).
+
+Marissa — can you pull their current usage shape (token distribution, peak TPS) and any open tickets about latency? Rishi — need an ops estimate for provisioning a 48h isolated run and the effort to produce a benchmark report. Monica — can you draft a succinct SLA page we can send to procurement? I want to get back to Laura by EOD Tuesday.
+
+Ben
+Account Exec — Redwood Inference
+ben_carter@redwood.com
++1 650-555-0102
+From: monica_patel@redwood.com
+To: ben_carter@redwood.com, marissa_cole@redwood.com
+Cc: rishi_malhotra@redwood.com
+Date: Mon, 19 Mar 2028 09:14:00 -0700
+Subject: Re: Fwd: Redwood renewal & capacity uplift questions
+
+Ben —
+
+Attached is a concise proposal for EmberTech outlining guaranteed performance targets and the uplift pricing (see attachment). Summary here:
+- Baseline p95 latency at seq=512: 210 ms (current plan, avg over last 30 days)
+- Committed uplift (3x baseline throughput): Guaranteed p95 <= 350 ms under committed load; burst available up to 5x for limited windows (see burst SLA).
+- Pricing: committed uplift priced as reserved capacity at 15% discount vs hosted per-token list for first 6 months; 12-month transition pricing available after successful benchmark conversion.
+- Audit/compliance: we will enable request-level audit logs (retention 90 days) for dedicated pools and provide a read-only access bundle for their security team.
+
+Proposed save plan steps:
+1) Schedule 30-min alignment call with procurement + platform (Laura + Amit).
+2) Run 48-hour isolated benchmark on dedicated pool (SE-owned) — proposed window: March 27–29.
+3) Deliver benchmark report + production migration plan within 3 business days of completion.
+4) Offer a 6-month bridge contract to extend current term while benchmark runs and we finalize Dedicated onboarding.
+
+Attachment: embertech_throughput_proposal.pdf (pdf, 140KB)
+
+Monica Patel
+Solutions Engineering Manager — Redwood Inference
+monica_patel@redwood.com
+
+[Attachment: embertech_throughput_proposal.pdf (pdf, 140KB)]
+From: ben_carter@redwood.com
+To: Laura Singh <laura.singh@embertech.com>
+Cc: monica_patel@redwood.com, procurement@embertech.com
+Date: Tue, 20 Mar 2028 11:02:00 -0700
+Subject: Re: Redwood renewal & capacity uplift questions
+
+Laura —
+
+Thanks for the clear ask. We're confident we can support the uplift and have a concrete plan: attached is a short SLA/proposal (same doc Monica sent) and a proposed benchmark plan. High level: we can provision an isolated dedicated pool and run a 48-hour throughput test w/ your sample workload. If the run shows parity with our guarantees we will stand up a 12-month reserved capacity plan and offer preferential pricing; otherwise we'll provide a migration remediation plan (no charge).
+
+Proposed next steps:
+- 30-min call: Thu, Mar 22 at 9am PT or Fri, Mar 23 at 10am PT — does one of those work?
+- If you sign the attached 6-month bridge LOI we can lock pricing and book the benchmark window (March 27–29).
+
+Attachments: embertech_throughput_proposal.pdf, throughput_benchmark_config.yml
+
+Ben
+Account Executive — Redwood Inference
+ben_carter@redwood.com
++1 650-555-0102
+From: Laura Singh <laura.singh@embertech.com>
+To: ben_carter@redwood.com
+Cc: procurement@embertech.com, Amit Rao <amit.rao@embertech.com>
+Date: Thu, 22 Mar 2028 08:11:00 -0700
+Subject: Re: Redwood renewal & capacity uplift questions
+
+Ben —
+
+Thanks — Thu 9am PT works for us. A few quick clarifications before the call:
+1) Our sourcing committee requires the benchmark harness and config (seed, prompt shapes, and concurrency matrix) in advance so they can validate the test; please confirm you will publish the throughput_benchmark_config.yml (we need it by EOD Wed).
+2) Security: we will need SOC 2 Type II attestation and evidence of audit-log retention for the dedicated pool (we have a short checklist attached in the RFP).
+3) Procurement wants to know the DocuSign timeline for a 6-month bridge LOI — can you indicate how fast we can get a countersigned LOI after the call?
+
+We'll be joined by Amit (procurement) and a platform engineer. Looking forward to the call.
+
+Laura
+
+[Attachment: embertech_rfp_2028-03.pdf (pdf, 220KB)]
+From: ben_carter@redwood.com
+To: monica_patel@redwood.com, rishi_malhotra@redwood.com, marissa_cole@redwood.com
+Date: Fri, 29 Mar 2028 15:22:00 -0700
+Subject: Internal: EmberTech renewal — next actions and approvals
+
+Quick internal note after the call (summary):
+- Call happened Mar 22; EmberTech agreed to a March 27–29 benchmark window contingent on receiving the benchmark config and SOC2 artifacts.
+- Procurement expects a countersigned LOI within 48 hours of benchmark success. They will likely require minor redlines on audit access and a short data-retention clause.
+
+Requested actions:
+- Monica: please push the embertech_throughput_proposal.pdf to the SE runbook and confirm config is staged to the drive. Also pull the SOC2 Type II package and create a short evidence bundle (redacted) for procurement.
+- Rishi: confirm ops can schedule the dedicated pool for Mar 27–29 and estimate the SRE support hours; we need smoke-run on Mar 26 to validate infra.
+- Marissa: prep a short customer success play (onboarding checklist and migration roll-back plan).
+
+If all green, I'll prepare the 6-month LOI and route to Legal for a fast-track review. Goal: countersign and lock window by EOD Mar 30.
+
+Ben
+
+[Quoted in thread: On Thu, 22 Mar 2028 08:11:00 -0700 Laura Singh <laura.singh@embertech.com> wrote: "Thanks — Thu 9am PT works for us..."]

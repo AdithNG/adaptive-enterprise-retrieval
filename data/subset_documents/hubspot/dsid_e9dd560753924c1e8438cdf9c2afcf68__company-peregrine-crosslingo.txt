@@ -1,0 +1,40 @@
+Peregrine CrossLingo Search
+
+Summary: Global KM/insights provider building a cross-lingual enterprise search product for consulting + client-facing knowledge. Heavy emphasis on embeddings + reranking pipeline. Wants predictable unit economics at scale and per-language tuning.
+
+Key points from discovery/demo: compact, choppy CRM notes style.
+- Use-case: RAG for internal knowledge + client deliverables; public website search pilot for multi-site e-commerce clients.
+- Languages: EN, FR, DE, ES, PT-BR, JA, ZH-CN, AR — need per-language recall/precision guarantees.
+- Scale: Plan initial index ~50M docs (PDFs, transcripts), long-term 500M+; estimated 10B+ embeddings. Concerned about storage + nearest-neighbor cost.
+- Latency targets: p50 < 120ms, p95 < 350ms for retrieval+rerank in EU/NA; JA/ZH budget for slightly higher tail (~450ms).
+- Cost target: blending embeddings + cross-encoder rerank, aim $0.002 - $0.01 per query (average), willing to trade cost for quality on enterprise routes.
+- Model preference: open models (multilingual dense encoders), but will accept Redwood-hosted fine-tuned reranker (cross-encoder) if private deployment approved.
+- Routing: regional routing required; fallback to lower-cost model family when Dedicated capacity constrained.
+- Security: EU data residency + KMS keys, SSO via SAML, audit logs retention 5+ years for regulatory clients.
+
+Quotes: "Need per-language recall reports — not just global metrics; FR and PT are business-critical for LATAM/EU markets." — Head of Search (M. Dupont)
+
+POC asks: 2M doc pilot with 10k eval queries across languages; per-language relevance labels (client will provide ~5k labeled pairs initially). Want Redwood SE to run indexing and measure throughput, vector store cost, and reranker latency on Dedicated GPUs.
+
+Concern/Notes: tokenizer/normalization differences (CJK vs. whitespace), need to evaluate per-language candidate counts (k retrieval) and reranker re-ranking span budgets. Interested in Redwood Optimize suggestions for quantization vs quality tradeoffs.
+
+Sales ask: present Dedicated vs Private TCO for 12/24 month commits, show fallback routing policy demo, include SLA on p99 tail for EU region.
+
+Stubs: Drive deck link above, security FAQ shared; started a Jira RDW-2381 for KMS questions.
+
+Run 2M-doc POC on Dedicated pool across 3 regions; collect per-language P95 and reranker recall@5
+final KMS integration spec
+legal signoff on EU/UK residency
+latency SLOs not validated for JA/ZH
+pricing ceilings for high-query loads
+SE (Priya) to scope resource footprint for 2M pilot and estimate GPU hours
+Provide TCO comparisons: Dedicated vs Private (on-prem) incl. KMS costs
+Run quick tokenizer/normalization test for JA/ZH on sample docs
+Deliver per-language precision recall baseline report after POC
+2025-11-02: Lead created via inbound webinar (multilingual search deep-dive)
+2025-11-12: Intro call — AE (Diego) + Head of Search; captured initial requirements (languages, scale)
+2025-12-04: Demo of Redwood retrieval + reranking; showed sample FR/EN results; client requested cross-encoder latency numbers
+2026-01-20: SE workshop — discussed indexing architecture, estimated 10B embeddings, storage comps; client sent sample dataset (10K docs)
+2026-02-21: Follow-up call (ff_2026-02-21_1430) — deep dive on per-language metrics and KMS requirements
+2026-03-03: Pricing & deployment options review (ff_2026-03-03_0900); client asked for Dedicated POC quote
+2026-03-09: Internal alignment: legal asked for residency clause; SE to scope 2M-doc POC; next call scheduled 2026-03-15

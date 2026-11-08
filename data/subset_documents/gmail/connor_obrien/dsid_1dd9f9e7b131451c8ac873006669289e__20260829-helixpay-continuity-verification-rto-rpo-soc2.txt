@@ -1,0 +1,135 @@
+HelixPay continuity verification — RTO/RPO artifacts & SOC 2 scheduling
+
+From: HelixPay Security <security@helixpay.com>
+To: connor.obrien@redwood.com
+Cc: procurement@helixpay.com
+Date: Sat, 29 Aug 2026 09:12:03 -0700
+Subject: Request: continuity artifacts + RTO/RPO substantiation
+
+Connor —
+
+Thanks for taking this. As part of our risk review ahead of the integration kick-off, we need a compact packet showing Redwood's operational continuity for our payments workloads. Specifically:
+
+- A short description of your BCP/DR strategy (regional failover, warm vs cold standby).
+- RTO and RPO targets for the hosted inference API and the Dedicated offering; any observed warm-cache failover times you can share.
+- Evidence of recent DR exercises (dates, scope, outcomes) or a redacted runbook excerpt showing recovery steps.
+- Your most recent SOC 2 Type II report (redacted ok) and SIG/CAIQ answers for BCP/DR sections.
+
+Can you either drop a drive link with artifacts or send a meeting invite to run through the packet and discuss a potential witnessed failover? HelixPay's compliance team will want to schedule a short live witness window if the artifacts look good.
+
+Appreciate it — we aim to complete our vendor acceptance by mid-September.
+
+— Priya (HelixPay Security)
+
+From: connor.obrien <connor.obrien@redwood.com>
+To: HelixPay Security <security@helixpay.com>
+Cc: marissa.cole@redwood.com, ben.carter@redwood.com
+Date: Sat, 29 Aug 2026 11:03:18 -0700
+Subject: Re: Request: continuity artifacts + RTO/RPO substantiation
+
+Hi Priya —
+
+Thanks for the clear ask. We'll assemble a compact package and propose a short walkthrough + potential witness slot. Quick notes up front so you have context:
+
+- BCP/DR approach: multi-region control plane with active/passive serving regions for any single-tenant Dedicated pool; hosted customers served from multi-region clusters with automated traffic shift. We maintain warm KV/prefix caches in standby region to reduce cold-start RTO for token generation workloads.
+
+- RTO / RPO targets: standard hosted API is RTO=5 minutes (application-level failover to nearest compatible region), RPO=60s for inference session state in our hot-cache mode; Dedicated (reserved pools) can be contracted to RTO=2 minutes and RPO=30s depending on replication policy. We'll include the contractual matrix.
+
+Plan: Marissa will assemble the runbook excerpt, recent tabletop notes, and the SIG/CAIQ answers. Ben will pull the redacted SOC 2 Type II and our recent DR exercise summary. I'll put everything into a shared folder and send a calendar invite for a 30-minute review.
+
+Attachments we intend to include: redwood_bcp_overview.pdf, rto_rpo_runbook_excerpt.txt, sig_caiaq_answers_v2.xlsx, soc2_type2_redacted.pdf.
+
+Proposed witness windows: Tue Sep 7 14:00-15:00 PT or Wed Sep 8 09:00-10:00 PT. Which do you prefer?
+
+Connor O'Brien
+Manager, Customer Reliability — Redwood Inference
+connor.obrien@redwood.com | +1 415-555-0198
+
+On Sat, 29 Aug 2026 at 09:12, HelixPay Security <security@helixpay.com> wrote:
+> Connor —
+> 
+> Thanks for taking this. As part of our risk review ahead of the integration kick-off, we need a compact packet showing Redwood's operational continuity for our payments workloads. Specifically:
+> 
+> - A short description of your BCP/DR strategy (regional failover, warm vs cold standby).
+> - RTO and RPO targets for the hosted inference API and the Dedicated offering; any observed warm-cache failover times you can share.
+> - Evidence of recent DR exercises (dates, scope, outcomes) or a redacted runbook excerpt showing recovery steps.
+> - Your most recent SOC 2 Type II report (redacted ok) and SIG/CAIQ answers for BCP/DR sections.
+> 
+> Can you either drop a drive link with artifacts or send a meeting invite to run through the packet and discuss a potential witnessed failover? HelixPay's compliance team will want to schedule a short live witness window if the artifacts look good.
+> 
+> Appreciate it — we aim to complete our vendor acceptance by mid-September.
+> 
+> — Priya (HelixPay Security)
+
+From: marissa.cole <marissa.cole@redwood.com>
+To: HelixPay Security <security@helixpay.com>, connor.obrien@redwood.com
+Cc: ben.carter@redwood.com
+Date: Sun, 30 Aug 2026 08:45:22 -0700
+Subject: Re: Request: continuity artifacts + RTO/RPO substantiation
+
+Hi Priya —
+
+Folder created and artifacts uploaded. Summary of what you'll find in the Drive link below. Quick notes on the runbook excerpt and measured warm-cache timing included in the overview doc.
+
+Drive: https://drive.google.com/drive/folders/0A1helixpay-shared/BCP-ARTIFACTS
+
+Files included (short):
+- redwood_bcp_overview.pdf — 2-page summary of our continuity model (failover triggers, orchestration, roles/contacts).
+- rto_rpo_runbook_excerpt.txt — redacted steps for failover from primary region to standby; includes timestamps from our May tabletop.
+- sig_caiaq_answers_v2.xlsx — CAIQ/SIG rows focusing on Resilience & Business Continuity with granular answers.
+- soc2_type2_redacted.pdf — redacted report (control names + results, sensitive customer references removed).
+- witness-plan-template.docx — short checklist for a live witness (roles, expected timeline, success criteria).
+
+Key measured datapoints called out in the overview:
+- Observed median warm-cache failover time (application-level): ~75s during our May maintenance drill (we capture trace and logs in the artifacts folder).
+- Typical automated traffic re-route latency: ~20–45s depending on region and DNS TTL.
+- Dedicated pools with pre-warmed standby (contracted): observed RTOs under 30s in internal smoke tests.
+
+Next steps: Connor to send calendar invite for the review. If HelixPay prefers, we can run a 15-minute pre-call to confirm scope for the witness.
+
+Thanks —
+Marissa Cole
+Senior Engineering Manager, Reliability
+marissa.cole@redwood.com
+
+Attachments: rto_rpo_runbook_excerpt.txt (text), redwood_bcp_overview.pdf (PDF), sig_caiaq_answers_v2.xlsx (Excel), soc2_type2_redacted.pdf (PDF)
+
+From: HelixPay Security <security@helixpay.com>
+To: marissa.cole@redwood.com, connor.obrien@redwood.com
+Cc: procurement@helixpay.com
+Date: Sun, 30 Aug 2026 12:20:05 -0700
+Subject: Re: Request: continuity artifacts + RTO/RPO substantiation
+
+Marissa / Connor —
+
+Thanks, the folder looks good and the overview is helpful. A couple of follow-ups from our side before we lock a witness slot:
+
+- Can you provide the May drill trace (anonymized) that shows the 75s warm-cache failover as an exported trace or log snippet? The compliance team wants a short timeline for the execution.
+- For Dedicated pools, we'll need the contractual SLA matrix itemized (you included the matrix in the overview, but please extract the Dedicated line items).
+- Please confirm there are no retained plaintext customer payloads in your DR snapshots for the hosted offering.
+
+We prefer Wed Sep 8 09:00-09:30 PT for the initial walkthrough. If the artifacts look good we'll schedule a witnessed mini-failover on Sep 15 (HelixPay can be on a 30-minute standby).
+
+— Priya (HelixPay Security)
+
+From: connor.obrien <connor.obrien@redwood.com>
+To: HelixPay Security <security@helixpay.com>, marissa.cole@redwood.com
+Cc: ben.carter@redwood.com, procurement@helixpay.com
+Date: Sun, 30 Aug 2026 20:05:00 -0700
+Subject: Re: Request: continuity artifacts + RTO/RPO substantiation
+
+Priya —
+
+Appreciate the quick review and clear asks. Plan to deliver today/tomorrow:
+
+1) Exported, anonymized trace from the May drill (trace_snippet_may2026.jsonl, included in the Drive).
+2) Extracted SLA matrix row for Dedicated pools (dedicated_sla_matrix.csv).
+3) Confirmation: hosted DR snapshots are encrypted at rest; backups contain only obfuscated session identifiers and no plaintext customer payloads. We'll include a short attestation statement and pointer to our encryption KMS policy document.
+
+Wed Sep 8 09:00-09:30 PT works for us — Connor will send a calendar invite for that slot with a short agenda (artifact review + witness scope). We'll also propose Sep 15 10:00-10:30 PT as a tentative witness window and confirm once you sign off.
+
+Connor O'Brien
+Manager, Customer Reliability — Redwood Inference
+connor.obrien@redwood.com | +1 415-555-0198
+
+Attachments: none (links added to Drive).

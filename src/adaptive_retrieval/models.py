@@ -9,6 +9,18 @@ class Document:
     id: str
     text: str
     source: str
+    path: str | None = None
+
+
+@dataclass(frozen=True)
+class Chunk:
+    id: str
+    document_id: str
+    text: str
+    source: str
+    path: str | None
+    start_char: int
+    end_char: int
 
 
 @dataclass(frozen=True)

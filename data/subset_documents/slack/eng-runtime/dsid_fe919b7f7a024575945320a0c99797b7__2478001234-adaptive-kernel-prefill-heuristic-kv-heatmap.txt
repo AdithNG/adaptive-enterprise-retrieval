@@ -1,0 +1,86 @@
+eng-runtime
+
+Carla R.: Heads-up — we've got a regression on the KV-prefill path after the recent kernel selector change. Perf-bot fired a spike and I'm seeing more workspace OOMs on long-prefill traces. Can we triage?
+
+perf-bot: ALERT: kv-prefill_critical OOMs increased by 3.8x vs baseline over last 30m. p95 latency +14%. See /alerts/kv-prefill-oom-2478.
+
+Ben L.: copying logs now. Do we have a reproducer? Any particular model / config?
+
+Carla R.: repro on canary: llama-13b-4bit, sequence mix skewed to long tails (>=2048). Autoscale off. Patch #kselector-3 landed yesterday. Root cause seems related to kernel choice that caused larger temporary workspace allocations during prefill.
+
+Alice M.: I ran a small profiler. Key snippet from heap trace (top 3 allocations during prefill):
+
+```
+prefill_workspace: 1.8GB (kv slab + decode buffers)
+kernel_tmp(optimized_matmul): 640MB
+kv_cache_prefill_buffers: 720MB
+```
+
+Alice M.: For baseline (old kernel) same trace looks like:
+
+```
+prefill_workspace: 1.1GB
+kernel_tmp(legacy_matmul): 280MB
+kv_cache_prefill_buffers: 560MB
+```
+
+Jin P.: oof — kernel_tmp jumped a lot. The selector is picking a fused matmul kernel that allocates big staging buffers for int8 tiling. That explains fragmentation + OOMs when prefill tries to reserve large contiguous workspace.
+
+Ben L.: Can we get per-request caps logged? I want to see whether prefill is violating per-request soft caps (we have a 1GB soft cap for long requests).
+
+Carla R.: I already pulled traces. Many requests report "soft_cap_exceeded": true and then trigger immediate kv eviction, but evictions are thrashing because fragmentation prevents coalescing. Eviction counts: ~17K events in last 30m; successful compactions are low.
+
+Alice M.: I dumped an allocation heatmap (ASCII) for a single GPU during a heavy prefill wave: 
+
+[heatmap rows are 128MB buckets left->right time->down]
+### HEATMAP (hot=##, warm=++)
+00: ##++##++##++##++##++##++##++##++##
+01: ##++##++##++##++##++##++##++##++##
+02: ##++##++##++####+++++##++##+++++##
+03: ##++##++##++##++##++##++##++##++##
+
+Alice M.: you can see stripes where kernel_tmp allocs create large contiguous runs that fragment the kv slab.
+
+Ben L.: actionable checklist: 1) revert selector change for canary, 2) enable per-request hard cap enforcement for prefill, 3) add compact-on-evict pass, 4) add kernel fallback to streaming for sequences > X. Thoughts?
+
+Jin P.: I'd prefer not to fully revert yet — let's try a targeted fallback: if kernel_tmp > 400MB predicted and prefill_size > 512MB then choose streaming kernel. That keeps perf for short requests but avoids big staging alloc bursts.
+
+Carla R.: Agree. Also propose we change soft cap semantics: make soft cap attempt to allocate with best-effort (allow fragmentation) but if allocation would split across >N fragments, force fallback to streaming or trigger early kv demotion (drop prefill buffers). That reduces thrash.
+
+Alice M.: Quick config snippet for experiment (applies to runtime canary):
+
+```
+adaptive_prefill:
+  per_request_soft_cap_mb: 1024
+  fragment_limit: 4
+  kernel_fallback_threshold_mb: 400
+  prefill_streaming_seq_threshold: 1536
+  enable_compact_on_evict: true
+```
+
+Ben L.: I'll wire up telemetry: new tags we need in traces: kernel_choice, predicted_kernel_tmp_mb, allocation_fragment_count, fallback_reason. Also record p50/p95 latencies pre/post.
+
+perf-bot: NOTE: added metric kv_prefill_fragmentation_ratio and kernel_tmp_alloc_mb to dashboards.
+
+Carla R.: Short-run plan: deploy the adaptive_prefill config to canary, enable kernel_fallback_threshold logic, and leave kernel selector in place. If OOMs drop and p95 improves we can avoid full revert.
+
+Jin P.: Long-run: re-evaluate kernel selection heuristics to account for workspace external fragmentation cost. We should extend kernel cost model: not just FLOPs/latency but also transient workspace allocation and fragmentation footprint. Maybe add a FRAG penalty during selection.
+
+Alice M.: Bench numbers from local canary run after patching fallback (single GPU, mix):
+- baseline (old selector): p50=23ms p95=110ms, OOMs=0, avg_workspace=1.1GB
+- regressed (new selector, no fallback): p50=21ms p95=125ms, OOMs=18, avg_workspace=1.8GB
+- adaptive fallback enabled: p50=24ms p95=118ms, OOMs=1, avg_workspace=1.2GB
+
+Carla R.: those look acceptable — slight p50 increase vs regressed but p95 and OOM profile much better. OK to push to canary for 2 hours and monitor.
+
+Ben L.: I'll add a small compact-on-evict prototype: run a short compaction coroutine after eviction if free fragments > 6. Might cost a handful ms but reduce long-term fragmentation.
+
+Jin P.: Note: compacting must be limited; don't block prefill path. Use async compaction and yield to decode loop. Also add a fast path to coalesce adjacent free ranges in the allocator to avoid heavy scanning.
+
+Carla R.: Assigning follow-ups: Ben implement metrics + compact prototype, Jin add kernel fallback hooks, Alice run extended canary bench and push dashboards, I'll coordinate rollout. 
+
+Ben L.: acked. Starting a small PR: runtime: adaptive_prefill + metrics.
+
+Alice M.: added a pinned test in perf suite to run long-sequence prefill every 5m to catch regressions.
+
+Carla R.: Thanks all. Will check back after canary window. :thumbsup:

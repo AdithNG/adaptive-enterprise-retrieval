@@ -1,0 +1,97 @@
+Partial response contracts and connector ergonomics — scan
+
+Status: exploratory scan / early PRD draft
+Owner: Maya Chen (product-hosted-api)
+Context and one-line summary:
+We need a lightweight, testable contract for returning "partial" structured replies from the hosted API that supports: 1) streaming small structured frames (status/metadata, JSON objects, and tool-handshake frames); 2) explicit connector/adapter ergonomics so client SDKs can surface backpressure, cancellations, and resumable reads; and 3) deterministic boundaries for tool-calls and machine-action synthesis (so integrators can wire tool adapters reliably).
+
+Why this matters now (problem statement):
+- Customers building interactive multi-step flows (agent loops, UI assistants with tool-chains) need reliable, machine-parseable chunks rather than freeform text fragments. Current streaming primitives are too loose: different clients interpret tokens differently which causes flakiness and subtle duplications.
+- Tool integrations frequently fail at the handshake layer: clients miss the exact moment a model is asking to call a tool versus outputting a suggestion, leading to wrong-side effects.
+- SDKs currently burden users with low-level stream handling (reconstructing JSON, buffering, handling partial parse errors). We want first-class ergonomics to reduce duplicated user code.
+
+Goals (success criteria):
+- Spec a minimal framing format for partial responses that is backward-compatible with existing text streams but gives clear machine markers.
+- Define a connector adapter surface for SDKs in 3 languages (JS, Python, Go) that: exposes events (frame, tool-request, tool-result, progress), provides a simple backpressure API, and allows safe cancellation with resumability hints.
+- Add test vectors and synthetic fuzz cases so model/operator teams can validate behavior across model variants and quantization modes.
+- Metric targets: reduce integration error rate on tool-calls by 80% for pilot customers; decrease client-side parsing code by 60% (measured by sample apps).
+
+Non-goals:
+- We are not solving document-level consistency (e.g., ensuring the model never backtracks on previously emitted JSON fields). That is a later reliability/eval problem.
+- This PRD will not attempt to design new tooling runtime (Dedicated/private scheduling). Focus is API/SDK contract only.
+
+High-level API framing proposal (sketch):
+- Response is a sequence of "frames" sent over the existing streaming channel (SSE/websocket/HTTP-chunked). Each frame is a small JSON object encoded as a single chunk (framing via newline-delimited JSON or netstring-like).
+- Frame envelope shape (human-friendly): { "t": "frame_type", "id": "frame_id", "p": { ... payload ... }, "seq": 12, "final": false }
+  - t (string): one of ["text", "structured", "tool_request", "tool_result", "meta", "error"].
+  - id (string): monotonic across the response; client can use to dedupe or resume.
+  - p (object): typed payload (for structured frames it is the schema payload, for tool_request it has tool name + args).
+  - seq (int): per-response ordinal useful for reordering detection when multiple chunks race.
+  - final (bool): whether this frame closes the logical response.
+- Backwards compatibility: text tokens can still be emitted as a sequence of text frames; unstructured streaming users can join text frames into a string like today.
+
+Structured output conventions:
+- We introduce a minimal typed payload convention for structured frames: { "schema": "urn:redwood/v1/assistant_action", "value": { ... } }
+- Encourage using compact schemas for agent/tool orchestration: action types (invoke_tool, set_state, user_prompt), with prescribed minimal fields.
+- For rich outputs (long JSON arrays), emitter should chunk at top-level array boundaries and tag frames with continuation=true/false to allow incremental parse without reconstructing entire array.
+
+Tool calling / handshake flow (example):
+- Model emits tool_request frame: {"t":"tool_request", "id":"x1", "p": {"tool":"weather.check","args": {"location":"Seattle"}, "request_id":"r123"}}
+- SDK/connector pauses normal text delivery and emits event to integrator: onToolRequested(request) -> integrator can return sync/async result or reject.
+- Integrator returns tool_result frame: {"t":"tool_result","id":"x1-res","p": {"request_id":"r123","status":"ok","result": {...}}}
+- Model may then emit follow-up structured frames referencing request_id (deterministic linkage).
+- If connector times out or rejects, SDK emits tool_result with status:"rejected" so model fallback paths can trigger.
+
+SDK ergonomics requirements (must-haves):
+- Evented surface: onFrame(fn), onToolRequested(fn), onProgress(fn), onError(fn), onClose(fn).
+- Stream consumer model: a) simple iterate() for sync-like reads (for JS: async for await frame of stream), b) event callbacks for UI use, c) helper to collect asText() that respects final frame.
+- Backpressure API: connector should expose pause()/resume() so host apps can manage buffer pressure (browser memory / mobile). Under the hood SDK should request smaller server-side batch sizes (where supported) or apply client-side flow control.
+- Cancellation and resumability: cancel(reason, resume_token=false) should send a cancel marker; if model provides a resume token in a meta frame (resume_token: "abc"), SDK should be able to re-open with resume_hint: "abc" to continue from the last acknowledged frame id. Not all models will support; design must allow graceful fallback.
+- Error handling: partial-parse errors should emit a special error frame with raw bytes attached (base64) and a suggested recovery action. SDKs should surface but not crash.
+
+Edge cases and compatibility notes:
+- Multi-client consumers (e.g., middle proxies) must be able to forward frames without parsing payloads; schema URNs should be opaque to proxies. Avoid big binary frames.
+- Streaming over HTTP/1 chunked vs HTTP/2 vs Websockets: canonical framing should be newline-delimited JSON (NDJSON) to maximize compatibility. Consider an opt-in msgpack/compact encoding for dedicated usage later.
+- Models that emit mixed token/text+structured frames must always emit an explicit structured frame before any action side-effect to avoid races.
+
+Testing and validation plan (early):
+- Create a suite of synthetic model output traces (valid, truncated mid-frame, duplicated frames, out-of-order after network reordering) and run through each SDK implementation.
+- Add integration tests with a toy weather tool and a toy database tool to validate handshake + retries. 
+- Fuzz harness that mutates seq/id fields to ensure SDKs are resilient.
+
+Rollout and migration strategy:
+- Phase 0 (internal): implement spec in internal-only endpoint /v1/partial-preview and ship SDK beta hooks. Use with 3 internal teams.
+- Phase 1 (pilot customers): opt-in toggle for specific workspaces; collect metric: tool-call misfires, avg client-side parsing errors.
+- Phase 2 (GA): default the framing for new routes; provide compatibility header so older clients still get plain text. Document migration steps and provide an automatic compatibility shim in SDKs for common patterns.
+
+Metrics to track:
+- tool_call_misfire_rate (client reports where a tool_request was not handled as expected)
+- partial_frame_parse_error_rate (per 10k frames)
+- avg_latency_from_tool_request_to_tool_result (ms)
+- bytes_saved_by_chunking (for large JSON lists)
+- SDK_api_surface_usage (counts for pause/resume/cancel usage)
+
+Open questions and trade-offs (short list):
+- Resume tokens: how much state do we include? Simple token vs last-acked-frame-id. Trade-off between size and correctness.
+- Wire format: NDJSON is easy but slightly larger than compact encodings. Is that acceptable for mobile-first customers?
+- Should we standardize a small JSON schema registry (URNs) or allow arbitrary schema names? Registry helps interoperability but is product overhead.
+- Ownership: who owns the schema registry and compatibility guarantees across model versions? Research or applied-ml likely.
+
+Immediate next steps (1–2 weeks):
+- Align with serving-runtime on seq/id guarantees across batching boundary (Arjun).
+- Build a JS prototype SDK surface (Lina) and a Python minimal iterator.
+- Draft test vector set and fuzz harness (Ethan).
+- Run a quick smoke test with the internal assistant team to exercise tool_request flow (Samira).
+
+Notes to self / rough ideas to explore later:
+- Consider an "action-summary" meta frame that gives a small human-friendly text summary to display in UIs while the full structured result streams in.
+- Evaluate using JSON Schema $id URNs to enable lightweight client codegen for common action types.
+
+References and related tickets:
+- JIRA: INF-482 (tool-call reliability epic)
+- Confluence: Partial Responses Working Notes (linked above)
+- SDK PR: github.com/redwood-inference/hosted-sdk/pull/789 (early prototype for JS-flow)
+
+This document is intentionally lightweight and exploratory. The goal is to converge on a single, small framing that solves the majority of integration pain without forcing heavy server-side changes.
+
+-- Maya

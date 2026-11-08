@@ -1,0 +1,94 @@
+request-to-token-lattice-scheduler-architectural-notes
+
+Summary:
+This note proposes a middle-ground scheduler we call the Request->Token Lattice (RTL) that blends request-level and token-level batching semantics. The goal is to improve throughput and token efficiency while preserving request completion fairness and bounded latency SLOs for mixed workloads (short chats, long generations, embeddings). This doc is intentionally practical: it lists constraints, a runnable core algorithm sketch, configuration knobs, testing/metrics plan, and rollout considerations for Dedicated/Private deployments.
+
+Motivation and problem statement:
+- Continuous token-level coalescing maximizes GPU utilization but can penalize short requests and produce outlier tail latencies (token starvation).
+- Pure request-level batching preserves request fairness but underutilizes throughput when many requests are short or have dissimilar sequence length distributions.
+- Existing hybrid approaches either complexify RPC semantics or require global coordination that doesn't scale across heterogeneous clusters.
+
+Design constraints and desiderata:
+- Backwards-compatible API: no changes to client-visible semantics (request-level completion event stays same).
+- Per-tenant/route weight control: allow different fairness weights for premium customers.
+- Bounded staleness: no token should be held > S_max_ms waiting for a coalescing event (configurable).
+- KV cache locality: maintain contiguous KV slices by preferring coalesces where KV cache reuse is likely.
+- Scalable: local to serving node, minimal cross-node locks.
+
+Core concepts:
+- Lattice: an internal 2D structure where rows are "request lanes" and columns are "token windows". Each incoming request is assigned a lane; its tokens map into successive windows. Windows act as scheduling quanta that may be executed when a readiness condition is met.
+- Window readiness: a window is ready to execute if one of: (a) it contains >= min_token_threshold tokens, (b) oldest token in window exceeds S_max_ms, (c) global util hint requests firing (burst mode).
+- Lane priority & weight: each lane has a dynamic priority computed from SLA weight, outstanding tokens, and observed latency. This priority biases tie-breaking when multiple ready windows compete for the same execution slot.
+
+Scheduler loop (high level):
+1) Enqueue incoming requests, assign them to lanes by route/customer.
+2) For each request, slice into token windows (size W, variable) and append references to lattice columns.
+3) Continuously evaluate readiness across windows. When a window is promoted to execution, the runtime builds a micro-batch using coalescing rules (respecting KV affinity) and issues kernel launch.
+4) On completion, map outputs back to requests, update lane stats and latency histograms.
+
+Adaptive parameters and knobs:
+- W (window size): default 16 tokens, adaptively reduced for high short-request fraction.
+- min_token_threshold: e.g., 8 tokens for inexpensive kernels; tuned per model/profile.
+- S_max_ms: default 12 ms for interactive routes, 80 ms for bulk routes.
+- kv_affinity_score: heuristic combining same model version and overlapping past token keys; score threshold used to prefer combining windows.
+
+Novel fairness mechanism:
+- Soft progress metric: each lane accumulates a progress counter when any of its windows execute; fairness is enforced on progress, not raw tokens. This prevents long requests from starving many short ones.
+- Epoch boost: if short-request tail latency exceeds percentile target, temporarily boost short-request lanes to force their windows to fire sooner until histograms recover.
+
+Pseudocode (simplified):
+-- enqueue(request R):
+--   lane = pick_lane(R.route, R.customer)
+--   windows = slice_tokens(R.tokens, W)
+--   for i,w in enumerate(windows): lattice.append((lane, col=i, token_count=w.length, arrival_ts=now))
+
+-- scheduler_tick():
+--   ready = []
+--   for col in lattice.columns:
+--     if col.total_tokens >= min_token_threshold or now - col.oldest_ts > S_max_ms: ready.append(col)
+--   ready.sort(by=col.score) // score includes lane priority and kv_affinity
+--   for col in ready: build_and_dispatch_batch(col)
+
+KV cache guidance:
+- When assembling a micro-batch, prefer windows with overlapping KV keys (same prefix of recent tokens). This reduces KV cache thrash and speeds up generation for long contexts.
+- If KV affinity is low for high token windows, consider splitting to maintain cache locality; track "kv_miss_rate" per lane and adapt thresholds.
+
+Metrics and observability:
+- Per-lane: request completion P50/P95/P99, tokens-per-second, progress counter drift.
+- Per-window: mean assembly delay, kv_affinity_score, executed_token_count.
+- Global: overall GPU occupancy, batch-size distribution, kernel queue time, tail latency SLAs per route.
+- New synthetic metric: fairness_gap = mean progress(lanes in bottom 25%) / mean progress(top 25%). Target fairness_gap > 0.6 for balanced behavior.
+
+Experiment plan (simulated + small-scale canary):
+1) Simulation harness: feed realistic traces (chatty web app, long generations, mixed embeddings) and compare: RTL vs token-only vs request-only. Collect GPU occupancy, fairness_gap, tail latency.
+2) Node canary: deploy to 1 Dedicated pool with traffic mirroring (5% live) for 48 hours; monitor regressions.
+3) Traffic-weighted rollout: enable for low-risk routes, expand by traffic until fleet-wide.
+
+Risks and mitigations:
+- Complexity: lattice bookkeeping increases memory and CPU overhead; mitigate by compact references and sampling.
+- Incorrect knob defaults cause oscillation: need slow-control loops (30s windows) and kill-switch to disable adaptive mechanisms.
+- KV mismatch: if affinity heuristics are poor, long-context models will see latency regressions. Mitigation: per-model quantized thresholds and conservative defaults for first deploy.
+
+Operational notes and rollout checklist:
+- Feature flag: rtl_scheduler_v1 (node-local)
+- Telemetry: enable detailed per-lane histograms for first 2 weeks, then downsample.
+- Backstop policy: if request P99 increases > 20% for any route, auto-disable RTL and revert to request-level batching with a 10s rollback window.
+- Docs: add a section in the Console UI explaining "scheduling mode" and exposing S_max_ms and lane weights for enterprise customers.
+
+Open questions / discussion items:
+- Should lane assignment be sticky per-customer across nodes to increase KV cache reuse? Tradeoff: cross-node stickiness requires global state.
+- How to best combine model-level kernel hints (short-token kernels) into readiness scoring without exploding per-model config surface?
+- Can we compress lattice references into a compact ring buffer to bound memory even with extreme concurrency?
+
+References and related work:
+- Internal: microbatch-scheduler-token-fairness-draft (see linked_artifacts)
+- Academic: "Elastic Batching for Interactive Inference" (internal summary attached in Confluence-1423).
+
+Next steps:
+- Implement simulator scenario and share baseline numbers (assigned: Miguel).
+- Small implementation spike to validate lattice memory overhead for 10k concurrent lanes (assigned: Priya).
+- Schedule design review with Serving Runtime + SRE in 2 weeks.
+
+Notes to reviewers: this is exploratory. Focus review on the fairness metric and failure modes. If we converge on the lattice framing, we can iterate on heuristics rather than rearchitecting the whole request dispatch flow.
+
+- Ava

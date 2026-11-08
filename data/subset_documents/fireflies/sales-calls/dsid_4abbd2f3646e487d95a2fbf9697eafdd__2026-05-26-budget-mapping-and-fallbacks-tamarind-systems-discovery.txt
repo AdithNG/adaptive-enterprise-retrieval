@@ -1,0 +1,71 @@
+2026-05-26-budget-mapping-and-fallbacks-tamarind-systems-discovery
+
+Initial cost/unit economics discovery for Redwood hosting options. Tamarind provided traffic shape constraints and strict data residency/KMS requirements. Primary focus: per-token cost targets, acceptable latency SLOs, and fallback behaviors for capacity/budget exceedance.
+Header:
+Date: 2026-05-26
+Start: 15:00 UTC
+Duration: 52 minutes
+Meeting type: Discovery - Cost/Unit Economics
+Attendees: Aisha Patel (Redwood AE), Diego Morales (Redwood SE), Rajiv Malhotra (CTO), Emily Wong (Lead ML Eng), Sofia Perez (Product)
+---
+00:00 Speaker 1 (Aisha): hey everyone, thanks for making time. quick roundtable who wants to intro?
+00:08 Speaker 2 (Rajiv): yeah hi im rajiv, cto at tamarind systems. we run user-facing recommendations and a couple of conversational assistants. looking at moving inference off our ad-hoc infra.
+00:20 Speaker 3 (Emily): emily here, ml eng, i own the models and the inference stack. we do a mix of short prompts (10-40 tokens) and longer context 150-400 tokens for conversation history.
+00:32 Speaker 1 (Aisha): great. goal today is to map cost levers — per-token, batching, KV cache, hosting choice — and see what meets your budget and latency targets. diego will jump into technical tradeoffs.
+00:45 Speaker 4 (Diego): hi all, quick note: i'll ask a few questions about traffic shape and models, then sketch per-call cost examples.
+00:55 Speaker 2 (Rajiv): ok high level, budget is... we have a runway constraint, want to cap inference spend to ~ $40k/month initially. throughput today is around 2.5 million tokens per day but could spike.
+01:10 Speaker 3 (Emily): and p95 latency target is 200ms for short prompts, and for full conv flows we can tolerate up to 800ms p95.
+01:22 Speaker 1 (Aisha): good. can you share model family? open or closed? quantized variants?
+01:28 Speaker 3 (Emily): using an open LLaMA-derivative tuned in house. we run 16-bit on our cluster today. evaluating int8 quantized deploys.
+01:38 Speaker 4 (Diego): int8 will reduce GPU memory and cost. big levers are batch size (bigger batches -> lower per-token GPU cost but higher latency), KV cache reuse (prefix cache) and model quantization.
+01:50 Speaker 2 (Rajiv): tell us about hosted vs dedicated vs private — our security team wants KMS integration and audit logs, might require private if we can't get KMS with hosted.
+02:05 Speaker 1 (Aisha): we support hosted with customer-managed KMS for key wrapping in many regions, but for strict air-gapped or certain residency contracts Private is common. Dedicated gives reserved capacity and predictable unit cost.
+02:20 Speaker 3 (Emily): what's the unit pricing delta we're looking at, ballpark? per token hosted vs dedicated?
+02:30 Speaker 4 (Diego): rough ballpark: hosted per-token includes variable execution and multi-tenant overhead, dedicated can be 20-40% cheaper at scale depending on commit. but caching and batching can change effective per-token dramatically — up to 3-4x reduction if you have high prefix reuse and good batching.
+02:48 Speaker 2 (Rajiv): ok show us an example with our numbers.
+02:55 Speaker 4 (Diego): if you do 2.5M tokens/day = ~75M tokens/month. host baseline maybe X cents/token, dedicated commit maybe 30% lower. but let me flip it: with modest caching (40% token reuse) and small batching we could drop effective tokens to ~45M equivalent, so your $40k budget maps to about Y cents/token — i'll send a worksheet.
+03:20 Speaker 1 (Aisha): note i'll follow up with a spreadsheet with three scenarios: conservative (no caching), realistic (40% reuse), optimistic (60% reuse + int8).
+03:32 Speaker 3 (Emily): what about burst spikes? we have marketing days where traffic triples.
+03:38 Speaker 4 (Diego): Dedicated supports burst pools and autoscale, but committed reserved capacity handles baseline. Hosted has dynamic scaling but you'll see variable unit prices. Fallback policy idea: route non-critical requests to a cheaper model variant or queue them — Redwood supports policy-based routing and automatic model fallback.
+03:56 Speaker 2 (Rajiv): model fallback is interesting. for recommendations we can accept lower-quality model during spikes, but for the assistant we need hard latency SLAs.
+04:10 Speaker 1 (Aisha): we can implement per-route policies: assistant route pinned to dedicated pool, recommendations route to hosted with fallback to cheap model. that helps keep assistant within SLA while controlling cost.
+04:25 Speaker 3 (Emily): security: we need SOC2 + SAML SSO, RBAC, and KMS/HSM integration. also audit logs retention 1 year.
+04:38 Speaker 4 (Diego): Redwood Dedicated and Private have enterprise features: SSO, RBAC, audit logs, and integrations with customer KMS/HSM. Hosted can do customer KMS key wrapping and logs but for some compliance customers choose Private so logs never leave VPC.
+04:58 Speaker 2 (Rajiv): do you support bring-your-own-HSM?
+05:03 Speaker 4 (Diego): yes for Private we integrate with BYOHSM and customer KMS endpoints. Hosted has managed options with rotations.
+05:12 Speaker 3 (Emily): latency numbers for different batch sizes? we need p95 under 200ms for short prompts.
+05:20 Speaker 4 (Diego): approximate: batch size 1 p95 ~ 110-160ms for short prompt on A100-class instance for your model family; batch 4 adds ~30-80ms but improves throughput and lowers per-token cost; batch 8 pushes p95 higher for short prompt maybe 250-350ms so not acceptable for assistant route. We'll provide more precise estimates after you share model size and perf traces.
+05:48 Speaker 2 (Rajiv): what's the impact of KV cache?
+06:00 Speaker 4 (Diego): KV cache reuse means we avoid recomputing prefix tokens; for conversational flows with stable history reuse you can see 30-60% token savings. caveat: cache hit depends on session affinity and routing — our runtime supports sticky routing and prefix caching. sometimes transcription shows KV as "KV cash" but, you know, that's the cache.
+06:25 Speaker 1 (Aisha): a practical pattern we recommend: pin assistant traffic to dedicated pool with low-batch, low-latency config and recommend hosting recommendations on hosted with caching and batching aggressive.
+06:40 Speaker 3 (Emily): what's onboarding timeline for Private? security wants to know how long to get setup with our network team.
+06:48 Speaker 4 (Diego): Private is typically 6-8 weeks for standard integration (VPC peering, KMS, SSO, audit pipelines). Dedicated can be done faster — reserving capacity in our cloud regions takes ~2-3 weeks if GPUs available. Hosted is immediate.
+07:05 Speaker 2 (Rajiv): are there minimum commits for Dedicated?
+07:10 Speaker 1 (Aisha): yes Dedicated requires reserved capacity commitment — we can do monthly or annual; typical entry is modest monthly commit that scales. we'll include sample pricing tiers.
+07:20 Speaker 3 (Emily): what about unit economics as we scale — break-even point hosted vs dedicated?
+07:28 Speaker 4 (Diego): break-even depends on utilization. at low utilization hosted is better; once you hit steady high throughput and can utilize reserved GPUs, dedicated becomes cheaper. our worksheet will show a utilization curve where dedicated is favorable above ~60-70% sustained baseline depending on commit.
+07:50 Speaker 2 (Rajiv): our traffic is spiky; concerned about paying for idle reserved GPUs.
+07:56 Speaker 1 (Aisha): that's common. options: lower baseline commit + burst pool, or hybrid routing: reserved handles baseline and hosted handles spikes. Redwood routing can overflow to hosted with cost controls.
+08:15 Speaker 3 (Emily): any tooling to simulate cost under our exact traffic?
+08:20 Speaker 4 (Diego): yes we'll take your CSV and run a token-slicing sim to show cost vs latency tradeoffs across scenarios. Diego: I'll run a batch/caching sensitivity analysis.
+08:34 Speaker 2 (Rajiv): curious about support SLAs and escalation path — we have enterprise hours and need 24/7 on-call for production incidents.
+08:43 Speaker 1 (Aisha): enterprise plans include 24/7 support, priority incident response, and a designated solutions engineer. We'll document SLA terms.
+08:54 Speaker 3 (Emily): internal compliance wants data retention options — can we set short retention for logs and longer for audit?
+09:01 Speaker 4 (Diego): yes retention is configurable on Private and Dedicated; hosted has default retention with add-on longer retention. We'll include options in the security packet.
+09:12 Speaker 2 (Rajiv): any hidden costs — e.g., network egress, caching storage?
+09:18 Speaker 4 (Diego): main costs: compute (per-token/gpu-time), storage for large caches and KV store, and network egress for Private if cross-region. We'll call those out in the worksheet.
+09:30 Speaker 1 (Aisha): moving toward next steps: we'll need your prompt set and traffic histogram. Emily -- can you share that by Friday?
+09:38 Speaker 3 (Emily): yes i'll export sample sets and histograms.
+09:42 Speaker 2 (Rajiv): also want a pilot with realistic traffic for two weeks to validate cost and latency.
+09:48 Speaker 1 (Aisha): totally. recommended pilot: 2-week pilot with mixed routes: assistant pinned to dedicated small pool, recommendations on hosted with caching. We'll outline success criteria: p95 latency <200ms for assistant, effective monthly cost <= $40k equivalent pro-rated.
+10:05 Speaker 4 (Diego): action: i'll estimate per-call latencies for batch sizes and caching rates and propose model fallback thresholds.
+10:12 Speaker 2 (Sofia): who will own the pilot setup?
+10:16 Speaker 1 (Aisha): solutions engineering (Diego) will own the pilot technical setup, Aisha will own commercial and scoping.
+10:24 Speaker 3 (Emily): any constraints on region? we must host EU data in eu-west.
+10:29 Speaker 4 (Diego): we have eu-west regions for Hosted and Dedicated; Private can be in your VPC region. note cross-region routing increases latency.
+10:40 Speaker 1 (Aisha): ok to recap next steps: 1) Emily sends prompt set + token histogram by 2026-05-30. 2) Aisha sends cost worksheet and security checklist by 2026-05-29. 3) Diego runs batch/cache sim and provides latency table by 2026-06-02. 4) schedule pilot kickoff week of 2026-06-08 if everything aligns.
+10:56 Speaker 2 (Rajiv): sounds good. one last Q: competitor comparison — any notes vs Anthropic or Vertex?
+11:05 Speaker 1 (Aisha): basic: Anthropic has good safety and managed offering, Vertex tight GCP integration; Redwood differentiates on flexible deployment modes and explicit cost tooling for inference economics. we'll include a short competitive note.
+11:20 Speaker 3 (Emily): thanks all, this was helpful.
+11:24 Speaker 1 (Aisha): thank you, we will follow up with the artifacts.
+11:30 Meeting end

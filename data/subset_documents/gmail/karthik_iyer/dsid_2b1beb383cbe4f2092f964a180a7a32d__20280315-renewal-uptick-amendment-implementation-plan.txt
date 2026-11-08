@@ -1,0 +1,118 @@
+Renewal & expansion: proposed 24mo annualized ramp + procurement timing
+
+From: Sara Kim <sara.kim@nimbusretail.com>
+To: karthik_iyer@redwood.com
+Cc: procure@nimbusretail.com
+Date: Fri, 15 Mar 2028 09:12:00 -0700
+Subject: Renewal & expansion — upcoming term options
+
+Hi Karthik,
+
+Thanks for the QBR last week. We’re preparing our renewal and will be expanding usage across three new product teams over the next 12–24 months. Quick summary:
+- Current: 500k tokens/month average, burst to 1.2M in peak events.
+- Planned: steady state 1.1M tokens/month by month 12, 30% additional burst for promotions.
+
+Procurement wants a recommended commercial structure to review with finance: multi-year vs one-year with true-up, and whether co-terming our other vendor contracts is possible. Attached is our usage export for Q1 (nim_usage_q1_2028.csv).
+
+Key constraints:
+- We need predictable unit economics for budgeting (Finance deadline 2028-04-15).
+- Security & data residency fine, but legal prefers consolidated term if discounts apply.
+
+Can you send 1–2 commercial options (pricing + ramp), and a recommended invoice / PO cadence? Also flag any SLA or credit considerations for ramp/burst.
+
+Best,
+Sara
+Head of ML Platforms
+Nimbus Retail
+
+----
+From: karthik_iyer@redwood.com
+To: Sara Kim <sara.kim@nimbusretail.com>
+Cc: Monica Patel <monica_patel@redwood.com>, Laura Bennett <laura_bennett@redwood.com>
+Date: Fri, 15 Mar 2028 10:08:00 -07:00
+Subject: Re: Renewal & expansion — upcoming term options
+
+Hi Sara — thanks for the usage export and the clear constraints. Attached is a short draft term sheet for two paths (draft_commercial-term-sheet.pdf):
+
+Option A — 24mo annualized ramp (recommended)
+- 24 month term, annual billing (or quarterly if preferred)
+- Year 1: 1.0x baseline increase (from current 500k -> planned 700k avg months 1–6)
+- Year 2: annualized to 1.1M tokens/month average (smooth ramp); burst headroom +30% reserved for promotions
+- Pricing: blended unit discount vs month-to-month (we propose 18% off list on committed units; overflow billed at PAYG rates)
+- Auto-renew: opt-in after year 2 with 90 days notice to change
+- True-up: annual true-up aligned with billing date
+
+Option B — 12mo commitment + true-up
+- 12 month term, smaller commit (10–15% uplift over current) with quarterly true-up and flexible burst credit bucket
+- Lower commitment discount (8–10%) but more pricing flexibility for year 2
+
+Operational notes:
+- We can reserve burst capacity for peak windows (add-on) with pre-warmed dedicated capacity; separate invoice line item.
+- SLA credits: propose a 99.9% availability SLA for API and a limited credit ladder tied to latency P95 targets during ramp months.
+
+Next steps I recommend:
+1) Confirm procurement cadence (annual vs quarterly invoicing).
+2) If 24mo preferred, confirm baseline committed units for year 1 so we can build the PO.
+3) Loop in SE (Priyom) for a short call to validate burst sizing and pre-warm plan.
+
+I’ll set up the options call—are you available Tue 3/20 or Wed 3/21?
+
+Regards,
+Karthik Iyer
+Account Executive | Redwood Inference
+karthik_iyer@redwood.com | +1 415-555-0178
+
+Attachment: draft_commercial-term-sheet.pdf
+
+----
+From: karthik_iyer@redwood.com
+To: laura_bennett@redwood.com, monica_patel@redwood.com, priyom_das@redwood.com
+Date: Sat, 16 Mar 2028 14:22:00 -07:00
+Subject: Internal: Nimbus proposed 24mo annualized ramp — pricing approval & SE input needed
+
+Team — quick internal sync. Nimbus is leaning toward multi-year for budget predictability but needs a blended discount and clear true-up mechanics. I proposed 18% blended on the committed units with overflow PAYG. Ask:
+- Laura, can we approve up to 20% for a strategic net-new expansion (strategic customer + potential Marketplace pilot)?
+- Monica, confirm the SLA ladder and whether we can offer a 30% burst headroom as a reserved add-on (how does that affect capacity planning for Dedicated pools?).
+- Priyom, can you validate the pre-warm strategy and whether 30% burst headroom + 2 pre-warm instances is a reasonable recommendation?
+
+Timeline: Procurement wants final terms by 4/15. I pushed for a PO/initial invoice cadence aligned to their fiscal process.
+
+Thanks — Karthik
+
+----
+From: Monica Patel <monica_patel@redwood.com>
+To: karthik_iyer@redwood.com, laura_bennett@redwood.com, priyom_das@redwood.com
+Date: Sun, 17 Mar 2028 09:40:00 -07:00
+Subject: Re: Internal: Nimbus proposed 24mo annualized ramp — pricing approval & SE input needed
+
+Karthik — solid framing. Short responses:
+- Pricing: Approve up to 20% on a documented 24mo commit if we secure a Marketplace pilot and a co-term commitment on their analytics product (adds strategic value). Make sure to include an early-exit clause with a 6-month minimum fee if they downsize before month 12.
+- SLA: 99.9% availability ok; add a P95 latency target of 200ms for inference for production routes — credit ladder: 5% credit under 99.9, 10% under 99.0. Exclude scheduled maintenance windows with 72hr notice.
+- Burst/reservation: 30% burst headroom as a charged reserved add-on is fine. For pre-warm: 2 x c5-equivalent pre-warm instances per region should be sufficient initially; we'll monitor and scale.
+- Procurement: ask them to route PO to laura_bennett@redwood.com; we can accept annual prepay or quarterly invoices.
+
+I uploaded the DocuSign template link: https://drive.redwood.com/shared/nim-procurement-terms (please review).
+
+Monica Patel
+Senior Customer Success Manager | Redwood Inference
+monica_patel@redwood.com
+
+----
+From: Sara Kim <sara.kim@nimbusretail.com>
+To: karthik_iyer@redwood.com
+Cc: procure@nimbusretail.com, laura_bennett@redwood.com, monica_patel@redwood.com
+Date: Tue, 20 Mar 2028 14:05:00 -07:00
+Subject: Re: Renewal & expansion — upcoming term options
+
+Karthik / team — thanks for the fast turnaround and the clear options. After an internal finance review, Nimbus will proceed with Option A (24 month annualized ramp) conditional on:
+- 18% blended discount as proposed;
+- Reserved 30% burst add-on as a separate line item;
+- Annual billing with an initial PO for year 1 by 2028-04-12 so we can align to our fiscal cutover (we targeted 4/15 but want a slight buffer).
+
+Procurement will route the PO to laura_bennett@redwood.com and expects a short SOW attached. I’ve attached a countersigned SOW stub (nim_signed_sow_v1.pdf) for your records.
+
+Let’s schedule a technical sync with Priyom on Thurs 3/22 to validate pre-warm sizing and a brief runbook for burst events. Please send calendar invites.
+
+Appreciate the partnership — Sara
+Head of ML Platforms | Nimbus Retail
+

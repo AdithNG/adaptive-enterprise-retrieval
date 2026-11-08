@@ -1,0 +1,117 @@
+Onramp stitch + runway manifest — draft MAP & evidence asks
+
+From: Tessa Morgan <tessa.morgan@redwood.ai>
+To: Elena Ruiz <elena.ruiz@medicore.com>
+Cc: Laura Bennett <laura_bennett@redwood.ai>
+Date: Tue, 07 Jul 2026 09:12:00 -0700
+Subject: Onramp stitch + runway manifest — draft MAP & evidence asks
+
+Hi Elena —
+
+Thanks again for the conversation this morning. Attached is a first-pass mutual action plan (Redwood_MAP_v1.xlsx) that maps evaluation milestones to procurement/legal gates and the order-form acceptance windows. High-level asks included in the sheet:
+
+- Week 1 (eval kickoff): access + test dataset ingestion (on-prem proxy + tokenization guide)
+- Week 2–3 (functional): throughput/latency validation + sample inference reports
+- Week 4 (security): SOC2 summary, data retention & audit-log requirements (we can provide evidence artifacts)
+- Week 5 (purchase): order form draft + MSA/DPA redline window
+
+Two quick asks for your procurement team to confirm so we can lock dates:
+1) Who on your side will own the DPA redlines (name + email)?
+2) Are there fixed acceptance windows we need to align to (e.g., month-end procurement board on July 30)?
+
+If it helps, we can stage the rollout so production traffic goes to a dedicated pool after signature while the pilot runs on a hosted environment (keeps the evaluation costs predictable).
+
+I've CC'd Laura to flag any known gating evidence we should pre-bundle (SOC2 summary, data flow diagram, retention matrix).
+
+Attachments: Redwood_MAP_v1.xlsx (MAP draft)
+
+Thanks — can you confirm preferred legal contact and an initial green light date?
+
+Best,
+Tessa Morgan
+Senior Solutions Engineer
+Redwood Inference
+
+
+From: Elena Ruiz <elena.ruiz@medicore.com>
+To: Tessa Morgan <tessa.morgan@redwood.ai>, Laura Bennett <laura_bennett@redwood.ai>
+Cc: Procurement Team <procurement@medicore.com>
+Date: Tue, 07 Jul 2026 11:03:00 -0400
+Subject: Re: Onramp stitch + runway manifest — draft MAP & evidence asks
+
+Tessa —
+
+Thanks for the fast turnaround and the MAP. This looks useful. Quick answers:
+
+- I'll loop procurement (procurement@medicore.com) — they own the DPA redlines.
+- We have a procurement committee on July 29 that would be ideal for signature, otherwise the next slot is Aug 12.
+
+Two asks from our side: do you have a current SOC 2 Type II that we can share with our InfoSec? Also would prefer to see a DPA with reasonable logging and retention language before the committee review.
+
+I'll forward to procurement with your MAP and ask them to propose a primary legal contact.
+
+Appreciate it —
+Elena Ruiz
+VP, Product
+Medicore Health
+
+On Tue, Jul 7, 2026 at 09:12 AM Tessa Morgan <tessa.morgan@redwood.ai> wrote:
+> [original message and attachment: Redwood_MAP_v1.xlsx]
+
+
+From: Tessa Morgan <tessa.morgan@redwood.ai>
+To: Karthik Iyer <karthik_iyer@redwood.ai>, Laura Bennett <laura_bennett@redwood.ai>
+Date: Tue, 07 Jul 2026 12:10:00 -0700
+Subject: Fwd: Onramp stitch + runway manifest — draft MAP & evidence asks
+
+Karthik / Laura —
+
+Forwarding Medicore thread. Procurement wants a DPA before their July 29 committee review; they asked for SOC 2 evidence. I attached a working DPA draft (DPA_redlines_v3.pdf) with a few flags:
+
+- Logging/retention windows: we propose 90 days for detailed request logs and 365 days for config/claim artifacts; happy to provide an audit-log export sample.
+- Subprocessor disclosure & notification timelines: standard 30-day notice for subprocessor additions.
+- Canary fallback: propose that if order-form signature is delayed, pilot can continue under a short-term eval contract for up to 60 days to preserve telemetry while procurement completes negotiation.
+
+Can you confirm realistic redline turnaround? Elena indicated the procurement committee on July 29 — they'd like something in hand a week prior ideally.
+
+HubSpot deal: https://app.hubspot.com/contacts/12345/deal/RDW-2026-MED-1287
+DocuSign sample flow: https://www.docusign.com/en/documents/rdw-med-dpa-ds-23934
+
+Thanks — Tessa
+
+On Tue, Jul 7, 2026 at 11:03 AM Elena Ruiz <elena.ruiz@medicore.com> wrote:
+> [Medicare procurement reply]
+
+
+From: Karthik Iyer <karthik_iyer@redwood.ai>
+To: Elena Ruiz <elena.ruiz@medicore.com>, Procurement Team <procurement@medicore.com>
+Cc: Tessa Morgan <tessa.morgan@redwood.ai>, Laura Bennett <laura_bennett@redwood.ai>
+Date: Wed, 08 Jul 2026 16:03:00 -0700
+Subject: Re: Onramp stitch + runway manifest — draft MAP & evidence asks
+
+Elena / Medicore procurement —
+
+Thanks for the note and for flagging the July 29 committee window. Redwood legal can review the DPA redlines and return a consolidated response within 3 business days (target: Fri, Jul 10 EOD Pacific) if you can confirm any non-negotiable clauses (e.g., specific retention maxima or HSM-only key storage).
+
+Operational plan we propose so procurement pressure doesn't block the pilot:
+- Week 0–2: evaluation pilot under existing eval terms (scope & data controls documented).
+- Week 3: DPA redline consolidation delivered to Medicore.
+- Week 4: formal order form + MSA edits; DocuSign envelope ready the week of Jul 26.
+- July 29: procurement committee review (target signature if redlines accepted).
+
+Action items:
+1) Medicore to confirm any absolute must-haves on retention/encryption by Jul 9.
+2) Redwood (Karthik) to deliver consolidated DPA response by Jul 10.
+3) Tessa to lock pilot access dates with the engineering team by Jul 12.
+
+Attachments: DPA_redlines_v3.pdf (redline highlights)
+
+If that timeline works for you, we'll mark the HubSpot record with the MAP milestones and route the DocuSign envelope once we have agreed redlines.
+
+Regards,
+Karthik Iyer
+Director, Legal Operations
+Redwood Inference
+
+---
+Note: forwarded history abridged for clarity.

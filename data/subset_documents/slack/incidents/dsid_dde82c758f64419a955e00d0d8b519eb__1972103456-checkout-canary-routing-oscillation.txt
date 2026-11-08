@@ -1,0 +1,73 @@
+incidents
+
+incident-bot: :rotating_light: [P1] Smart-routing alarm: Canary health for rollout 'checkout-rewrite-canary' in eu-west-1 dropped below threshold. Auto-fallback to sticky variant engaged, followed by region-fallback oscillation. Alert IR-1972103456. https://redwood/alerts/IR-1972103456
+
+alex: saw the bot, I'm on call. pinging eng-runtime and ops. initial glance: spike in 5xx and tail latency for some EU tenants.
+
+maria: paging @sam (runtime) and @jen (sre). canary health shows rapid 502s + repeated cross-region handoffs in the router metrics.
+
+sam: taking pager. quick summary: canary v2 failing to load / warm on several hosts in eu-west-1 (OOM/memory pressure). smart-router sticky fallback routes affected sessions to stable v1 in eu-central-1, but affinity TTL + routing policy allow re-evaluation leading to bouncing between regions. client retries amplify latency and error surface.
+
+jen: ack. I'll standby — can take handoff in ~10m if needed. what's scope: how many customers / percent traffic?
+
+alex: early telemetry: 3 enterprise tenants (custA, custB, custC) with ~10-30% error rates on inference calls. affected traffic ~2% of global, concentrated in EU.
+
+maria: runbook immediate actions: (1) pause the rollout (2) disable sticky fallback for this policy. proposing to execute both unless objections.
+
+sam: concur. alternative is to scale the canary pool to avoid OOMs but pausing and rolling back is safer for now.
+
+jen: executing mitigations now:
+```
+# pause rollout
+redwoodctl rollout pause --id checkout-rewrite-canary
+# remove sticky fallback from the routing policy
+redwoodctl routing update --policy checkout-policy --remove-fallback sticky
+# pin affected tenants to stable region eu-central-1
+redwoodctl routing set-region --policy checkout-policy --force eu-central-1 --selector "tenant in (custA,custB,custC)"
+```
+
+incident-bot: Action logs: rollout pause submitted by jen at 1972103470; routing update submitted.
+
+sam: confirmed rollout paused, sticky fallback flag cleared, region pinning applied for custA/custB/custC. monitoring for oscillation stop.
+
+alex: notifying support/CS for customer comms. @luis can you draft a short customer notification?
+
+luis: drafting now. suggested text: "We've paused a canary rollout for the Checkout rewrite after observing elevated errors in EU. Your traffic has been routed back to the stable variant; we'll follow up with a timeline. Sorry for the disruption." Sending to affected account reps.
+
+maria: telemetry update ~2 minutes post-mitigation: error rates for custA/B/C down from ~20% to ~1.5%; global metrics back to baseline.
+
+jen: extra step: clear cached per-client affinity to avoid residual sticky routing entries:
+```
+redis-cli -h routing-cache.prod --eval scripts/clear_affinity.lua "checkout-policy" "custA,custB,custC"
+```
+
+sam: cache cleared. router logs no longer show cross-region handoffs. latency and success rates returning to normal.
+
+alex: infra side: do we have OOM traces or model load failures to file an ops bug?
+
+sam: yes — kernel/OOM logs on several canary hosts. root cause: model v2 memory profile underestimated for the observed request sequence-length distribution. will file infra ticket for headroom and add preflight memory checks.
+
+maria: opening follow-up task: INF-4921 "canary v2 memory underestimate -> sticky-fallback oscillation" assigned to eng-runtime.
+
+jen: incident summary for pager.go:
+- root cause: model variant v2 exceeded memory under specific request distribution in eu-west-1, causing canary health to degrade.
+- contributing: smart-routing policy used sticky fallback + region-fallback rules that permitted oscillation between regions.
+- mitigations: paused the rollout, removed sticky fallback, pinned affected tenants to stable region, cleared affinity cache, rolled back where necessary.
+- impact: three enterprise tenants experienced elevated errors (10-30%) for approx. ~10 minutes, mitigated within ~14 minutes total.
+- follow-ups: infra sizing for v2, routing policy circuit-breaker to prevent region oscillation, canary preflight memory validation, add test for fallback oscillation.
+
+alex: agree. escalate to postmortem and CS follow-up.
+
+jen: marking incident MITIGATED at 1972103650, handing to postmortem queue. assigned to eng-runtime, eng-platform, infra.
+
+incident-bot: Incident IR-1972103456 status: MITIGATED at 1972103650. Duration ~14m. Postmortem requested.
+
+maria: status page blurb proposed: "Mitigated: a partial canary rollout caused elevated errors for a small set of EU customers. Traffic rerouted to the stable variant; no ongoing impact." approve?
+
+alex: approve, please publish.
+
+sam: follow-up commits: add memory guardrails to canary pipeline, add unit test for routing policy to detect fallback oscillation, and include canary preflight for memory checks.
+
+jen: closing the active incident thread. tagging follow-ups: @sam @maria @alex @luis @jen. Postmortem: required.
+
+alex: thanks all :thumbsup:
