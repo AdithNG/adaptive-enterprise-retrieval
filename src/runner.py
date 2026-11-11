@@ -11,6 +11,7 @@ from adaptive_retrieval.data import DEFAULT_CORPUS, load_documents
 from adaptive_retrieval.embedding import MiniLMEmbedder
 from adaptive_retrieval.evaluate import format_summary, run_evaluation
 from adaptive_retrieval.interactive import SearchSession, run_interactive
+from adaptive_retrieval.hybrid_search import OptimizedSearchSession
 from adaptive_retrieval.paths import (
     FULL_DOCUMENTS_DIR, PROCESSED_DIR, RESULTS_DIR, SUBSET_DOCUMENTS_DIR,
 )
@@ -73,6 +74,8 @@ def create_parser() -> argparse.ArgumentParser:
     interactive.add_argument("--index", type=Path, default=DEFAULT_INDEX)
     interactive.add_argument("--corpus", type=Path, default=DEFAULT_CORPUS)
     interactive.add_argument("--top-k", type=int, default=3)
+    for command in (search, evaluate, interactive):
+        command.add_argument("--retriever", choices=("hybrid", "cosine"), default="hybrid")
     return parser
 
 
@@ -125,20 +128,21 @@ def main(argv: list[str] | None = None) -> None:
                 f"Embedded {len(fitted_chunks)} model-safe pieces from {len(chunks)} "
                 f"chunks with {embedder.model_name}: {args.out}"
             )
-        elif args.command == "search":
-            session = SearchSession(args.index, args.corpus)
-            for chunk, score in session.search(args.question, args.top_k):
-                source = chunk.path or chunk.source
-                print(f"{chunk.id} | cosine={score:.3f} | {source} | chars {chunk.start_char}:{chunk.end_char}")
-                print(chunk.text[:350].replace("\n", " "))
-        elif args.command == "evaluate":
-            session = SearchSession(args.index, args.corpus)
-            run_dir, summary = run_evaluation(session, args.questions, args.out_dir)
-            print(format_summary(summary))
-            print(f"\nSaved per-question results and summary: {run_dir}")
-        elif args.command in {"interactive", "chat"}:
-            session = SearchSession(args.index, args.corpus)
-            run_interactive(session, args.top_k)
+        elif args.command in {"search", "evaluate", "interactive", "chat"}:
+            with OptimizedSearchSession(
+                SearchSession(args.index, args.corpus), retriever=args.retriever,
+            ) as session:
+                if args.command == "search":
+                    for chunk, score in session.search(args.question, args.top_k):
+                        source = chunk.path or chunk.source
+                        print(f"{chunk.id} | {session.score_type}={score:.3f} | {source} | chars {chunk.start_char}:{chunk.end_char}")
+                        print(chunk.text[:350].replace("\n", " "))
+                elif args.command == "evaluate":
+                    run_dir, summary = run_evaluation(session, args.questions, args.out_dir)
+                    print(format_summary(summary))
+                    print(f"\nSaved per-question results and summary: {run_dir}")
+                else:
+                    run_interactive(session, args.top_k)
     except (FileNotFoundError, ValueError, RuntimeError, KeyError) as exc:
         parser.exit(2, f"Error: {exc}\n")
 

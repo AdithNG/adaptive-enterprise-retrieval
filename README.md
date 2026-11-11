@@ -39,7 +39,7 @@ adaptive-enterprise-retrieval/
 - Open Terminal on macOS or PowerShell on Windows.
 - The commands below run from the repository root. If you already have a clone,
   skip the `git clone` line and change into that directory.
-- The synthetic demo and tests use only Python's standard library. The vector
+- The synthetic demo uses only Python's standard library. The retrieval
   search needs the packages in [`requirements.txt`](requirements.txt). Installing
   them and downloading the MiniLM model requires internet access on the first run.
   No API key is needed.
@@ -153,13 +153,29 @@ need to activate it or change PowerShell's script execution policy. If `py -3`
 selects Python older than 3.11, install a newer Python and select it explicitly
 (for example, replace `py -3` with `py -3.12`).
 
+## Hybrid retrieval
+
+Hybrid BM25S + FAISS exact is now the default for `search`, `interactive`, and
+`evaluate`. It reuses the existing embeddings and combines keyword and dense
+retrieval. Update dependencies with `python -m pip install -r requirements.txt`.
+Use `--retriever cosine` to run the original search instead.
+
+```bash
+python src/runner.py search "Why can't I log in?"
+python src/runner.py search "Why can't I log in?" --retriever cosine
+```
+
+Hybrid uses the top 50 chunks from each retriever and displays RRF scores.
+Evaluation uses the same candidates as search. If the relevant document isn’t
+among them, its reciprocal rank is zero. Cosine keeps its original scores and full ranking.
+
 ## Interactive terminal demo
 
 After building the index, start `src/runner.py interactive` with your virtual
 environment's Python (as shown above). Ask as many questions as you like at the
 `Question>` prompt. The index stays in memory, and MiniLM loads on the first
 question and is reused. Each search displays the full retrieved passages with
-similarity scores, document IDs, source paths, and original character offsets.
+retrieval scores, document IDs, source paths, and original character offsets.
 
 ```text
 Question> Medicore operational runbook turnaround timeline
@@ -189,7 +205,7 @@ planned work. Use `--index`, `--corpus`, or `--top-k` to override defaults.
 - `chunk` writes source-traceable passages to `data/processed/chunks.jsonl`.
   `embed` downloads `sentence-transformers/all-MiniLM-L6-v2` on first use and
   writes `data/processed/minilm_index.jsonl`; this step can take several minutes.
-- `search` prints the top passages with a similarity score, source path, and
+- `search` prints the top passages with a retrieval score, source path, and
   character offsets. Try your own question by replacing the quoted text. It
   returns evidence for inspection, not a final answer.
 - `interactive` keeps a terminal session open for repeated searches and full
@@ -198,7 +214,7 @@ planned work. Use `--index`, `--corpus`, or `--top-k` to override defaults.
   (`expected_doc_ids`) ranks. Chunks are collapsed to documents, ranked by each
   document's best chunk. It prints two scores over the 90 questions that have a
   correct document: **Hit@5**, the share with the correct document in the top 5,
-  and **MRR**, the mean of 1 / rank. The current baseline is Hit@5 = 0.844 and
+  and **MRR**, the mean of 1 / rank. The original cosine baseline is Hit@5 = 0.844 and
   MRR = 0.670. The 10 `info_not_found` questions are saved but not scored. Each
   run writes `per_question.jsonl` (rank, scores, and top 5 documents per
   question) and `summary.json` (metrics, git commit, and index settings) to
@@ -207,8 +223,8 @@ planned work. Use `--index`, `--corpus`, or `--top-k` to override defaults.
 - Generated files in `data/processed/` are ignored by Git. You do not need the
   much larger `data/all_documents/` corpus for this walkthrough.
 
-If you only want the synthetic demo or tests, run those commands with Python
-3.11+ directly and skip the virtual environment and dependency install. If a
+The synthetic demo can run with Python 3.11+ without installing dependencies.
+The hybrid tests require `python -m pip install -e '.[hybrid]'`. If a
 search says the corpus changed, rerun `chunk` and `embed` after `prepare-subset`.
 
 ## Project files

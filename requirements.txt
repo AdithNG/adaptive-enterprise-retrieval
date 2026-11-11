@@ -4,7 +4,7 @@
 # Install this project with the local chunk-embedding, search, and interactive
 # demo feature. This extra is defined in pyproject.toml and installs PyTorch,
 # Transformers, NumPy, tokenizers, and the model's other dependencies transitively.
--e .[local-embeddings]
+-e .[local-embeddings,hybrid]
 
 # Version verified with MiniLM indexing and the interactive terminal demo.
 sentence-transformers==6.1.0
