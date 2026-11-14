@@ -13,6 +13,7 @@ dist/
 .coverage
 data/raw/*
 !data/raw/.gitkeep
+data/subset_documents/
 data/processed/*
 !data/processed/.gitkeep
 outputs/*

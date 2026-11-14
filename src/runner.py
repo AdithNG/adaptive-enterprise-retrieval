@@ -2,12 +2,15 @@
 
 import argparse
 from pathlib import Path
+from urllib.error import URLError
+from zipfile import BadZipFile
 
 from adaptive_retrieval import build_subset, check_subset, demo, prepare_subset
 from adaptive_retrieval.chunking import (
     chunk_documents, fit_chunks_to_token_limit, load_chunks, write_chunks,
 )
 from adaptive_retrieval.data import DEFAULT_CORPUS, load_documents
+from adaptive_retrieval.dataset_download import ensure_subset_data
 from adaptive_retrieval.embedding import MiniLMEmbedder
 from adaptive_retrieval.evaluate import format_summary, run_evaluation
 from adaptive_retrieval.interactive import SearchSession, run_interactive
@@ -29,7 +32,10 @@ def create_parser() -> argparse.ArgumentParser:
     sample = commands.add_parser("demo", help="Search synthetic sample documents without a model")
     sample.add_argument("question", nargs="?", default="reset password")
 
-    prepare = commands.add_parser("prepare-subset", help="Prepare the checked-in 100-question subset")
+    download = commands.add_parser("download-subset", help="Download the pinned source subset locally")
+    download.add_argument("--root", type=Path, default=SUBSET_DOCUMENTS_DIR)
+
+    prepare = commands.add_parser("prepare-subset", help="Prepare the pinned 100-question subset")
     prepare.add_argument("--root", type=Path, default=SUBSET_DOCUMENTS_DIR)
     prepare.add_argument("--out", type=Path, default=PROCESSED_DIR)
 
@@ -85,8 +91,15 @@ def main(argv: list[str] | None = None) -> None:
     try:
         if args.command == "demo":
             demo.main([args.question])
+        elif args.command == "download-subset":
+            ensure_subset_data(args.root)
         elif args.command == "prepare-subset":
+            manifest = None
+            if args.root.resolve() == SUBSET_DOCUMENTS_DIR.resolve():
+                manifest = ensure_subset_data(args.root)
             prepare_subset.main(["--root", str(args.root), "--out", str(args.out)])
+            if manifest and file_sha256(args.out / "subset_corpus.jsonl") != manifest["subset_corpus_sha256"]:
+                raise ValueError("Prepared corpus differs from the pinned subset")
         elif args.command == "build-subset":
             build_subset.main(["--root", str(args.root), "--out", str(args.out)])
         elif args.command == "check-subset":
@@ -143,7 +156,7 @@ def main(argv: list[str] | None = None) -> None:
                     print(f"\nSaved per-question results and summary: {run_dir}")
                 else:
                     run_interactive(session, args.top_k)
-    except (FileNotFoundError, ValueError, RuntimeError, KeyError) as exc:
+    except (FileNotFoundError, ValueError, RuntimeError, KeyError, URLError, BadZipFile) as exc:
         parser.exit(2, f"Error: {exc}\n")
 
 

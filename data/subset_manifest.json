@@ -1,0 +1,1971 @@
+{
+  "release": "v1.0.0",
+  "questions_sha256": "f9524b9157cd43aae36b99333a124738804306ea6d07f332d49faa6d3d147905",
+  "archive_sha256": "9d1174928696ad08bc15f3f104739519de633c1605a4ec2034e0e3c0087bc5cd",
+  "subset_questions_sha256": "7d947e61ca67c6f994727cbf4f3e045c9888d226a3aa59d918df3c7a01b55a6b",
+  "subset_corpus_sha256": "e0e9ad110102f8f124ac51522c2f569e01eca64dd136d3321a8596c5993e9f2d",
+  "questions": [
+    {
+      "question_id": "qst_0046",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_c725b5e9e3194f99af2062938e44fb4b",
+        "dsid_4a9ee26ef21b469483b90ab498665753"
+      ]
+    },
+    {
+      "question_id": "qst_0026",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b4ab2a20a6e24d5bbf35fc6a4e2cd549",
+        "dsid_6882d382e247413c8e42bd2f736cd3a9"
+      ]
+    },
+    {
+      "question_id": "qst_0101",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_82255c059d0642dbb9643a81cf4a06cf",
+        "dsid_4abbd2f3646e487d95a2fbf9697eafdd"
+      ]
+    },
+    {
+      "question_id": "qst_0154",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_7e5389bed0c24fc59166c9186ef28f14",
+        "dsid_51858c87c2924000ab65a98900b20a45"
+      ]
+    },
+    {
+      "question_id": "qst_0087",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_d2352531614d4514a0695a883b755cf3",
+        "dsid_39282485ab0447398ee1240ec99bd8a9"
+      ]
+    },
+    {
+      "question_id": "qst_0029",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_24ad37cf41bd4d1190e6741cd5a87569",
+        "dsid_fdbcbf7eb43a45e9a9c95bc33b2f649c"
+      ]
+    },
+    {
+      "question_id": "qst_0075",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_55c740f9caba45b8bf53fdfe81162f1e",
+        "dsid_acffea87fdf343aaad01f7ded81a6a2f"
+      ]
+    },
+    {
+      "question_id": "qst_0136",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_70124860f38d4604981c3c41c45308ce",
+        "dsid_9ad82a10c0594d24824a36fcdab4b450"
+      ]
+    },
+    {
+      "question_id": "qst_0085",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_e3f03d6663d545ddb3cb47166c8a73fc",
+        "dsid_ec0e9a69c7ac4477a5c13a30d448d25e"
+      ]
+    },
+    {
+      "question_id": "qst_0133",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_d4e0ccaebc884e12977d1474b0042579",
+        "dsid_19ce66cf65964b9eb1e0a89c5780b209"
+      ]
+    },
+    {
+      "question_id": "qst_0137",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_339ea830576e4ebf813b4233a030c746",
+        "dsid_38781281cb9543c392768ef7da2f6359"
+      ]
+    },
+    {
+      "question_id": "qst_0063",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_05b212c211fc4f28884266af3c745ba3",
+        "dsid_6690baa22f2f417d913baa7f61bf0e08"
+      ]
+    },
+    {
+      "question_id": "qst_0061",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_2742469b61e74298a56cb72252325b0b",
+        "dsid_765ca3f681ed4b8a95d237b6b23f843c"
+      ]
+    },
+    {
+      "question_id": "qst_0152",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_e18caa296265411fb1ae3d8d659bbf4f",
+        "dsid_bcfa7c88fe724824807cafab37afaec1"
+      ]
+    },
+    {
+      "question_id": "qst_0030",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_2d06f6fc22e1404ba58ac9cc99de3ea8",
+        "dsid_e8c3d049ff3a467a8089b7d89e5b2b9f"
+      ]
+    },
+    {
+      "question_id": "qst_0120",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_8c4ea89fd9e1421eac7ceb58d2f90cfc",
+        "dsid_4219e27719a149b1b3a8a2049dab02ea"
+      ]
+    },
+    {
+      "question_id": "qst_0044",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_3637383716ff4bc69ffd47642fc16437",
+        "dsid_e11aa1e442b64018ab8aa3a8cddfdb92"
+      ]
+    },
+    {
+      "question_id": "qst_0025",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_dde94c89aaf54ebdbb116265822c35b8",
+        "dsid_a15105ac05894880910c15c92024b8b3"
+      ]
+    },
+    {
+      "question_id": "qst_0104",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_9b6b316938d44b74ab478c45be94f661",
+        "dsid_9fc07b0c73ba41d9b984f6b485670d5d"
+      ]
+    },
+    {
+      "question_id": "qst_0033",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_a320c0067f554cc9b899bcb4ad5f98af",
+        "dsid_2fd82eb3eeb7435a98f22e99e605ba31"
+      ]
+    },
+    {
+      "question_id": "qst_0172",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_9c43bb6b40b5493fbc6e8bbf9cb63f25",
+        "dsid_4ff1da3d8f354d30a21005173641f3d0"
+      ]
+    },
+    {
+      "question_id": "qst_0084",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_a041a6600df747598304bf270d9155ac",
+        "dsid_33a57b057c68436c80a3ea2d007cf936"
+      ]
+    },
+    {
+      "question_id": "qst_0077",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_04aaa0ef6ece4e4da0215c5539b42900",
+        "dsid_5b2e0ac251e648f394002c9890b1215e"
+      ]
+    },
+    {
+      "question_id": "qst_0131",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b99141939cdf4a2f9a76b41ff41d8e94",
+        "dsid_376ec773a4274a978dc5710685e90de4"
+      ]
+    },
+    {
+      "question_id": "qst_0058",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_f0cdbd1fde2c4383855c3da80aaaa38d",
+        "dsid_2b1beb383cbe4f2092f964a180a7a32d"
+      ]
+    },
+    {
+      "question_id": "qst_0126",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_78af0bb57e664b7fa9468fa3295544f9",
+        "dsid_b69588c79b1d4d9badb8441e87116ad5"
+      ]
+    },
+    {
+      "question_id": "qst_0121",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_9bc751cb474443aea0dcc12d291fc438",
+        "dsid_b5b3513b649c4534b539c7b87492bccc"
+      ]
+    },
+    {
+      "question_id": "qst_0057",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_9ba3621e1a3c401db4ef316afc484ba6",
+        "dsid_264cf92f333c49a6993e0e50c0da006b"
+      ]
+    },
+    {
+      "question_id": "qst_0089",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_25d53523b94144f6aa36a8dcd3101939",
+        "dsid_cd0a915e779b494d9a1327269746d51f"
+      ]
+    },
+    {
+      "question_id": "qst_0068",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_275b27e5cad9480582ce625dc55b3ea5",
+        "dsid_7826d5c111284a42957bb4c2890be331"
+      ]
+    },
+    {
+      "question_id": "qst_0059",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_6a80b7ed807a4ee7a1a9b4e1f57a92cc",
+        "dsid_ad229219e19b4dbabf7e348c483dec2b"
+      ]
+    },
+    {
+      "question_id": "qst_0022",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_4c95187add7e4845857f02bc4fecf9dd",
+        "dsid_9a72d66e12854ada96f73f1076701158"
+      ]
+    },
+    {
+      "question_id": "qst_0174",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_02ec1fbd9624446988a66cd6be70cb69",
+        "dsid_903b86b1723741138d54a9dd60ac1b5c"
+      ]
+    },
+    {
+      "question_id": "qst_0045",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_33b8ef3fa0134aec892debb7dcaae434",
+        "dsid_ca51ebbdbb1f4d6797d29afddb411d1e"
+      ]
+    },
+    {
+      "question_id": "qst_0054",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_36ae5261f8ee4838af3fa377b8effb2d",
+        "dsid_1301924108834071a2356548e4b3ab91"
+      ]
+    },
+    {
+      "question_id": "qst_0260",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_81afed9a3c5b4f798725cb5d223cc177",
+        "dsid_d585d1d0dd884e288f91b858f9219b1c"
+      ]
+    },
+    {
+      "question_id": "qst_0220",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_9fd2fa387e4e49058f588b2bf5443761",
+        "dsid_117252da79224513adf3cc4d82aa70d1"
+      ]
+    },
+    {
+      "question_id": "qst_0187",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_1bf7d6e9b6154a92a629d7ee1288c9f5",
+        "dsid_167627a8803145a191e1885dc92584f7"
+      ]
+    },
+    {
+      "question_id": "qst_0207",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b253f5cc715f4d47bdd578edd6f2f19e",
+        "dsid_19d17b5db9e14d80aff9449c1218ab0f"
+      ]
+    },
+    {
+      "question_id": "qst_0281",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_44f3413c3edc4815964da616d0370e8e",
+        "dsid_f2a29d39414c4a1db617d0772cb69c11"
+      ]
+    },
+    {
+      "question_id": "qst_0199",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b9cc7dab6b8b4229aeaf7e8f6f74af29",
+        "dsid_868ed831c87b431ab713fd0c831a6195"
+      ]
+    },
+    {
+      "question_id": "qst_0254",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_14b27ba9f9034561bfc5b31638a18c59",
+        "dsid_3e5dbef851984cc4b55f589947431a22"
+      ]
+    },
+    {
+      "question_id": "qst_0264",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_1dd9f9e7b131451c8ac873006669289e",
+        "dsid_ee06f98b9bd44d06a7219d9506551237"
+      ]
+    },
+    {
+      "question_id": "qst_0230",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_f54c46f313074186bf8a1594334d071d",
+        "dsid_3cadd1c76fcd4705a4d5582fcbb0c155"
+      ]
+    },
+    {
+      "question_id": "qst_0251",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_c458389b5d3447c7b93ef5e48f68279e",
+        "dsid_223bde57804f446bb9105c3b8ec77b37"
+      ]
+    },
+    {
+      "question_id": "qst_0184",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_a9a2461be755412ba12aebb497801fba",
+        "dsid_d79f83b3b3bf4dd7819c5fd3abec5989"
+      ]
+    },
+    {
+      "question_id": "qst_0242",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_efa9bd543bfa4f038bd76b953f5bd121",
+        "dsid_31cc9ab1c90e48ba800eaef3c927b32d"
+      ]
+    },
+    {
+      "question_id": "qst_0253",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_4ac2e7c966914aceae40aedd762a509e",
+        "dsid_ec7398f6682543a99876bd796d88b9e7"
+      ]
+    },
+    {
+      "question_id": "qst_0205",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_8d3bd7ba5a1c4261bb28ddbf28fd1964",
+        "dsid_8def37ed9fd345dd9c2abd1c781dec23"
+      ]
+    },
+    {
+      "question_id": "qst_0216",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_82c0781b50cb47668b5d37a67a9a157d",
+        "dsid_2401e6c7889b4c2081c66dae551f434a"
+      ]
+    },
+    {
+      "question_id": "qst_0212",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_64c6ac2693d649128d1d5279a839681b",
+        "dsid_8367caf6b305404688737a5350f2eb08"
+      ]
+    },
+    {
+      "question_id": "qst_0268",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_9aa06958b8654735b75658778c890d19",
+        "dsid_f9e0feb390bb402d94b419d354476a8a"
+      ]
+    },
+    {
+      "question_id": "qst_0247",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_f488aa5143f3485d95dd718ccbcbcb42",
+        "dsid_1251ae799c0d4f3ba83d8b7bf2d91a02"
+      ]
+    },
+    {
+      "question_id": "qst_0263",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_e246f931a6c842df836fcf14e04c7862",
+        "dsid_e58445dc6cf5420380c94542648bd5d3"
+      ]
+    },
+    {
+      "question_id": "qst_0194",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_f7270a1dc50d41aba92aacb56ccfe99c",
+        "dsid_01602d67d9bd4cbabd540349afd16a02"
+      ]
+    },
+    {
+      "question_id": "qst_0181",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_fb91791924d245218e2b99799d7787bc",
+        "dsid_5db22babefbf45279d9c5b58aa428343"
+      ]
+    },
+    {
+      "question_id": "qst_0180",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_0ccc2ab2b8c64be3a6b209c9c81cc876",
+        "dsid_dd5f2446068044769b2ab2be35a717d2"
+      ]
+    },
+    {
+      "question_id": "qst_0222",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_5973ad14337449d0a0f8139e4ac3ae92",
+        "dsid_bbad0b3cd7f043a1a52bafabdbfdb50a"
+      ]
+    },
+    {
+      "question_id": "qst_0200",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_deab2305bbde431ebf3a89e4e57efe4b",
+        "dsid_d5761f19c43d45a98aa6cd2d9f962d56"
+      ]
+    },
+    {
+      "question_id": "qst_0272",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_73e7b6330dfe481c92598ba4f97c3fff",
+        "dsid_dbd0e2a056a24786bf25d69d372aebd1"
+      ]
+    },
+    {
+      "question_id": "qst_0319",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_3dad9a02e02347c8b39b145f9e678ed5",
+        "dsid_fe919b7f7a024575945320a0c99797b7"
+      ]
+    },
+    {
+      "question_id": "qst_0334",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_f49c3ff8a9d844119ee2f0dc081a3758",
+        "dsid_0a97c40f4554448f9bce3db6fb95e926"
+      ]
+    },
+    {
+      "question_id": "qst_0329",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_c08d7e39ca134fb083d6331528707c8a",
+        "dsid_5634c026eda6480b866f00ae1f9e696d"
+      ]
+    },
+    {
+      "question_id": "qst_0331",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b26025f704a54ddf8954ba6cebf6bce7",
+        "dsid_ee113c3c66dc453da25c9f763e591313"
+      ]
+    },
+    {
+      "question_id": "qst_0318",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_fefb12469132405dae564173c0fe1605",
+        "dsid_681485e4afe04afe994f922b21517983"
+      ]
+    },
+    {
+      "question_id": "qst_0335",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_cfaddf1c0ebc499aad52a2d4c9825538",
+        "dsid_28cb6ebdd12f4328a49be57863c00505"
+      ]
+    },
+    {
+      "question_id": "qst_0301",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_55cf50b9520e42a4b6d71a2e798992a3",
+        "dsid_932d2b485cfe4a9daf41214a795c7b36"
+      ]
+    },
+    {
+      "question_id": "qst_0339",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_2c7df9209ebe47ba982b9382e102d292",
+        "dsid_22cf75c2a0ec4786ad7d32374a05cfaf"
+      ]
+    },
+    {
+      "question_id": "qst_0303",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_af95ce641ae44e67ae07df89004be24b",
+        "dsid_f643fe580a694bed8009d16e21c80d66"
+      ]
+    },
+    {
+      "question_id": "qst_0338",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b094923d476843aca6af9d88c5864a1a",
+        "dsid_85e104424a9846c3b9e50382adcdf4d2"
+      ]
+    },
+    {
+      "question_id": "qst_0327",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_62f1a9cc6477452b8946d618690c2195",
+        "dsid_63ff9a2868b444c897f317d9849b94d9"
+      ]
+    },
+    {
+      "question_id": "qst_0333",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_c2856c3525eb4e2f9c3d48d797fcbe09",
+        "dsid_bf5047946c22437cbfa178c4d1dec0eb"
+      ]
+    },
+    {
+      "question_id": "qst_0310",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_780d8363677241c18f1a3f3793236483",
+        "dsid_ea0f55af5eb3442da7867b572b3d627e"
+      ]
+    },
+    {
+      "question_id": "qst_0322",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_dec3054a14fc45b5b12ac4003a8f4cfe",
+        "dsid_030357ccb6d64aba8174fdf29469673d"
+      ]
+    },
+    {
+      "question_id": "qst_0320",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_cadd970007ab4876a024c47f9eb9cf4e",
+        "dsid_252dd5cfb9414917855d236aed10e54b"
+      ]
+    },
+    {
+      "question_id": "qst_0387",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_3da8b0bce9c047f9922f3769f6498cfb",
+        "dsid_cc3aa4a6886d454ab08e5966907c617f"
+      ]
+    },
+    {
+      "question_id": "qst_0407",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_fd7ff39aa57948b8a886c8fefa3f94c8",
+        "dsid_35b4aa7e4edb477a8ba08356306cefdb"
+      ]
+    },
+    {
+      "question_id": "qst_0396",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_b33c0dca706f4fa7946ec7797d672afb",
+        "dsid_b127efa7f884490fb4704c90cc8f0592"
+      ]
+    },
+    {
+      "question_id": "qst_0382",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_bd07ce3fd104400c8caa0a1ab7a7191f",
+        "dsid_563579e0f4144f5fa3fd09480957864f"
+      ]
+    },
+    {
+      "question_id": "qst_0386",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_c182d518aca44b93a2570c456eeae764",
+        "dsid_8ccef19703bd4df4b2ed91037eda9737"
+      ]
+    },
+    {
+      "question_id": "qst_0388",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_f17d5752392f4f0599bcf8804a4f0833",
+        "dsid_68fbf6106e38493e94a832e218fa14c1"
+      ]
+    },
+    {
+      "question_id": "qst_0409",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_298aa922e9e04592968565ea4e9e2422",
+        "dsid_3d0400b2f9b8478c90b041603082b016"
+      ]
+    },
+    {
+      "question_id": "qst_0389",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_a93884bb63f44dc5b23d5c2a1f3c4cee",
+        "dsid_de66474810b744bab42dba3566886d1b"
+      ]
+    },
+    {
+      "question_id": "qst_0406",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_ce9ecfe8502d466b94a04d28a1194891",
+        "dsid_56c1cfa218d04a1ab23aed94e5874c85"
+      ]
+    },
+    {
+      "question_id": "qst_0410",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_7a3f9384be8c400a94958d55c8041b4f",
+        "dsid_9dddd4cc78a8438fbba583acb261e7e3"
+      ]
+    },
+    {
+      "question_id": "qst_0398",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_3818ae9bfed141419b0f68c2c163eaec",
+        "dsid_5d5dc6a5ec894f11b72c69396aa35f43"
+      ]
+    },
+    {
+      "question_id": "qst_0399",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_54117cc7cb2140528cc025f3789af691",
+        "dsid_dde82c758f64419a955e00d0d8b519eb"
+      ]
+    },
+    {
+      "question_id": "qst_0383",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_8f4aaaa7d4cc4813b20263d52487484f",
+        "dsid_31f88d6120864248ae9327e51a4b06ff"
+      ]
+    },
+    {
+      "question_id": "qst_0391",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_56c0fccd4435436e95ffbd019c1e998f",
+        "dsid_b0837262f3a14e97a8ed31345e839790"
+      ]
+    },
+    {
+      "question_id": "qst_0392",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_1572255f25394d7ebb868baae4f7ad68",
+        "dsid_ebdc776e4fcb481fbae68e9d7d5c767b"
+      ]
+    },
+    {
+      "question_id": "qst_0490",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_d915bff903414998a70a43e83a9c2ddb",
+        "dsid_39acfd07ea51492d9bb70e3e59ea211d"
+      ]
+    },
+    {
+      "question_id": "qst_0484",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_c784d192d86b44b481ab747d5ce1627c",
+        "dsid_2679baedab704cd5bd0e311a4f7e20b6"
+      ]
+    },
+    {
+      "question_id": "qst_0495",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_cb9345f4cb2845a192084109f57ed72d",
+        "dsid_151306c5277245b699cb8093ca1a8205"
+      ]
+    },
+    {
+      "question_id": "qst_0489",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_061b164292f44033ad3f6e0e10f5750b",
+        "dsid_f05febc275874624b3d7d5c11a99450c"
+      ]
+    },
+    {
+      "question_id": "qst_0500",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_22b0e0f6065e4115aff1ab5cf9086946",
+        "dsid_aa5f05fc2e1a4a1999f08b5f1d4526e9"
+      ]
+    },
+    {
+      "question_id": "qst_0481",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_116f78f1abc743abb7b1def1c7ffe8ef",
+        "dsid_f8f2a15050004a74b8b1f7e8f4377786"
+      ]
+    },
+    {
+      "question_id": "qst_0487",
+      "split": "dev",
+      "hard_negative_ids": [
+        "dsid_02e2925b58b2452a8f9cefa38de3b211",
+        "dsid_fbd1ba6857104c18a879ae6d6a025992"
+      ]
+    },
+    {
+      "question_id": "qst_0485",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_6a450e5d921240afa8e4ce949da42df7",
+        "dsid_6e3387ba2a6a45c2a075a713dd8c0450"
+      ]
+    },
+    {
+      "question_id": "qst_0494",
+      "split": "val",
+      "hard_negative_ids": [
+        "dsid_72f9a72f30184cb8b1093389c0c6a8d4",
+        "dsid_4df4410bb4444cada36b87ffb8684cfe"
+      ]
+    },
+    {
+      "question_id": "qst_0491",
+      "split": "test",
+      "hard_negative_ids": [
+        "dsid_a15d9a802d8142f789611a7fa07f93a3",
+        "dsid_0f51ab0cc43d467ab58f1bf4be500238"
+      ]
+    }
+  ],
+  "documents": [
+    {
+      "path": "confluence/applied-ml-and-evals/eval-harness/dsid_c784d192d86b44b481ab747d5ce1627c__eval-budget-accounting-ledger-and-cost-attribution-2026.txt",
+      "sha256": "f77c7ff3fdc694fede4ecce4c7aab26acea5c2eded630dbf8a786f6d9f766dfa"
+    },
+    {
+      "path": "confluence/applied-ml-and-evals/prompt-sets-and-benchmarks/dsid_d4e0ccaebc884e12977d1474b0042579__adversarial-noise-prompt-suite-and-eval-procedures-2026.txt",
+      "sha256": "5eb4ee28c70143ac8cd3fb1fca13c2791bbe4bcc56aff158b2cfdae6bb7469e3"
+    },
+    {
+      "path": "confluence/architecture-and-standards/api-standards/dsid_6a450e5d921240afa8e4ce949da42df7__client-semantic-rate-limits-and-tenant-fairness-protocol-2027.txt",
+      "sha256": "a2e328028d7a8e458f91be072c9a90a042335f89ff754b1ad507cce060dc0769"
+    },
+    {
+      "path": "confluence/architecture-and-standards/decision-records/dsid_04b24bf957c047f4b7d8ceefdfde8290__adr-declarative-contract-tests-and-schema-fencing-2026.txt",
+      "sha256": "da77e96aee3ab1cd70016af0dada745aa9ac59834dd5daa02c06ae2bf983ad3e"
+    },
+    {
+      "path": "confluence/architecture-and-standards/infra-standards/dsid_06682ba9559b4b2192ffe6dee7a7abba__mixed-priority-cgroup-and-soft-quota-playbook-2026.txt",
+      "sha256": "5a5d2d990764b6cc206f8ea172386f06f7c4461d74af08e9ab5e7437c37b22d6"
+    },
+    {
+      "path": "confluence/customer-success-and-support/enterprise-onboarding/dsid_dde94c89aaf54ebdbb116265822c35b8__onboarding-risk-scenarios-and-service-contract-matrix-2025.txt",
+      "sha256": "9090883b560ecdde5a221ea4aafe82548c4ba0a0f6a79197849948ff870e9d00"
+    },
+    {
+      "path": "confluence/customer-success-and-support/support-process/dsid_9c8cb10d65324c03a8ededbd98c1b058__go-live-protocols-cross-org-communications-escalation-2027.txt",
+      "sha256": "fd102dbc5c3623312c774dd9862c424b1a184cc1934bdd71448e0ac8cb9d37bc"
+    },
+    {
+      "path": "confluence/eng-developer-experience/quickstarts-and-templates/dsid_02e2925b58b2452a8f9cefa38de3b211__sdk-stream-resume-idempotency-playbook-2026.txt",
+      "sha256": "504040ced64342e24db252b5482e8beec52c39b8cd61ff86ac1925c911a39056"
+    },
+    {
+      "path": "confluence/eng-platform/dashboards-and-alerts/dsid_2c7df9209ebe47ba982b9382e102d292__usage-insights-data-freshness-and-quality.txt",
+      "sha256": "2fe8d69b6a3d13434c6c14c58689ab54114094aa7d2ac442b0bfb29da625ae62"
+    },
+    {
+      "path": "confluence/eng-platform/how-tos/dsid_f8f2a15050004a74b8b1f7e8f4377786__configuring-priority-routing-and-quotas.txt",
+      "sha256": "754e221fae1f30da254b59a3e5b5d63a106fa36d5258bff4778039cc72e71899"
+    },
+    {
+      "path": "confluence/eng-platform/runbooks/dsid_9c43bb6b40b5493fbc6e8bbf9cb63f25__gateway-routing-fallthrough-401s-runbook.txt",
+      "sha256": "b89a3b9ca34f7b2fd35d507615b94a778a3d2ec0037e512428af883592e0b640"
+    },
+    {
+      "path": "confluence/eng-platform/systems-and-services/dsid_116f78f1abc743abb7b1def1c7ffe8ef__hot-route-capacity-protection-technical-design.txt",
+      "sha256": "fcff238769498d3954d9bd8661ffd74c888241193fed71b3a3d8dd0104b27852"
+    },
+    {
+      "path": "confluence/eng-private-deployments/deployment-guides/dsid_d915bff903414998a70a43e83a9c2ddb__vpc-peer-and-interconnect-design-playbook-2026.txt",
+      "sha256": "a486a28c99bcac0105b292929b9d29484507c4fa6775d9917819cd0d7994d3f0"
+    },
+    {
+      "path": "confluence/eng-serving-runtime/profiling-playbook/dsid_a15105ac05894880910c15c92024b8b3__observability-driven-onboarding-runbook-2027.txt",
+      "sha256": "aafba47bb2d749259bb3f30d978e3027a08bd71143b8dfb459e5954a42a58e6a"
+    },
+    {
+      "path": "confluence/eng-serving-runtime/team-wiki/dsid_72f9a72f30184cb8b1093389c0c6a8d4__runtime-telemetry-sampling-cost-aware-profiling-2027.txt",
+      "sha256": "af763598b4804ad7d0fcba643f51e800e7369d094d1bddd59a1ba30811705257"
+    },
+    {
+      "path": "confluence/finance-and-legal/procurement/dsid_f2f019c122154edc8b21f56879661043__procurement-legal-risk-escalation-sop-2026.txt",
+      "sha256": "7f5a3a88873b2dd38bab4ff76e504f1c181f65204b2d06777fb6bde65cabc218"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/dsid_2401e6c7889b4c2081c66dae551f434a__operator-field-guide-tiered-notification-and-status-cadence-2026.txt",
+      "sha256": "e839c5ee78484bc81032cb139961b24994265bb50a7a09a93ccb5a57d516e84f"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/dsid_82c0781b50cb47668b5d37a67a9a157d__containment-and-recovery-runbook-customer-impact-2024.txt",
+      "sha256": "734dd027d52d7e25ac4cdb2df0ae40861f4fbe2f76dff47cdb2317b0dddd54c5"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/dsid_c175ab6b52fe4226baac85697c562c7d__tribe-liaison-and-status-wire-protocol-incident-playbook-2026.txt",
+      "sha256": "89ea898587fdf3f10ee27947381f900aa3ddfb8481222220edf3e1c95adafaff"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/postmortems/dsid_3638bd02227d4882ad0605f1e8b767c0__2026-02-25-p1-metrics-pipeline-dropped-spans-postmortem.txt",
+      "sha256": "10297fdd97636bef7db24088aec3097a10aa8a4733424de6df4ded8b61e4a765"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/postmortems/dsid_5e65a1cb22b6464e9f36d0fa2d1f4317__2026-02-09-sev2-dedicated-autoscaler-stuck.txt",
+      "sha256": "5f99578521c75b6fc1d8c5b34aa1f24a89dcaffb9cd82b359607c646be407b65"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/postmortems/dsid_7d347905549f4456b0d2226b47e4aa68__2026-02-12-p1-token-accounting-mismatch-postmortem.txt",
+      "sha256": "97dc13f195aa9731f0098959084615f0068eef249ae2954f9d36a275d6f3cbb8"
+    },
+    {
+      "path": "confluence/oncall-and-incident-response/status-page-and-comms/dsid_061b164292f44033ad3f6e0e10f5750b__adr-014-status-page-component-mapping-source-of-truth.txt",
+      "sha256": "12ae48d49584f3245c103ce3044a049785f8a00d81c11a0f8d2a796e9e5c281c"
+    },
+    {
+      "path": "confluence/people-ops/dsid_005f7a937cad4b3cbb30d9d93199e22a__embedded-contractor-conversion-playbook-2026.txt",
+      "sha256": "5124ab8b2ccaf39946ebc6113b0f2ef6bb5db08cab9d4b6d28597f1461925575"
+    },
+    {
+      "path": "confluence/people-ops/dsid_9fc07b0c73ba41d9b984f6b485670d5d__crossfunctional-activation-access-provisioning-2028.txt",
+      "sha256": "a5c629762a98b6cbf8d3e855d6592584772f34e9759657b633aee8e5f0d167ed"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_22b0e0f6065e4115aff1ab5cf9086946__rights-to-spend-and-access-governance-manual-2026.txt",
+      "sha256": "3f1f449f91c4df935f51e6b0663d7d3df1ffdda053d69c71049654e7ca0f8aef"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_329e7ecd6b304c30b61a30e07919e008__ops-orchestra-procedures-2026.txt",
+      "sha256": "959e4e56c8c05788f27a34f47e51966657986c46ec0898eff681fb551b414269"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_36d7605113204cdca94405cb30fc2c10__operational-flows-and-policy-gallery-2026.txt",
+      "sha256": "5110a983523eb9582ae06fd2ca330a17ceb54b2a9e5aab9922f078bad0b8853a"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_5973ad14337449d0a0f8139e4ac3ae92__ops-governance-checklists-2027.txt",
+      "sha256": "aaba9c3dcc16b45d5a97fd4a2861973b70459e5e2009f22bf75cc46674b71a5e"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_73e7b6330dfe481c92598ba4f97c3fff__integrated-access-and-spend-governance-2026.txt",
+      "sha256": "b859d24c1e9e754ed3afa3568831d89bf494d83ccd4670668af910b983fcc87b"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_aa5f05fc2e1a4a1999f08b5f1d4526e9__permission-and-procurement-guidance-hub-2027.txt",
+      "sha256": "762a4de908045e7e056a60d8e185fc9ffc053e5bf39f135201993d47fb57cf76"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_bbad0b3cd7f043a1a52bafabdbfdb50a__companywide-authorization-and-supplier-onboarding-manual-2030.txt",
+      "sha256": "9e434973df411879fef2e915006129071be9f552af9ad5dde9b2e14213e0af28"
+    },
+    {
+      "path": "confluence/policies-and-process/dsid_dbd0e2a056a24786bf25d69d372aebd1__enablement-controls-and-authorization-patterns-2025.txt",
+      "sha256": "04501e3d58019857e27659a2e6cf40011a31b5917d52bc475d21d19fc6543374"
+    },
+    {
+      "path": "confluence/policies-and-process/procurement-and-expenses/dsid_cb9345f4cb2845a192084109f57ed72d__remote-first-pilot-office-supplies-and-chair-reimbursement.txt",
+      "sha256": "44e364d3dd3e030b729c71a6cb0ed6c602bd2e5540bf6b02ab7733ac40035faf"
+    },
+    {
+      "path": "confluence/product-docs/pricing-and-packaging/dsid_62f1a9cc6477452b8946d618690c2195__hybrid-deployment-packages-consumption-guidelines-2026-11-15.txt",
+      "sha256": "cac32dd68e19f11a3fb841210c56ba156b2abcd238da08197e3af2dbe75886bd"
+    },
+    {
+      "path": "confluence/product-docs/product-overview/dsid_63ff9a2868b444c897f317d9849b94d9__deployment-surface-consumption-pricing-implications-2026.txt",
+      "sha256": "8bb8ceb33b5bf417f6c23a1c96ce6d7bef9a377cba1e64b08bcd7e37e052183f"
+    },
+    {
+      "path": "confluence/product-docs/product-overview/dsid_69e745b76aa34eab8721ba0c88482ec0__unified-inference-consumption-paradigm-overview-2026.txt",
+      "sha256": "9e511c9e0142768b59fed91b4f3d4a6ea883aa40066ad841a33e63b5642d5cc7"
+    },
+    {
+      "path": "fireflies/customer-success/dsid_e3ae91c7f83f46e492209ffec2c7f2b8__2026-11-27-mariner-health-ops-bridge-cost-uptime-standup.txt",
+      "sha256": "c4f66cfa530c831593678e75ef60e86d6a2f94425e1a803b0dcf3620879106f4"
+    },
+    {
+      "path": "fireflies/dsid_05faa1ab6427403888a06d7083c7f0a9__2025-06-12-security-review-private-upgrade-auditability.txt",
+      "sha256": "c288f5aeed270adaf78ae9273e751d35eae5e082173e091a31dbb7488ca3b302"
+    },
+    {
+      "path": "fireflies/marketing/dsid_9bf09a549d22494c9672ecdd79896878__2025-07-29-sandstone-search-prototype-embeddings-rerank-walkthrough.txt",
+      "sha256": "12056486d8ec563b7594c4271721bc428b82a1ab21c14e5d237aecc0338dde38"
+    },
+    {
+      "path": "fireflies/partners/dsid_3fc14ed9048e4e1f861e0632b06fc39b__2025-03-11-halotech-marketplace-ref-arch-integration-sync.txt",
+      "sha256": "c98f5a986c9be6db64902cc135b8815d793db54903731199cf301835e4ac8e8e"
+    },
+    {
+      "path": "fireflies/partners/dsid_912991a0a2ce4000a55b1f67bda8c3a3__2025-05-09-ironcrest-bio-quickstart-hosting-pathway-discovery.txt",
+      "sha256": "3945cbf95f5685b8372b4c8d2414a68113ac89144c0b61536d61824c9c3e892b"
+    },
+    {
+      "path": "fireflies/partners/dsid_cc2f84330d014d03b8c49f8e92063b07__2026-12-20-orbital-networks-gtm-co-sell-sprint-review.txt",
+      "sha256": "a89422d83253b1ee96a55b7cdd65a8f776fb258bfefe0a07eb04570324b784ee"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_100d6362c85946ab97758b63509bc182__2027-07-22-runtime-inference-forensics-interactive-walkthrough-arcadia-retail.txt",
+      "sha256": "3594d8fed852c61a27d0eebd4dffa81c86f15c1de30418a6476cd19418192436"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_376ec773a4274a978dc5710685e90de4__2026-04-11-atlas-retail-multilingual-context-and-tooling-discovery.txt",
+      "sha256": "df8b842fb0ffd807d3a391dae36b654a18bdceed57ac47dcb53047c85477aba9"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_4abbd2f3646e487d95a2fbf9697eafdd__2026-05-26-budget-mapping-and-fallbacks-tamarind-systems-discovery.txt",
+      "sha256": "440f47f06764a979f5a5f88c7baa9380a6e9497cb02ebfb4a0ca04a697e17473"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_78af0bb57e664b7fa9468fa3295544f9__2026-04-11-pebbleforge-time-to-first-token-hosting-decision-discovery.txt",
+      "sha256": "5e2666597dbd70e16b8dc42bf4d99a1b6fc29a6de00220894ee0f6337ff3ff46"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_82255c059d0642dbb9643a81cf4a06cf__2027-08-14-zephyrus-latency-economics-and-concurrency-discovery.txt",
+      "sha256": "43cd3e1d0a892992d146262301babaf195e5eee4f0f6e8e7eae525a16d95d5f5"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_b9025f196ac14b2cb7a2905654dd42d7__2026-09-30-onprem-cutover-readiness-egress-capacity-playbook.txt",
+      "sha256": "fecf3da6321a2b785198b917a38c0cf19bbfa6df7b05ffe9925b7855c997909a"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_b99141939cdf4a2f9a76b41ff41d8e94__2028-05-09-novaquest-inference-options-and-internationalization-discovery.txt",
+      "sha256": "10fb940dbb374fb90f983586e90a801e34b431a5cf7bd9cf5d7e401df1d6b79f"
+    },
+    {
+      "path": "fireflies/sales-calls/dsid_e37e7b7723e34b8087ef051804bfe85e__2026-06-25-unit-cost-investigation-zephyrus-labs.txt",
+      "sha256": "7687945689be6384a18816d8958602b47fd4a1630268708728e1392c089b2f3c"
+    },
+    {
+      "path": "github/dsid_1653d1ed11a1403ca8e44bef03a610a9__pr-84923-per-route-function-call-telemetry-and-jsonl-output-tags.txt",
+      "sha256": "30bc36f880e65dc0a3cfb2c31a387508f313656a26e67f9158c71de628eebfb4"
+    },
+    {
+      "path": "github/dsid_25d53523b94144f6aa36a8dcd3101939__pr-31210-hybrid-scheduler-gradual-fallback-consistency-kernel-toggles.txt",
+      "sha256": "a02945c02986e80da9cf87b6a3200bc6bb6544a2bb2df86ccffccd7739497454"
+    },
+    {
+      "path": "github/dsid_426ca69578a84dd4af512e5a2782086e__pr-20311-safelock-fastpath-precision-toggle-kv-eviction.txt",
+      "sha256": "a989d3051ff7f360afca144802ad6c699ab24a0338a6e4a23bf5dd1674ad5864"
+    },
+    {
+      "path": "github/dsid_730ed8ee5fc84e0b9be761003b9a60d3__pr-874321-traffic-escrow-and-rehearse-proxy-for-staged-promotes.txt",
+      "sha256": "d755f8f63db13e2f75e93a09f868781e625c27299e2d74638ac01d87f76f6d18"
+    },
+    {
+      "path": "github/dsid_7d7a89d91c3d4c1c854cc513e76316aa__pr-42739-session-snapshot-client-ack-stream-resume-openai-compat.txt",
+      "sha256": "464dec30edcf8ecdda03167a2fe267be3684e8ec31669afc8a02b2b62f448cfd"
+    },
+    {
+      "path": "github/dsid_88b39d13bd584ef8b1422d76994808c7__pr-95312-unify-handshake-consumer-ux-and-retry-bump.txt",
+      "sha256": "bac93a5e6f6f6fca56ac713c198c9b071107cb62dd3526ae3325f7c49dcf688c"
+    },
+    {
+      "path": "github/dsid_b253f5cc715f4d47bdd578edd6f2f19e__pr-182450-tool-result-merging-and-backoff-wizardry.txt",
+      "sha256": "bb0accef5525e6a66ae9bac880fc03aa391075b884cd6c4342bce643f732b964"
+    },
+    {
+      "path": "github/dsid_c7860fdbc17a48b0b6c5f9a0c5e3d054__pr-176421-coalescing-invoker-grace-period-and-structured-output.txt",
+      "sha256": "f6f7ff9f00e08817feb9faf2da66b3c08490d1f1e3d26b9100cbc8b4a162f292"
+    },
+    {
+      "path": "github/dsid_caf02469a41c46cf8387713b83c628f3__pr-23145-adaptive-scratch-and-deferred-ckpt-scheduler.txt",
+      "sha256": "4fc241bf7ad1b2ef3f4e2c5a1041cf8c141fef199e75116946fbdac16e04b673"
+    },
+    {
+      "path": "github/observability-pack/dsid_81208556437644a0a4dedf168baf81b5__pr-311-add-dashboard-usage-insights-freshness.txt",
+      "sha256": "a854d06cdcc69ca6a0a943ddaf354d4a11ab31736fb2fca1e67b3f87492a83fd"
+    },
+    {
+      "path": "github/redwood/dsid_04aaa0ef6ece4e4da0215c5539b42900__pr-483999-align-telemetry-schema-preserve-stream-cursors-and-soft-retry.txt",
+      "sha256": "a35eb69308ae28ed367c9b7c76f82dff7693b21cdc49fe0092ef5e588dba4104"
+    },
+    {
+      "path": "github/redwood/dsid_0ccc2ab2b8c64be3a6b209c9c81cc876__pr-942727-lightweight-lint-dep-rotation-release-hooks.txt",
+      "sha256": "f5ef331b218ba1b83df4d955274fd800191a6047241f0beff35c6f663f4bcfa4"
+    },
+    {
+      "path": "github/redwood/dsid_22cf75c2a0ec4786ad7d32374a05cfaf__pr-23166-reconciliation-tests-vs-billing-totals.txt",
+      "sha256": "35875d80ec19e88c1056fab134414b63b4227cbac1ae9a6c98e6a68ca8a40080"
+    },
+    {
+      "path": "github/redwood/dsid_39282485ab0447398ee1240ec99bd8a9__pr-997731-commitment-telemetry-aggregator-and-latency-targeted-autoscale.txt",
+      "sha256": "9ed30e24045dd9531949142d0bc0c6fb4aeef0a44c0cf8f8683118f656695120"
+    },
+    {
+      "path": "github/redwood/dsid_3cadd1c76fcd4705a4d5582fcbb0c155__pr-361234-soft-termination-tombstone-resume-negotiator-openai-compat.txt",
+      "sha256": "1bc6f9ba50c20732612c84dac9a5348cbf764ec931c1aa24f0a2f97619d6115a"
+    },
+    {
+      "path": "github/redwood/dsid_5b2e0ac251e648f394002c9890b1215e__pr-65213-polyglot-sdk-smoothing-token-handshake-and-stream-ux.txt",
+      "sha256": "12fb3b4368e197b306d89677e9c630f56d7f4db8be1ed87971f656c6772b5f53"
+    },
+    {
+      "path": "github/redwood/dsid_bab6aba4c06e41e9ae46b9355f644a7a__pr-128765-hetero-bandwidth-allreduce-kv-coalesce.txt",
+      "sha256": "98277b005a3aa66cc77171e2769c7fd63740e10559b74c750e08440d90a751db"
+    },
+    {
+      "path": "github/redwood/dsid_dd5f2446068044769b2ab2be35a717d2__pr-347999-turnstile-canary-gate-with-audit-rewind.txt",
+      "sha256": "326712b1acaa23274fef712bd4485171375a85e43ac6c60c973a7e4a2fe77d90"
+    },
+    {
+      "path": "github/redwood/dsid_dec3054a14fc45b5b12ac4003a8f4cfe__pr-106432-heuristic-driven-commcompute-kernel-affinity.txt",
+      "sha256": "a12f91ce8a56de7068132146da6af5850ddce7a5240ff2a0e7658e12f91719d4"
+    },
+    {
+      "path": "gmail/aditya_rao/dsid_e11aa1e442b64018ab8aa3a8cddfdb92__20251014-marketplace-evidence-runbook-brand-claim-walkthrough.txt",
+      "sha256": "9b54a139786917bac82a8891e38af03d94aa8322c64959518a0d29380679f8fa"
+    },
+    {
+      "path": "gmail/avery_johnson/dsid_d79f83b3b3bf4dd7819c5fd3abec5989__20270409-edgewave-tdx-timing-and-prep-checklist.txt",
+      "sha256": "8f2d87fc915ba961c03251f13d7bdf81d334c4abec3d16afe6ec4f74dc80f89c"
+    },
+    {
+      "path": "gmail/ben_carter/dsid_39acfd07ea51492d9bb70e3e59ea211d__20260918-multi-region-controlplane-dataplane-connectivity-eval.txt",
+      "sha256": "6fe0dd9aa6cba32d3e606d2558105a3dc106fa4a4e419c2cd4fc3a3bb84482bb"
+    },
+    {
+      "path": "gmail/ben_carter/dsid_b5b3513b649c4534b539c7b87492bccc__20280329-embertech-capacity-uptick-negotiation.txt",
+      "sha256": "f4498707ace3dc02d50799559d1dcf1fc420c8eaaf2138ce09cd5754918a4733"
+    },
+    {
+      "path": "gmail/camila_reyes/dsid_1251ae799c0d4f3ba83d8b7bf2d91a02__20261201-prorated-merit-equity-routing-org-shift.txt",
+      "sha256": "5e41de05e1404901ea914cfbeba799ac6ac7158537d0ffe69f7caceca2dbb614"
+    },
+    {
+      "path": "gmail/camila_reyes/dsid_9bc751cb474443aea0dcc12d291fc438__20280217-marketgate-uptier-proof-escape-offer.txt",
+      "sha256": "98282119dc4df61b55865c748e34bf1d2d6d3cbce2ed9786f6812789c7236443"
+    },
+    {
+      "path": "gmail/chloe_martin/dsid_ee06f98b9bd44d06a7219d9506551237__20270401-pinecrest-recovery-onboarding-evidence-plan.txt",
+      "sha256": "70b3ae6df0b3275d810bd90873d918d29c756fce1b935e18347515f97cac4d1e"
+    },
+    {
+      "path": "gmail/connor_obrien/dsid_1dd9f9e7b131451c8ac873006669289e__20260829-helixpay-continuity-verification-rto-rpo-soc2.txt",
+      "sha256": "fb6bec2c3a1703636f4ba5fb8f149a65d91c9255f6f1e89a959922392b27eaae"
+    },
+    {
+      "path": "gmail/connor_obrien/dsid_94f011e1d2d04c89a4edc1d68ed9d855__20270504-marketplace-technical-evidence-support-rto-query.txt",
+      "sha256": "598c8769d90fe06a62fa8026a1d23d3a5d60482d457e2bd756666677fed75f34"
+    },
+    {
+      "path": "gmail/diego_fernandez/dsid_28cb6ebdd12f4328a49be57863c00505__20260913-lead-briefing-orbit-sponsor-handoff-map.txt",
+      "sha256": "039950122d028332ffaf089c0bc997bda1a8d02bb83de64ac4f475388b2a1d36"
+    },
+    {
+      "path": "gmail/diego_fernandez/dsid_ea0f55af5eb3442da7867b572b3d627e__20260210-healthlytics-map-cutover-readiness.txt",
+      "sha256": "90379c2bac752f8b4fd5a1a5cea6ff89480c9497531ce186862054764bf99673"
+    },
+    {
+      "path": "gmail/dsid_c6a6396159964deeb021d646eaaf2b0c__20250603-customer-escalation-private-upgrade-rollback-request.txt",
+      "sha256": "da18a7ab87cf68854a5ee1693951d193558cc7f91014dd52c74bfeac5da55122"
+    },
+    {
+      "path": "gmail/dylan_brooks/dsid_29fbaa51102242e5a1efe670e7214591__20260709-senior-stewardship-meeting-plan.txt",
+      "sha256": "4f58f387981d5a0dd8bbcb517db04aeed71f728b0cc68d16b88de512d2b7cedb"
+    },
+    {
+      "path": "gmail/evelyn_hart/dsid_4219e27719a149b1b3a8a2049dab02ea__20270402-observability-evals-briefing-next-steps.txt",
+      "sha256": "9315898ba4a485ffa120450f88e442e6bb07c4f7760c356d44604d0c93d47313"
+    },
+    {
+      "path": "gmail/hannah_schmitt/dsid_3637383716ff4bc69ffd47642fc16437__20260612-cloud-mktplace-claims-clearance-legal-op-coordination.txt",
+      "sha256": "d3d6144092c25088de8779d53693f4d855ffd480a52acb9ebc2c7f084444b8b8"
+    },
+    {
+      "path": "gmail/jonas_weber/dsid_4a9ee26ef21b469483b90ab498665753__20260914-econ-buyer-dossier-legal-sequencing.txt",
+      "sha256": "8eb3c5916aa384e74d6cc7bd9221a1cc9c99cd7ae53203adad5a9dbde328d0f3"
+    },
+    {
+      "path": "gmail/jonas_weber/dsid_a9a2461be755412ba12aebb497801fba__20270430-inference-integration-technical-preview-booking.txt",
+      "sha256": "21827c21fb2ae76c0c45c18b2a1f05bcddd0632c7ae450f1a53c89584261a5ed"
+    },
+    {
+      "path": "gmail/jordan_blake/dsid_780d8363677241c18f1a3f3793236483__20260910-prelaunch-sync-action-tracker.txt",
+      "sha256": "2c876e8c35e1ba4b005fbf009f8eae5863893acd6e7806c94f5d318b47df6dec"
+    },
+    {
+      "path": "gmail/karthik_iyer/dsid_252dd5cfb9414917855d236aed10e54b__20260405-upfront-term-shift-crediting-and-ramp-plan.txt",
+      "sha256": "13e548c95a51d1e86bbf98e28d32395b42518c476773fb123cf96b4fda2c697f"
+    },
+    {
+      "path": "gmail/karthik_iyer/dsid_2b1beb383cbe4f2092f964a180a7a32d__20280315-renewal-uptick-amendment-implementation-plan.txt",
+      "sha256": "fb40d91a9bf4d9a6060632cb54df164603754db43c389685ee23ec19ef8ae7b8"
+    },
+    {
+      "path": "gmail/marcus_lin/dsid_ca51ebbdbb1f4d6797d29afddb411d1e__20270411-loglineage-exportability-rfp-response.txt",
+      "sha256": "8cb92875ec1435ea410e2820ddfb2188f9522665e82f3714027aa264c1177e75"
+    },
+    {
+      "path": "gmail/marcus_lin/dsid_cadd970007ab4876a024c47f9eb9cf4e__20260218-annualizing-billing-with-swingline-credits-nimblehealth.txt",
+      "sha256": "508b81e0a29492cffb3b7269360346a13c019a2f91d639159ac24343c1c71b2c"
+    },
+    {
+      "path": "gmail/markus_klein/dsid_d585d1d0dd884e288f91b858f9219b1c__20250624-swing-demo-weekly-rotation-proposal.txt",
+      "sha256": "078b34deff59d8e3ebd770e32c7c95763cfa5577233bc2bcc4f3a423dbf69059"
+    },
+    {
+      "path": "gmail/mateo_alvarez/dsid_e052daca29064eb5ba2b1b0f046fbb84__20260430-onramp-prepay-transition-safety-net-and-term-credits.txt",
+      "sha256": "e53dd09b84c6e275c62f40cb2b8112a3827535485f1bb0b75107a35975e7b784"
+    },
+    {
+      "path": "gmail/michael_grant/dsid_4c95187add7e4845857f02bc4fecf9dd__20260714-regulatory-exclusion-subrogation-msaflow.txt",
+      "sha256": "929ecca28e1dfd73a47a83b73ee89b0d99f3458dc28ba3cb5c2c7d80d43cd432"
+    },
+    {
+      "path": "gmail/naomi_feldman/dsid_bf5047946c22437cbfa178c4d1dec0eb__20270328-arcadia-onramp-playbook.txt",
+      "sha256": "d5afff7848e0a445465fb1c2ff3f10be73dc12b68abaa443bacfd505176751d7"
+    },
+    {
+      "path": "gmail/naomi_feldman/dsid_f0cdbd1fde2c4383855c3da80aaaa38d__20290512-optima-extension-timeline-and-qbr-booking.txt",
+      "sha256": "54aab6080ead6cb1a9dba0d8457280282106ebf02fa26ebc1223d3deded766e5"
+    },
+    {
+      "path": "gmail/neha_kapoor/dsid_44f3413c3edc4815964da616d0370e8e__20260821-slatepoint-trueup-burst-to-reserve.txt",
+      "sha256": "c455d817c52208d71e6bd7273a94a1602b29d36dd74f0d10c0020a4df7fbd905"
+    },
+    {
+      "path": "gmail/neha_kapoor/dsid_a8f0c8524573431c9b789291d63b716a__20260414-featureflag-licensing-review-stakeholder-sync.txt",
+      "sha256": "809bb6cb26df4fcd496d055a4d26fdfdfb1c16af17a4b240fd0220eceda6890c"
+    },
+    {
+      "path": "gmail/olga_petrov/dsid_f09cf2d633174b7ab7105ef0a7498e74__20270809-seedbank-restore-slas-evidence-and-table-ask.txt",
+      "sha256": "ed2199cda49aed9f6adbeded33e5f76c1b63ee7915f5060afb0c1e0f668d45af"
+    },
+    {
+      "path": "gmail/rachel_kim/dsid_8c4ea89fd9e1421eac7ceb58d2f90cfc__20270523-oakandbirch-geo-steer-authorization.txt",
+      "sha256": "6c6858b77ca1a75ee1773a7e0ba7908e8762885de1096ea14738e2fd31cab448"
+    },
+    {
+      "path": "gmail/rishi_malhotra/dsid_9a72d66e12854ada96f73f1076701158__20261005-consequence-language-compromise.txt",
+      "sha256": "0421f2fe7b787089f4cec4476efa15bc63a0d8d5d981e294f726c69519d5a277"
+    },
+    {
+      "path": "gmail/rishi_malhotra/dsid_c2856c3525eb4e2f9c3d48d797fcbe09__20260825-slo-guardrail-proposal-transient-noise.txt",
+      "sha256": "77b8e5a3dc373b2541225273452cb6e7731da949dddd85ba958722231a028201"
+    },
+    {
+      "path": "gmail/sofia_ivanova/dsid_6091c41379e04d07adcf0a5646c65909__20260519-dedicated-lane-options-and-ramp-cadence-meridian.txt",
+      "sha256": "d7005dfbff215ce850576758ab1e03e8a438949b747f2e9f49490893f7bdbc4d"
+    },
+    {
+      "path": "gmail/soojin_lee/dsid_74cd6ebda84547e2a534f8f6d1b49739__20281020-architecture-review-booking-next-steps-cytohealth.txt",
+      "sha256": "b9719dcdef7cb94f6269ba7075bc67c1deec7c55502601d05cc20a006393e00b"
+    },
+    {
+      "path": "gmail/soojin_lee/dsid_9aa06958b8654735b75658778c890d19__20260929-streaming-channel-pacing-regression-client-quickplay.txt",
+      "sha256": "43d8de3877854a2fce1c2d628a67dbc9674dffe1bb6e66e5159f6dcd4716665a"
+    },
+    {
+      "path": "gmail/tessa_morgan/dsid_c725b5e9e3194f99af2062938e44fb4b__20260707-onramp-stitch-runway-manifest.txt",
+      "sha256": "eec357771c0f49954a4ee83cb900ffb1afdf343eaa5e4061f735fbfd87699bad"
+    },
+    {
+      "path": "gmail/vanessa_ortiz/dsid_31cc9ab1c90e48ba800eaef3c927b32d__20261118-catalog-visibility-pricing-commitments.txt",
+      "sha256": "37ac0dc8c4ea3a5a67d6d2c1e86389c52761b898e774d2ad9a8f5489db4ebb3b"
+    },
+    {
+      "path": "gmail/vanessa_ortiz/dsid_cfaddf1c0ebc499aad52a2d4c9825538__20280418-sponsor-ownership-handoff-eb-slot-negotiation.txt",
+      "sha256": "92da226d3b332daa1d874ba2eadb3420246624c5a9df8ff9ae723cfc1b277f9c"
+    },
+    {
+      "path": "gmail/vivek_kulkarni/dsid_3be2b45196414cad9b187551da3ed448__20261116-telemetry-optout-prompt-ownership-kms-routing.txt",
+      "sha256": "50f0e6f63630ff2ebd50e1acb96ecda41631885972b14d92f18ba3616ab6b63f"
+    },
+    {
+      "path": "google_drive/shared_drives/company/dsid_ae7131f5d64f4f37af677f702dc60d2b__embed-robustness-noise-length-probe-suite.txt",
+      "sha256": "b749a1fdddbf02057155f14729d00bd98fae353bfc64eaaeac936eaac28fb105"
+    },
+    {
+      "path": "google_drive/shared_drives/dsid_5085c9f4b4484f298dabd02c99d9ce03__observability-slice-storyboard-alert-finessing-notes.txt",
+      "sha256": "7a673097f58bd9ffa69eb07c1bc9e9a730aa805ac7025a0c59d6f9d1f0ef1365"
+    },
+    {
+      "path": "google_drive/shared_drives/dsid_cfc80f61d84848c58d961b49d1b3a774__kernel-lattice-weekly-capture.txt",
+      "sha256": "49ecab297719fd4612ad3e9260383b595470a7283a96aad45dd14c1d550269d9"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/applied-ml/dsid_19ce66cf65964b9eb1e0a89c5780b209__embedding-eval-playbook-multilingual-cluster-sanity.txt",
+      "sha256": "b4b3f213d3e879ccc320c0c54cb36ec885ba548575a9a183e8fea71b4ad2bb93"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/developer-experience/dsid_0b0595a6d39247ada6238d8311b587f8__streaming-write-stall-ttl-regression-postmortem-2026-04-25.txt",
+      "sha256": "a7b2ef31365c1890e1802060323ab7346a779b411a2f5462967089540869155a"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/infrastructure/dsid_e246f931a6c842df836fcf14e04c7862__stochastic-batching-impact-analysis-q3-2027.txt",
+      "sha256": "9b2210598d1b41a970c5c8cf72b17224e647f33e18de004700d28f64e48efb0f"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/infrastructure/dsid_f2a29d39414c4a1db617d0772cb69c11__adaptive-warmup-provisioning-sheet.txt",
+      "sha256": "d802ea52897780eb1ed15a2236b7db28b9a8a110d182fe026bef7e5643b3f155"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/misc-uploads/dsid_8def37ed9fd345dd9c2abd1c781dec23__incremental-sync-mobile-sdk-low-bandwidth-prd-wip.txt",
+      "sha256": "f79bb6130d60e2436f9668398a9271726a038d7ba161ed0c3da2e7ef2f9c9f5d"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/observability/dsid_4df4410bb4444cada36b87ffb8684cfe__sampling-budget-calculator-and-tradeoffs-playbook.txt",
+      "sha256": "65ca3a8f3189648cf09ede283ddb87d6c77708c9c1fe8288a607c55768d09d9d"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/observability/dsid_64c6ac2693d649128d1d5279a839681b__oncall-context-strip-and-visual-anchors-notes.txt",
+      "sha256": "68abf919acebe09dd3c4d91d8bb61755d37389afdf5e4ca393cc59fee0330915"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/private-deployments/dsid_903b86b1723741138d54a9dd60ac1b5c__data-residency-consent-ledger-and-pin-change-process.txt",
+      "sha256": "39fe3f4cf95bb55aaa79c3ec40421c5860c5087f62b13bd642316a5179965b43"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/serving-runtime/dsid_117252da79224513adf3cc4d82aa70d1__peak-spike-heap-recycling-notes.txt",
+      "sha256": "e282fd049afab00edacb572e23f416cc93e82fb06c0f007de32581bd7431eab0"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/serving-runtime/dsid_36ae5261f8ee4838af3fa377b8effb2d__request-to-token-lattice-scheduler-architectural-notes.txt",
+      "sha256": "c2f59df3124f6eda882e40b215f2568629473722a3af3dd5aec9b4bbc82939f4"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/serving-runtime/dsid_55c740f9caba45b8bf53fdfe81162f1e__attention-chunking-and-mem-reclamation-mixed-precision-moe-qwen-notes.txt",
+      "sha256": "054f77b0f5e5eef2d08c5c57e3a9cea31c56ba2cd86ca97da05841a62606a189"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/serving-runtime/dsid_9fd2fa387e4e49058f588b2bf5443761__split-allocation-hotspots-and-kvcache-coalescence-notes.txt",
+      "sha256": "456796d365e72f154cd80a361dcc09a3f212d91da0cb5cdf278c238306b1eb9d"
+    },
+    {
+      "path": "google_drive/shared_drives/engineering/serving-runtime/dsid_cd0a915e779b494d9a1327269746d51f__mixed-quant-fallback-scenarios-and-scheduler-proposals.txt",
+      "sha256": "778ab73b544d06d237aa37da8fc1b1fad1a1789646eb618dc018ddadf4e12380"
+    },
+    {
+      "path": "google_drive/shared_drives/go-to-market/dsid_d5761f19c43d45a98aa6cd2d9f962d56__aureon-health-account-scout-notes.txt",
+      "sha256": "39ac2a33109ab9d93eb7c10e95e0c02fe2199c16cd93e9dcd9ff7db536b17460"
+    },
+    {
+      "path": "google_drive/shared_drives/go-to-market/dsid_efa9bd543bfa4f038bd76b953f5bd121__listing-partner-onboarding-bridge-checklist-and-creative-prompts.txt",
+      "sha256": "879dc6460bf8a8a1c92ec2a1d90ca3a1939fac45a4c592f3eae44c48d4ddfa3e"
+    },
+    {
+      "path": "google_drive/shared_drives/product/console-and-rollouts/dsid_167627a8803145a191e1885dc92584f7__safety-net-and-reversion-playbook-for-production-experiments.txt",
+      "sha256": "7010a9e73ef51a43556e4bd1e1f8fa4db4126767f73c3fc912745dac00e666e5"
+    },
+    {
+      "path": "google_drive/shared_drives/product/console-and-rollouts/dsid_81afed9a3c5b4f798725cb5d223cc177__heuristic-eval-intercept-insights-jul2026.txt",
+      "sha256": "35bff993e5bf750118279fc83ccfb1c101848efde274ab53166e2df1a5025f09"
+    },
+    {
+      "path": "google_drive/shared_drives/product/console-and-rollouts/dsid_e8c3d049ff3a467a8089b7d89e5b2b9f__cohort-harm-reduction-schematic-and-ops-playbook-wip.txt",
+      "sha256": "7afbe14d7bada5430de966a0bc52373bfc60016dc0ce77a270c38e0cf846d989"
+    },
+    {
+      "path": "google_drive/shared_drives/product/hosted-api/dsid_8d3bd7ba5a1c4261bb28ddbf28fd1964__partial-response-contracts-and-connector-ergonomics-scan.txt",
+      "sha256": "e723ea46ce5308800ba8d24b6e3ba45517449c5635e1e6d5a3c45bb57db84505"
+    },
+    {
+      "path": "google_drive/shared_drives/product/hosted-api/dsid_f54c46f313074186bf8a1594334d071d__disconnected-client-handoff-and-typed-sink-proposal.txt",
+      "sha256": "e52ee68fcb1fec9a247af388480859fb007a9521663131fa2948e6ba310e77b0"
+    },
+    {
+      "path": "google_drive/shared_drives/product/private-deployments/dsid_0f51ab0cc43d467ab58f1bf4be500238__cryptographic-approval-receipts-for-vpc-changes-prd-draft.txt",
+      "sha256": "b9ebb6e99e0c514f519455c54c0cd8835f73eb017c96c5c59409a464b0ed0e6b"
+    },
+    {
+      "path": "google_drive/users/dsid_2271ae6c393d409093b11b5a6d5b96ed__niko-rogers-interaction-tiering-idea-scrapbook.txt",
+      "sha256": "a7c33f0f9193d4a5faca46b0e0f804ed387046c0aa6b891e0cc892bbee1b63fd"
+    },
+    {
+      "path": "google_drive/users/dsid_264cf92f333c49a6993e0e50c0da006b__aditya-checkpoint-staging-gcs-timeouts-notes.txt",
+      "sha256": "062f12ee03f28b076fa5e5ead9a20707bd26a94a332dd182d4d9a50f325114dc"
+    },
+    {
+      "path": "google_drive/users/dsid_38781281cb9543c392768ef7da2f6359__pinehaven-retail-cold-sequence-notes.txt",
+      "sha256": "b5dbb5be01b858ba38b0cbab482f82aae466b2231d8e8ce4b84bd47d8fe057ea"
+    },
+    {
+      "path": "google_drive/users/dsid_4e89403dcf74496c8a8516bfd64e351f__lucas-resume-download-hang-notes.txt",
+      "sha256": "3d8dfafcb7ae36a462cff6a7b2e5a34ae090615e4f2557eb44b60e75486aa09f"
+    },
+    {
+      "path": "google_drive/users/dsid_88f1c9800dd54a75bad05653b7f07a93__refactor-thoughtstream-kiran.txt",
+      "sha256": "35e1426788f789a9af2c742fb4da32a0422b21c03c84e78e842b4793da5567e9"
+    },
+    {
+      "path": "google_drive/users/dsid_9ba3621e1a3c401db4ef316afc484ba6__olivia-lazyfetch-ttl-stall-notes.txt",
+      "sha256": "474d3f93c76184487e43111158990d8ff55646c339ae51eebce6423927f3bb86"
+    },
+    {
+      "path": "google_drive/users/dsid_b9cc7dab6b8b4229aeaf7e8f6f74af29__tidy-paths-refactor-idea-log-sanjana.txt",
+      "sha256": "a5eabff2ff85f54bd5b051a0dc5eba2eb974db6abaf61c5bed698f5d8126d052"
+    },
+    {
+      "path": "google_drive/users/dsid_deab2305bbde431ebf3a89e4e57efe4b__northgrove-medops-integration-field-scrap.txt",
+      "sha256": "2c5b191d6ff030494d6a67d053fbf9d86e1e0fc5a5bf2f0c57ea00ae3deebe11"
+    },
+    {
+      "path": "google_drive/users/dsid_e3f03d6663d545ddb3cb47166c8a73fc__julian-park-inkwell-brief.txt",
+      "sha256": "0afdc616eccacca9959231e381069d58a709d0d0968838d9db802c0c0db5c65f"
+    },
+    {
+      "path": "google_drive/users/dsid_eab7ef95052c4016aff7a3df422131f0__valehealth-implementation-capture.txt",
+      "sha256": "9aa5ac66f5fdec86440b85414cee6bebaeb10f89fe3a8859bec31344e036069e"
+    },
+    {
+      "path": "google_drive/users/dsid_ec0e9a69c7ac4477a5c13a30d448d25e__client-context-tiering-prototype-notes.txt",
+      "sha256": "e3e19915913b4d70edeeb7e9ce5e4ad4315f1aa40c9217a8b7fc325ba75b2d46"
+    },
+    {
+      "path": "google_drive/users/dsid_f488aa5143f3485d95dd718ccbcbcb42__marketplace-partner-sync-scratchpad.txt",
+      "sha256": "f2c5e43bd62553a4c3d11a5e377f22f66c162b4ba70f81e73ced564faac83173"
+    },
+    {
+      "path": "hubspot/dsid_14b27ba9f9034561bfc5b31638a18c59__company-quillstack-studios.txt",
+      "sha256": "06cce309004ccb7ba33b4a4c16e34e87ccc12930383cd044a09e8b52f2bfda65"
+    },
+    {
+      "path": "hubspot/dsid_1a4563b5332f41a499464ea69f92c9b0__company-cerulean-support-networks.txt",
+      "sha256": "f453b4bffb07446d7835970dab66917e8a69de54bb9d3347bddaa67d10b51e59"
+    },
+    {
+      "path": "hubspot/dsid_223bde57804f446bb9105c3b8ec77b37__company-regal-analytics.txt",
+      "sha256": "c0801c804b95dfd9c34534192def873108649a18802fe62e647ea111b8ab5bee"
+    },
+    {
+      "path": "hubspot/dsid_398e6e782364403a9fcfc73cac68ac5c__company-paperplane-cx.txt",
+      "sha256": "9c222867b1a696726934ba649f6e581400e7110bbb63f177728450df704d6bbd"
+    },
+    {
+      "path": "hubspot/dsid_3e5dbef851984cc4b55f589947431a22__company-inkbridge-collective.txt",
+      "sha256": "8e48a20f34f5255f8c7487217c028f7825e66953e7eeae40fa8c97c648223313"
+    },
+    {
+      "path": "hubspot/dsid_4ac2e7c966914aceae40aedd762a509e__company-voxentra-realtime-labs.txt",
+      "sha256": "dac577047097c78b93fccea7767c227880f1099aefb845c6451763be92ffe21a"
+    },
+    {
+      "path": "hubspot/dsid_4b0f5e573e5e4ce8bbbcf370c3ea7eaa__company-northpoint-signalworks.txt",
+      "sha256": "48df5f33cbefe04d71fbce87f40d7a089a6d3dce6f0a53cd80a22d10324c2668"
+    },
+    {
+      "path": "hubspot/dsid_5634c026eda6480b866f00ae1f9e696d__company-devscribe-labs.txt",
+      "sha256": "1049ee5336420ab5c6eb14ca14db6cb022a04657ad8bf8fe3980051cf135121c"
+    },
+    {
+      "path": "hubspot/dsid_5d161fbc61f94eaeb6098a9f9275d38f__company-copper-kite-works.txt",
+      "sha256": "9d91241fefaca88b0b03afca2a7bab478f29ee30f09a0dbc4a5e2583596648be"
+    },
+    {
+      "path": "hubspot/dsid_6690baa22f2f417d913baa7f61bf0e08__company-northpoint-risk-technologies.txt",
+      "sha256": "40d796c4114a764fced922bb5163ca73446d595daf00c55b95bcfb52e0100223"
+    },
+    {
+      "path": "hubspot/dsid_a15c0247e9de4e128293bd820fc4c659__company-pearlgate-embedlabs.txt",
+      "sha256": "2e5e6c906fbc93616747c9ffb67115fcf49b66450b457efa13014b57640dd51f"
+    },
+    {
+      "path": "hubspot/dsid_a320c0067f554cc9b899bcb4ad5f98af__company-cascade-financial-group.txt",
+      "sha256": "8acf26fa867435850e7eabd4b260cd99accb749b5b0ccaf28c902c9d396fcf0c"
+    },
+    {
+      "path": "hubspot/dsid_b69588c79b1d4d9badb8441e87116ad5__company-papertrail-ragmate.txt",
+      "sha256": "286f95474eee4588f1a84b40251afc66a5c789919a5270b2ee5eb97eb04a48fd"
+    },
+    {
+      "path": "hubspot/dsid_c08d7e39ca134fb083d6331528707c8a__company-sparrow-copilot-works.txt",
+      "sha256": "b91cad4dd39694c2d1bc945e3a67890fa94e7f6461ebcb40e00da8a6de8d20e6"
+    },
+    {
+      "path": "hubspot/dsid_c458389b5d3447c7b93ef5e48f68279e__company-devflow-ai.txt",
+      "sha256": "6572b22d57ae5a1415dc8bd696bb2fc105327dde0cc2f1c21463ad9b17424835"
+    },
+    {
+      "path": "hubspot/dsid_cb58379b249f4e7dab5e716bbeb11b29__company-silver-birch-scribeco.txt",
+      "sha256": "347ad633eb2418067b4253163e867347550a218ae6774c89956d0216b76dc5c3"
+    },
+    {
+      "path": "hubspot/dsid_e9dd560753924c1e8438cdf9c2afcf68__company-peregrine-crosslingo.txt",
+      "sha256": "1f274f1a34baabce1c3ab57b852f0bed4ae9e0fa3dfb77de316ebca7c99742a0"
+    },
+    {
+      "path": "hubspot/dsid_ec7398f6682543a99876bd796d88b9e7__company-helioverse-cx-bridge.txt",
+      "sha256": "8cea22258c6fe1eb6e51e463575df01405a54630654361fcdab9c5de0f6164f4"
+    },
+    {
+      "path": "hubspot/dsid_f4fbc3f2bcc24bb29f9da2c81e43661f__company-nimbus-compliance-labs.txt",
+      "sha256": "62be5ec0d69970c6c6194576a4c855a7934d8f07a0dbb90a32daea028afc56c6"
+    },
+    {
+      "path": "jira/customer-support/dsid_01602d67d9bd4cbabd540349afd16a02__SUP-290301-client-cert-chain-ordering-breaks-service-impersonation.txt",
+      "sha256": "48e1efa960011e4e6e1e7f76382f25c1b317b76c43ef308f697997d6a253c28d"
+    },
+    {
+      "path": "jira/customer-support/dsid_0c8ea3b2a7fd4392b1f480fe5f0c4725__SUP-92247-service-account-impersonation-scoping-prevents-admin-ops.txt",
+      "sha256": "101b583e2776f1d761437506e45b079cae5caeaa62fb0b9705dc7864534b26dd"
+    },
+    {
+      "path": "jira/customer-support/dsid_1572255f25394d7ebb868baae4f7ad68__SUP-555678-tenant-cookie-domain-leak-bounces-routing.txt",
+      "sha256": "6bd4d35151c03e08330ee91ce698d01f094c56d21c7d59ac2c55474d10509c60"
+    },
+    {
+      "path": "jira/customer-support/dsid_1d53445cc74b4d7db325cd585736f87f__SUP-100012-saved-dashboard-filter-presets-reset-on-report-edit.txt",
+      "sha256": "507a83e5e203a42ba1e84cdda7d70b33d5093b4ce5cd30d4283792994e328f71"
+    },
+    {
+      "path": "jira/customer-support/dsid_33b8ef3fa0134aec892debb7dcaae434__SUP-71902-audit-log-bulk-delivery-and-security-assertions-for-vendor-audit.txt",
+      "sha256": "2e95cf950062abaf492dd17490e96a3f0d51449123d0d7094b3571a7d6ac6521"
+    },
+    {
+      "path": "jira/customer-support/dsid_35b4aa7e4edb477a8ba08356306cefdb__SUP-108321-connection-downgrade-idempotency-header-encoding-mismatch.txt",
+      "sha256": "cb49cd90a914d29e94116b1ff289b334e4a80409644646c84b110ecb4991573f"
+    },
+    {
+      "path": "jira/customer-support/dsid_3818ae9bfed141419b0f68c2c163eaec__SUP-812358-admin-api-403-device-compliance-claim-mismatch-private.txt",
+      "sha256": "321fbdb3341bd887e5fcd411c45f93ff6ec333f147ddf8314d7efae2539787a9"
+    },
+    {
+      "path": "jira/customer-support/dsid_3fb8a400e0cf42d0b19dc134e2b7f46c__SUP-356712-saml-attribute-leading-bom-breaks-group-parsing-in-private.txt",
+      "sha256": "db153a1310264807f116abd310919385fc54cff29b2731f5f960d107ad4a0c44"
+    },
+    {
+      "path": "jira/customer-support/dsid_521553a072244d199d06a34dd6e1aca0__SUP-314158-prorated-free-tier-redistribution-on-segmented-usage.txt",
+      "sha256": "287deed2a3a12914cfcdeab674eb097870bec37bec47417ce50bb4d924db9391"
+    },
+    {
+      "path": "jira/customer-support/dsid_58220c63dc384549a60a5eb8e400d55a__SUP-591122-sticky-snapshot-loss-during-tiered-canary.txt",
+      "sha256": "8f44270b6e3743b6b7690587c1db02ec482b47d7dc40ea8ecc8ca6807e8cd215"
+    },
+    {
+      "path": "jira/customer-support/dsid_5db22babefbf45279d9c5b58aa428343__SUP-271432-staggered-retry-warmups-triggering-tenant-429s.txt",
+      "sha256": "7442117b68ac825e349e3b691492b07f00f909ee52d5100877f3353cec9e0f09"
+    },
+    {
+      "path": "jira/customer-support/dsid_663ae6b555814a779d9abffba8339e84__SUP-63219-rbac-policy-not_in-operator-absent-claim-fallthrough-grants-unexpected-access-in-private.txt",
+      "sha256": "ae45423fcdda2d8b5b5a39f5c0e03d6f9de5e67ce6b08ce6746a3ecf1ffb317a"
+    },
+    {
+      "path": "jira/customer-support/dsid_681485e4afe04afe994f922b21517983__SUP-471089-daylight-saving-prorate-gap-batch-embed-job-cross-region.txt",
+      "sha256": "64f9d60d1f3482c14df71bf189db0fe89a18f04bc486f90df8717a52c74a85ba"
+    },
+    {
+      "path": "jira/customer-support/dsid_68fbf6106e38493e94a832e218fa14c1__SUP-128540-heartbeat-only-chunk-coalescing-leads-to-missing-final.txt",
+      "sha256": "a22bf905c3ea80e311079a799b546bc46b0c4bf3f436763294e9daac28ea74dc"
+    },
+    {
+      "path": "jira/customer-support/dsid_70124860f38d4604981c3c41c45308ce__SUP-1842-streaming-connection-resets-us-east.txt",
+      "sha256": "f3f64bec64919db78f34f61783f4a7ac6d1208250e517c8c486fa3799b90ce84"
+    },
+    {
+      "path": "jira/customer-support/dsid_7fd136dd100c4c9cbbe1958c94c26152__SUP-215478-cookie-domain-rotation-evicts-pinned-sessions-during-canary.txt",
+      "sha256": "bf4b5a558a637297a98be048f1dd98ea1e9a298a667a900565eedc7d5712b374"
+    },
+    {
+      "path": "jira/customer-support/dsid_8c15ff526e00491e9ccbde5ef4a4458c__SUP-1000007-sse-keepalive-suppression-and-duplicate-heartbeat-resume.txt",
+      "sha256": "aa224355fc4e5baa32d1d45b15302fb8738408bf78c35e5b791c606e46b0f105"
+    },
+    {
+      "path": "jira/customer-support/dsid_8f4aaaa7d4cc4813b20263d52487484f__SUP-17458-multi-value-role-assertion-causes-403-in-private.txt",
+      "sha256": "e3731c6666c20683e4b089a20fe59ce9273fb35613951133c233beceb60e2df3"
+    },
+    {
+      "path": "jira/customer-support/dsid_9ad82a10c0594d24824a36fcdab4b450__SUP-977321-sse-multipath-handoff-heartbeat-out-of-order-stalled-epilogue.txt",
+      "sha256": "e93b1cedbbf7519d12b486e7a9db23fbfc746b3463c23916076561ab245eda57"
+    },
+    {
+      "path": "jira/customer-support/dsid_a990e708840f481795741cfd3fb55691__SUP-376545-cinderlabs-session-tear-retry-amplification-billing-spike-postincident.txt",
+      "sha256": "58ee88ec52c0ce094bd9018f10993bf4dff8484ee0dc69bdf5250ad27f0d8ce8"
+    },
+    {
+      "path": "jira/customer-support/dsid_b127efa7f884490fb4704c90cc8f0592__SUP-61234-saved-query-timespan-timeout-trace-404.txt",
+      "sha256": "0e1392c5f38aee350da2c8d4b2dfbb5e01c76e02c2de009cc1ced8907dc677ec"
+    },
+    {
+      "path": "jira/customer-support/dsid_b26025f704a54ddf8954ba6cebf6bce7__SUP-483212-canary-affinity-reconciler-flip-cross-region-fallback.txt",
+      "sha256": "af2eba0a2cd5a6a05a71cf15447e7af4137f28ed749f1744f10164a0009455a0"
+    },
+    {
+      "path": "jira/customer-support/dsid_b33c0dca706f4fa7946ec7797d672afb__SUP-612999-scheduled-alerts-drop-tracehook-links-after-org-attribute-migration.txt",
+      "sha256": "29c86456449a82d918bf5fdc06bf9d10a7e3d067adef09ea5d001bc314f8ca52"
+    },
+    {
+      "path": "jira/customer-support/dsid_b4ab2a20a6e24d5bbf35fc6a4e2cd549__SUP-18488-request-rollback-procedure-for-private-onprem.txt",
+      "sha256": "977bb315ca3ca8b2ccd1c409244bee584836ef100d523cb5d930ba1950a98346"
+    },
+    {
+      "path": "jira/customer-support/dsid_cc3aa4a6886d454ab08e5966907c617f__SUP-830333-adfs-group-claim-jwt-size-exceeds-proxy-limit-blocks-service-exchange.txt",
+      "sha256": "6c63ec4a50b0c9694eb9be3dc32536313971f5016e313aa18ceb6d6e21975062"
+    },
+    {
+      "path": "jira/customer-support/dsid_ebdc776e4fcb481fbae68e9d7d5c767b__SUP-912346-edge-cookie-scope-truncation-siphons-pinned-sessions.txt",
+      "sha256": "d9d9345988d91850699ab7264d42ac6a9a1d6c38abbe0a4d67c32d559ecff5cc"
+    },
+    {
+      "path": "jira/customer-support/dsid_ee113c3c66dc453da25c9f763e591313__SUP-732411-sticky-pin-cache-ttl-exceeded-after-regional-canary-rollback.txt",
+      "sha256": "c2fc80f8f9904de13b4206e96c649189362b44c6d26837362fdb15a2ac13b762"
+    },
+    {
+      "path": "jira/customer-support/dsid_f17d5752392f4f0599bcf8804a4f0833__SUP-903210-reactive-reconnect-suppresses-termination-metadata.txt",
+      "sha256": "596a9edcbfa6e1a4955f573b422e4fbb67f31c0168badbe23b0111b65d94f51a"
+    },
+    {
+      "path": "jira/customer-support/dsid_f70e8011de994a9d956fca708445fb5e__SUP-61595-saml-sessionindex-stale-rolecache-causes-intermittent-403s.txt",
+      "sha256": "68346189b417657e8d486d1b80ebafdb535bc8ed093ba1b447015fbe9ab16cd5"
+    },
+    {
+      "path": "jira/customer-support/dsid_f90b68cdda834c6fb4c76508d359c72f__SUP-100200-console-query-cache-stale-after-api-key-rotation.txt",
+      "sha256": "3687287e0c8115a5f5a7e2d1ba72260a3622971d407abc2011c451020a70c021"
+    },
+    {
+      "path": "jira/customer-support/dsid_f983fca1510e4cf492c0f39a4984d80c__SUP-1000001-unicode-idempotency-normalization-mismatch-multibyte-keys.txt",
+      "sha256": "c685167646b3ebc9ce86b9fc516e5d0132fd9cdb0487a72cf6659e2b27643eca"
+    },
+    {
+      "path": "jira/customer-support/dsid_fb91791924d245218e2b99799d7787bc__SUP-271000-delegated-account-refresh-loop-consuming-burst-credits.txt",
+      "sha256": "fbb2b0107590dc102253b9a191c285ec054cacdb8a66f73018faff6a60b01854"
+    },
+    {
+      "path": "jira/customer-support/dsid_fd7ff39aa57948b8a886c8fefa3f94c8__SUP-555888-nonce-serialization-unicode-escape-retries-cross-sdk.txt",
+      "sha256": "2fb08d4396c38d5772e546f1a24874490653d2f1cd1aa5b1c7eea642aac20920"
+    },
+    {
+      "path": "jira/customer-support/dsid_fefb12469132405dae564173c0fe1605__SUP-887600-postclose-rate-correction-hourly-buffer-gap.txt",
+      "sha256": "2607351f9b32a14f4b9b9e0fcd3e6bdd6da27b873de8481e4cb6221cbc2b463b"
+    },
+    {
+      "path": "jira/internal-support/dsid_24ad37cf41bd4d1190e6741cd5a87569__INT-271001-oauth-refresh-loop-blocks-jenkins-job-triggering-via-service-user.txt",
+      "sha256": "682de50a3d6ff0d01fa635729666d5a0306b322d7b8e1770af3a1638f7018cd0"
+    },
+    {
+      "path": "jira/internal-support/dsid_31f88d6120864248ae9327e51a4b06ff__INT-741210-saml-role-serialization-mismatch-blocks-console-switch.txt",
+      "sha256": "13c715c2d98fc01099c0e2fe6fb2123ebbb33f99bd3349dea6bda61ee7876e8e"
+    },
+    {
+      "path": "jira/internal-support/dsid_3da8b0bce9c047f9922f3769f6498cfb__INT-475555-identity-cache-stale-role-propagation-k8s-dashboard.txt",
+      "sha256": "d9fc1dd82c450521e1e4a2e83d3e0f86907ae0fc33ab8d5bcc6b5e24136fc1cc"
+    },
+    {
+      "path": "jira/internal-support/dsid_429267fe79c74918a26272f6c0e48f10__INT-999999-service-cron-sso-refresh-failure-blocks-nightly-model-evals.txt",
+      "sha256": "b830b765eecf7f692e9a2e3c2e5c87581428d5c6db52a63e4bc0f43ab19dbb4a"
+    },
+    {
+      "path": "jira/internal-support/dsid_9619c1f3ff3c4626a2bd029e907e1f76__SUP-721406-connection-affinity-flip-induces-half-closed-stream-with-partial-json-choice.txt",
+      "sha256": "6018648fdfaeab47a5b9cdc05d76575c678a3e96723eb8cfac2647a1ae677d47"
+    },
+    {
+      "path": "jira/internal-support/dsid_fdbcbf7eb43a45e9a9c95bc33b2f649c__INT-17211-oidc-audience-enforcement-blocks-release-runners.txt",
+      "sha256": "873c5d011784e25be4ae2b0e16b52ad6907b06efe7a3323cefaa41ec89ccc6c2"
+    },
+    {
+      "path": "jira/misc-requests/dsid_151306c5277245b699cb8093ca1a8205__INT-324-misc-office-supplies-request.txt",
+      "sha256": "8cb2afebc5bc5c94154e93b29446a21835ac95d5c8cf7dad0c52f688e020ee8d"
+    },
+    {
+      "path": "jira/ops-requests/dsid_8f80516053a24beba08e603cb1831dd6__SUP-501603-signed-cookie-refresh-loop-ephemeral-worker-429s.txt",
+      "sha256": "022c8ceb8f953b2e1c1b12af012bdef1e8e9f19df082d8c57a7b3c7a36922f8a"
+    },
+    {
+      "path": "jira/ops-requests/dsid_9a088141571b435f995568199ec4bcc9__INT-738210-runner-service-token-leak-detection-and-rotation-assist.txt",
+      "sha256": "625567b4bbb5dad08598afa31f5798515f56322e53165a12fec108a1d580e92b"
+    },
+    {
+      "path": "jira/ops-requests/dsid_a673ed031ece43c5bc4a0d27a284c8dc__SUP-99340-structured-audit-delivery-and-PII-redaction-evidence-request.txt",
+      "sha256": "8961acfe4bb453a9f50fddfbf8ba4b1d5ca0819916c3724ce5f65632e30bf02a"
+    },
+    {
+      "path": "linear/business-ops/dsid_275b27e5cad9480582ce625dc55b3ea5__ENG-843219-multichain-invoker-stream-injection-loop-defenses.txt",
+      "sha256": "08a224356393ba6f032ff18be5de8a494ce5e24e4eb0db7bf97ede26da4e284e"
+    },
+    {
+      "path": "linear/business-ops/dsid_d921e1d4282b45a7b4990e2366bedc05__ENG-62670-workload-forecast-headroom-controller.txt",
+      "sha256": "eb7857796270a4566869a3a269dc3f1f45ad0ff1337eaf7c24205b2fe278b4ff"
+    },
+    {
+      "path": "linear/design/dsid_2742469b61e74298a56cb72252325b0b__DES-830412-ephemeral-spinner-lane-and-tone-token-rescue.txt",
+      "sha256": "e5e7a6245bd377a9ae744d878e9030f783442be0430850542df532a7e4ec6ba1"
+    },
+    {
+      "path": "linear/design/dsid_2e5aaaa6db404ec19cb15a6f92be66a3__DES-12901-consistent-spinner-overlay-and-label-behavior.txt",
+      "sha256": "d9a1b6669b6003b00afe73aebd20966a33dbe93a5170586ff4d311512067cb28"
+    },
+    {
+      "path": "linear/design/dsid_765ca3f681ed4b8a95d237b6b23f843c__DES-96205-compact-surface-press-shear-and-deferred-spinner-strategy.txt",
+      "sha256": "f91d0737dd31d9d1c006ffa6dd662ac3ef655dbf832877ea45360cc4ffabab8c"
+    },
+    {
+      "path": "linear/design/dsid_a93884bb63f44dc5b23d5c2a1f3c4cee__DES-21456-pulse-inspector-health-timeline-burst-editor.txt",
+      "sha256": "11fa05198e87c1032f63fd0bc6c3b2e8a078a13724f69aec20528b473ade8318"
+    },
+    {
+      "path": "linear/engineering/dsid_061c09d8eef649eba85cd1421e28a41a__ENG-23109-batching-backpressure-latency-isolation.txt",
+      "sha256": "56df4a4da40bea4820ce8c3188b612b3ac227381fd1b756e4b5dd1079e9c46f3"
+    },
+    {
+      "path": "linear/engineering/dsid_1301924108834071a2356548e4b3ab91__ENG-73901-capability-topology-and-authority-lattice-design.txt",
+      "sha256": "2ecf7ec0a26c362df3bf86e61be5bf9fc71c4100026b33e5a3e9b43034b8c1d2"
+    },
+    {
+      "path": "linear/engineering/dsid_19d17b5db9e14d80aff9449c1218ab0f__ENG-276412-streaming-relay-toolchain-staged-injection-and-recursion-hysteresis.txt",
+      "sha256": "8d0d0a8c2ca95762ce2e803d76121e9da1a89a322139a2a1f9e9d7d24a8fc5bf"
+    },
+    {
+      "path": "linear/engineering/dsid_298aa922e9e04592968565ea4e9e2422__ENG-662211-priv-session-stitching-assertion-replay-rbac-binder-audit-mismatch-hotfix.txt",
+      "sha256": "88e338573f506297b83095467e120d547afbd780b039a584b361692096e22d0d"
+    },
+    {
+      "path": "linear/engineering/dsid_3d0400b2f9b8478c90b041603082b016__ENG-30789-resolve-session-leak-and-missing-audit-events-during-onprem-key-rotation.txt",
+      "sha256": "c31a4f82bfce28045d31ec30dfe29d414d212be5b60900fcbfa5a82a355afeaa"
+    },
+    {
+      "path": "linear/engineering/dsid_55cf50b9520e42a4b6d71a2e798992a3__ENG-30217-adaptive-eval-dispatch-for-model-locks.txt",
+      "sha256": "37adf11d3e6577d3e6624bafd5852641fddca037dd0b7eaec1c2a7525046c884"
+    },
+    {
+      "path": "linear/engineering/dsid_56c1cfa218d04a1ab23aed94e5874c85__ENG-12008-metrics-traces-ingestion-regression-hotfix.txt",
+      "sha256": "a9655d31e5b3c036b41185700eac7daa84113404bc72407da2d6ce63dceee21a"
+    },
+    {
+      "path": "linear/engineering/dsid_5d5dc6a5ec894f11b72c69396aa35f43__ENG-9476-escalation-overpermission-admin-controls.txt",
+      "sha256": "e2c4f5efd1c5a8138231aa977ec1993f674132d3edd8205e09c9c5beac70a6e8"
+    },
+    {
+      "path": "linear/engineering/dsid_6e3387ba2a6a45c2a075a713dd8c0450__ENG-135790-adaptive-burst-handover-regional-sla-safeguard.txt",
+      "sha256": "c3ab3fb0c0e19a4440da5f938a0066f595c784b7737ea3ce250053b40bb8065e"
+    },
+    {
+      "path": "linear/engineering/dsid_7159e8c7b7a84c45aa51b71fdfc837fc__ENG-11097-priv-cross-tenant-audit-suppression-and-kms-rotation-fix.txt",
+      "sha256": "2f5511b034e1779b33decec9e16e8ec450e6052f84a0e99f11e40e618a101421"
+    },
+    {
+      "path": "linear/engineering/dsid_7826d5c111284a42957bb4c2890be331__ENG-20845-interleaved-invoker-recursion-throttle-structured-contracts.txt",
+      "sha256": "9f23d477cb5dd1561fb658f0675f270d1212105b17b11c58385007c27e471b57"
+    },
+    {
+      "path": "linear/engineering/dsid_85e104424a9846c3b9e50382adcdf4d2__ENG-807213-tenant-allocator-safeguard-and-gradual-degradation-playbook.txt",
+      "sha256": "918ef9f5faa517131cd69dcc7154b7163f6a176185c53606bdf404c0ce89a763"
+    },
+    {
+      "path": "linear/engineering/dsid_8ccef19703bd4df4b2ed91037eda9737__ENG-450301-autoscaler-horizon-misprojection-fix.txt",
+      "sha256": "cc815cab3970b988f0a813bd3946c52203f327c25941a2d7fd4195c8cf32c1cd"
+    },
+    {
+      "path": "linear/engineering/dsid_932d2b485cfe4a9daf41214a795c7b36__ENG-67892-dedicated-capacity-runaway-isolation-and-reservation-healing-protocol.txt",
+      "sha256": "84349755de94beb56316cb6642dbfa8db9974b0cd15b6c412227cd8d8169c435"
+    },
+    {
+      "path": "linear/engineering/dsid_b094923d476843aca6af9d88c5864a1a__ENG-7934-fleet-tenancy-and-noise-mitigation-policy.txt",
+      "sha256": "ed44cb3bfcb8e6054a7983e466f841a99a80bed93703bce5bfa9723d8d596ac3"
+    },
+    {
+      "path": "linear/engineering/dsid_ca18eee975d34f4da7b1b880ea5ac271__ENG-847213-reservation-governor-rationalization-and-noisy-tenant-surge-remedy.txt",
+      "sha256": "de3bda6a888cafd703f5459529e4e6ede5cf45aaa4b21af76cbb206f5ca00826"
+    },
+    {
+      "path": "linear/engineering/dsid_d2352531614d4514a0695a883b755cf3__ENG-262981-per-tenant-circuit-breaker-tiers-predictive-load-shed-windows.txt",
+      "sha256": "851c3fb901355e8c2f18f92a235e557c9b8e7c70a8bb958de6c5fc969e4ff0ac"
+    },
+    {
+      "path": "linear/engineering/dsid_de66474810b744bab42dba3566886d1b__ENG-50123-activity-chronicle-cursored-exports.txt",
+      "sha256": "03f4408b6bc244ba29f42de27383039f1a27ef5e98f3d5b9a12c0536777ed7eb"
+    },
+    {
+      "path": "linear/engineering/dsid_e58445dc6cf5420380c94542648bd5d3__ENG-38654-latency-first-tail-trimmer-hybrid-bucketer.txt",
+      "sha256": "5739c66b7f1735f5af6cd4cb2dd6c733a5d78edff6c2c23c1369a36e75269ea6"
+    },
+    {
+      "path": "linear/engineering/dsid_f05febc275874624b3d7d5c11a99450c__ENG-4821-status-page-component-granularity.txt",
+      "sha256": "4dbd08d32ef7ff530dfac25fe9b8e6ca2eabd833eb0ebf8bc8fe8c4efdb5c20e"
+    },
+    {
+      "path": "linear/engineering/dsid_f9e0feb390bb402d94b419d354476a8a__ENG-16220-misaligned-invoice-credits-after-regional-failover.txt",
+      "sha256": "e415b75ae1e26e51782f7a121ca30bdb277a3ebb3212104de8754ab62200e4f9"
+    },
+    {
+      "path": "linear/product-management/dsid_02ec1fbd9624446988a66cd6be70cb69__PM-792864-model-ingest-gating-prd-versioning-phasing-and-conformance-tests.txt",
+      "sha256": "1d7df1d7e7634295ecee8f48994c876f365bda676510672dbc3df318860a0e19"
+    },
+    {
+      "path": "linear/product-management/dsid_2d06f6fc22e1404ba58ac9cc99de3ea8__PM-4721-hosted-api-token-experiment-pricing.txt",
+      "sha256": "70e9f8ce2f82cebe7d14f34000e12fa936bdeba82e9e639320098f74514489eb"
+    },
+    {
+      "path": "linear/product-management/dsid_2fd82eb3eeb7435a98f22e99e605ba31__PM-1440-post-pilot-readout-and-next-steps.txt",
+      "sha256": "f98d1c94150c786dce586dee7949018b141f89e786373454393ee51bfc240455"
+    },
+    {
+      "path": "linear/product-management/dsid_339ea830576e4ebf813b4233a030c746__PM-7382-centralize-enterprise-identity-request-routing.txt",
+      "sha256": "a7785252c5d687d5146720e7ac25568c9ceddffb5e8ef0a3983e2a2060264a4c"
+    },
+    {
+      "path": "linear/product-management/dsid_33a57b057c68436c80a3ea2d007cf936__PM-888202-enterprise-feature-pulse-rapid-coalescence-feasibility-triage.txt",
+      "sha256": "afb4ac7943ecfdc4534f91b0d9eb1a7e1352acd08a1709b247ffeb18b3958207"
+    },
+    {
+      "path": "linear/product-management/dsid_54525a33e2d44d4a9b665feaf8fab624__PM-24680-cohort-comparator-and-trace-linker-for-deployment-health.txt",
+      "sha256": "df71b89b23334c8ab1ad7226582e33d8566a23aaa8f6660f40de76ed5a48bd8e"
+    },
+    {
+      "path": "linear/product-management/dsid_7a094ff98c3b4c96a77f3949aedeb749__PM-91829-intake-lens-minimum-implementation-slate.txt",
+      "sha256": "71f47ad7bc2b7d0fab0a95b80f5c5ddfd318e36713b9679e890b31f739962f24"
+    },
+    {
+      "path": "linear/product-management/dsid_a041a6600df747598304bf270d9155ac__PM-33119-slate-compressor-initial-scoping-for-high-touch-account-asks.txt",
+      "sha256": "78a2b0e0e8706e14215b01048fbcdea0592b4e4d8c1561062a64cbadfb83cd3c"
+    },
+    {
+      "path": "linear/product-management/dsid_a27715e7309c494d812c75cf03bcf916__PM-189762-acceptance-matrix-for-optimize-quality-shocks-and-auto-remediation.txt",
+      "sha256": "fe4d9323aa39a586155b4b582fd86b413d8ff223b0f119e08a638c1539f57311"
+    },
+    {
+      "path": "linear/product-management/dsid_af95ce641ae44e67ae07df89004be24b__PM-21147-initiative-threading-capability-mapping-playbook.txt",
+      "sha256": "6c31f73a7b5ddb5cd46cd059de712070677040c89db662e39c04178439880754"
+    },
+    {
+      "path": "linear/product-management/dsid_cf4696a68a924cc3aaf48ba4a2c1fab1__PM-663210-dedicated-capacity-intake-heuristic-and-stakeholder-synthesis.txt",
+      "sha256": "52916221db26ddde82b5bb2cf90885c31c88ff39009a9d038ea25933fdef5dc6"
+    },
+    {
+      "path": "linear/product-management/dsid_f643fe580a694bed8009d16e21c80d66__PM-35942-quarterly-okr-consolidation-exchange-initiative-inbox-workflow.txt",
+      "sha256": "2d5f74dbfff40d254cce4ae96583aab1aaaa0e14a740db2aae3482421b278e6f"
+    },
+    {
+      "path": "slack/customer-success/dsid_05b212c211fc4f28884266af3c745ba3__1839517777-northpoint-pilot-kickoff-ops.txt",
+      "sha256": "80fa1a7170fe65efc19d256b169120ea49b6e161bb435afb6d90af9dadaf93ba"
+    },
+    {
+      "path": "slack/dsid_72b2bd3c2a094fdca6d5f3187a752c24__1919002468-kv-prefetch-batch-trigger-block-heuristic.txt",
+      "sha256": "6d23954eacbce7b6e4b4b96aec88e9f0483ead01389078c50b69e4e0a04ac66e"
+    },
+    {
+      "path": "slack/dsid_d680e052f220485eb985434b56f20ba2__1715001234-eng-platform-daily-checkin-gateway-routes.txt",
+      "sha256": "b8ce61e05c2f5c36d69dfad6b2908e33ebab845581eac60856db3f22dafd5c81"
+    },
+    {
+      "path": "slack/dsid_f608b4d739f240c0b56d4d4b151b8cd3__1713201234-tor-l4-loss-investigation.txt",
+      "sha256": "0b6ae0f28c70e7bce2885770f868db2f6cd63ea0833f87464c4c1c16ba706c48"
+    },
+    {
+      "path": "slack/eng-infra/dsid_e18caa296265411fb1ae3d8d659bbf4f__1765432100-link-negotiation-flap-eucentral-firmware-mix.txt",
+      "sha256": "26fb77adad2df63311ba4118604496855802383dfafef657efe411c56475c68e"
+    },
+    {
+      "path": "slack/eng-oncall/dsid_1bf7d6e9b6154a92a629d7ee1288c9f5__1765432100-alerts-debounce-handoff.txt",
+      "sha256": "50928b20fc67f36a93e052987c144cde4594f5998a08a3ece2204fbbc97283ea"
+    },
+    {
+      "path": "slack/eng-oncall/dsid_ad229219e19b4dbabf7e348c483dec2b__1759001234-exfil-watchroom-audit-kms-rbac-checks.txt",
+      "sha256": "199962d190398a5823683e2612ce7f0a735fdc754ebc1627d1d361de8fb87344"
+    },
+    {
+      "path": "slack/eng-oncall/dsid_c182d518aca44b93a2570c456eeae764__1772104567-dedicated-router-metric-signal-blackhole.txt",
+      "sha256": "31bce4978317b1af6e2e36c85557adbdd36b7b7d60fa919897fe92e51dac72d8"
+    },
+    {
+      "path": "slack/eng-platform/dsid_4ff1da3d8f354d30a21005173641f3d0__1764509876-gw-canary-rate-auth-tidbits.txt",
+      "sha256": "94b096445de40b5794e77ef6433409707cfe712c947cf64e9eac87422da1b18a"
+    },
+    {
+      "path": "slack/eng-platform/dsid_98525cb72fd948ef9797c6d35b504b9d__1799004321-sse-proxy-keepalive-heartbeat-mismatch.txt",
+      "sha256": "13098b7c98c7d07dbef9c9d99636125cb72f6a8810285077dc7dbb7f3dc0602e"
+    },
+    {
+      "path": "slack/eng-platform/dsid_ce9ecfe8502d466b94a04d28a1194891__1748001234-exporter-outage-trace-propagation.txt",
+      "sha256": "52c57cd6800f391a858df65acb590d6370cc543fb087df0e9e7ab9fa9bd7e511"
+    },
+    {
+      "path": "slack/eng-platform/dsid_fbd1ba6857104c18a879ae6d6a025992__1748888888-cursor-window-retry-budget-sdk-surface.txt",
+      "sha256": "593221046c6f04c9ca25f236b39895c70c744bea90c5961b318aa28fcdda4369"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_030357ccb6d64aba8174fdf29469673d__1812349999-expert-traffic-all2all-sleuth.txt",
+      "sha256": "45cb9a41245734da0a3821f1231bcf975fee411a45999d4e71a0143fa768236b"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_3ab32ce7a21947de8fa071e06243b6a8__3467890123-tensorpool-oom-heuristics-thread.txt",
+      "sha256": "912d0fd69cd089aa1968aedffc74e2c1a31773407e36ffc9360634b35c84117b"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_3dad9a02e02347c8b39b145f9e678ed5__3311223344-eviction-defer-prototype-exchange.txt",
+      "sha256": "46e23210ca1ca63ee69a2f81c21d919950fa453760920f01f781e1df3d56c304"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_acffea87fdf343aaad01f7ded81a6a2f__1763001234-kernel-selector-trace-bisect.txt",
+      "sha256": "d1984dbefa680319c38d735f825341d4de6a4a2757629dd1525043f945a8acb1"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_bcfa7c88fe724824807cafab37afaec1__1763205123-nccl-roce-packetloss-investigation.txt",
+      "sha256": "17c325fb60299aa43e99c4a814c81ceb1a280d72229536e4d21032adca5eb76d"
+    },
+    {
+      "path": "slack/eng-runtime/dsid_fe919b7f7a024575945320a0c99797b7__2478001234-adaptive-kernel-prefill-heuristic-kv-heatmap.txt",
+      "sha256": "4a518c096a228d55ff6bc58d89b583807bf816c7297bbe2c1a2ae931dfbd101c"
+    },
+    {
+      "path": "slack/eng-security/dsid_6a80b7ed807a4ee7a1a9b4e1f57a92cc__1749256789-ci-leak-detected-in-pipeline.txt",
+      "sha256": "7af4e7958c57d31185f295389531739e0dca66b9afab4307c356ac064ee03073"
+    },
+    {
+      "path": "slack/eng-security/dsid_a15d9a802d8142f789611a7fa07f93a3__1951234567-webhook-signature-rotation-and-tenant-contract-qna.txt",
+      "sha256": "08bfaa9a1c132538b38f79aed7c7c0e7f150bc0b883e76459776915784bcea40"
+    },
+    {
+      "path": "slack/eng-security/dsid_f7270a1dc50d41aba92aacb56ccfe99c__3612345678-authn-rbac-decomposition-checkin.txt",
+      "sha256": "3948f09d938eafae23d8fc6ec9175b17ba93cb752001d55802d786f7c480d351"
+    },
+    {
+      "path": "slack/finance/dsid_2679baedab704cd5bd0e311a4f7e20b6__1759508642-partner-trial-chargeback-flow.txt",
+      "sha256": "94602780a2686121231d1cf864163105942f3f4bb676cd13ee49e72f4ba9febd"
+    },
+    {
+      "path": "slack/finance/dsid_563579e0f4144f5fa3fd09480957864f__1719785432-shard7-ingest-remediation-plan.txt",
+      "sha256": "35b06b3af08390c758e954a4ad9ad0fbe99e123a8e94e0b04a9c161e1d635eaf"
+    },
+    {
+      "path": "slack/incidents/dsid_4cfe0c490c974065bd497f06ad4a1105__1764823141-rollout-sticky-region-mismatch.txt",
+      "sha256": "5b5a943b74c7b4846c6b52a3bf47ff85172e4a68d7dd21cd035e5217b396eae0"
+    },
+    {
+      "path": "slack/incidents/dsid_54117cc7cb2140528cc025f3789af691__1819954321-sticky-fallback-oscillation-handoff.txt",
+      "sha256": "5f95b9bd70d5692ef37390e50ad99fae4d1c8c5ecfd7464682bd627012c35dbc"
+    },
+    {
+      "path": "slack/incidents/dsid_8367caf6b305404688737a5350f2eb08__1769998888-initial-pager-to-customer-ready-copy-sync.txt",
+      "sha256": "79f7efe44d844ef49668bfe6433bf7dd59e5ce70bbdd5e0b45473d462991882d"
+    },
+    {
+      "path": "slack/incidents/dsid_9dddd4cc78a8438fbba583acb261e7e3__1779004321-trace-header-canary-5xx-spike.txt",
+      "sha256": "498416bab394a477ecac9c0c773dd7d6a69af97419c4e8365fe7c418ebafc720"
+    },
+    {
+      "path": "slack/incidents/dsid_dde82c758f64419a955e00d0d8b519eb__1972103456-checkout-canary-routing-oscillation.txt",
+      "sha256": "32d7c4b0d06df293d07c99a3fce7ebc2d5b5366bd43cab01a823a350f73cbcb8"
+    },
+    {
+      "path": "slack/partnerships/dsid_51858c87c2924000ab65a98900b20a45__3842109999-si-onboard-micro-credentials-bundle-play.txt",
+      "sha256": "e3dcc62390590e5d13c75b15114d994d2b20650bb07ec234ee031b4783abacc8"
+    },
+    {
+      "path": "slack/partnerships/dsid_7e5389bed0c24fc59166c9186ef28f14__1729632000-systems-integrator-mentorship-pilot.txt",
+      "sha256": "f95203e545819053cd4c98f789b694b71435967196c8fe862c488dc2b247a9f2"
+    },
+    {
+      "path": "slack/people-ops/dsid_9b6b316938d44b74ab478c45be94f661__2090123456-contractor-to-fulltime-conversion-promo.txt",
+      "sha256": "dfa6cac2bf8ee847aaa8569383cf6d1954ca240c20e5d2fd9e6a0d6ae513d16d"
+    },
+    {
+      "path": "slack/product/dsid_af49172aba97474aa215a460a817a2f7__1845604822-capability-profile-contract-negotiation.txt",
+      "sha256": "6435750865ea3e9cc3b93030427230418d2c18e0fb4c1d206b6fcc73a540729a"
+    },
+    {
+      "path": "slack/support/dsid_0a97c40f4554448f9bce3db6fb95e926__3960012345-sse-intermittent-midstream-billing-retries-proxy-heartbeat-workaround.txt",
+      "sha256": "e381c763c80701757d760a75da3a90dd3901234644b9e698fa50f768f1f911e4"
+    },
+    {
+      "path": "slack/support/dsid_56c0fccd4435436e95ffbd019c1e998f__2777777777-gw-l7-auth-throttle-spike-repro.txt",
+      "sha256": "f57aa35348c312030e4f4722a7fc930ea2cc42357c3fbca02e78d081f25727b8"
+    },
+    {
+      "path": "slack/support/dsid_6882d382e247413c8e42bd2f736cd3a9__1739451188.txt",
+      "sha256": "76a5187fe59c43a9c43534498674918fefc955f6eee0069f57065026806d7456"
+    },
+    {
+      "path": "slack/support/dsid_7a3f9384be8c400a94958d55c8041b4f__6357901234-authz-header-nul-502s-customer-escalation.txt",
+      "sha256": "00ed90d822588094c6311489c57b730213e3c60ef560c7588a6fc7d01ef04c31"
+    },
+    {
+      "path": "slack/support/dsid_868ed831c87b431ab713fd0c831a6195__1765554322-idp-metadata-hostname-change-assertion-403-repro.txt",
+      "sha256": "cdd6cc0cc4bc0b912efa102657e36e3b1853aaf744070197b13d0436709dd583"
+    },
+    {
+      "path": "slack/support/dsid_ab50b630b14e4bfda87847286157b739__1709456789-proxy-header-parse-fail-502-streaming-repro.txt",
+      "sha256": "137b790eb7a9384310a043489aa215da57b22c7d6a47e115813034965635067c"
+    },
+    {
+      "path": "slack/support/dsid_b0837262f3a14e97a8ed31345e839790__1837777000-edge-502-stream-retry-window-jitter.txt",
+      "sha256": "639c47fec594fcad45af498aeaa66990966d34c02cb63c97ebf646fae620c896"
+    },
+    {
+      "path": "slack/support/dsid_bd07ce3fd104400c8caa0a1ab7a7191f__1890123456-csv-export-day-skip-after-backfill.txt",
+      "sha256": "975cb776f38cfc7f0da254dd40f27685a430dd386d5679f4eaf3651f01997cdb"
+    },
+    {
+      "path": "slack/support/dsid_f49c3ff8a9d844119ee2f0dc081a3758__1955554321-chunk-boundary-keepalive-reconnects.txt",
+      "sha256": "7aa44a7617d1bfaaddbe85e6ef6bfaa8482d924c334d9c3767104acb7cb1b2e4"
+    },
+    {
+      "path": "slack/vendors/dsid_993a77869d244d36972f5efc39dbc59a__3412345678-si-microcredential-exchange-pilot.txt",
+      "sha256": "b2b42c9a9013b45a7182ee0fe33877d7a77b8146408e18e1886f59ae7aa8e477"
+    }
+  ]
+}

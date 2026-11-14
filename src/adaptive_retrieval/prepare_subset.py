@@ -1,4 +1,4 @@
-"""Build the local corpus from the document subset committed to Git."""
+"""Build the local corpus from the downloaded document subset."""
 
 import argparse
 import json
@@ -57,7 +57,7 @@ def prepare_subset(root: Path, out: Path) -> tuple[int, int]:
 
 
 def main(argv: list[str] | None = None) -> None:
-    parser = argparse.ArgumentParser(description="Prepare the checked-in evaluation subset")
+    parser = argparse.ArgumentParser(description="Prepare the local evaluation subset")
     parser.add_argument("--root", type=Path, default=SUBSET_DOCUMENTS_DIR)
     parser.add_argument("--out", type=Path, default=PROCESSED_DIR)
     args = parser.parse_args(argv)
